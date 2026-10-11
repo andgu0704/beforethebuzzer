@@ -188,6 +188,7 @@ export function createCareer(index: ContentIndex, input: CreationInput): GameSta
       forceNextGame: null,
       revealHidden: false,
       draftTeam: null,
+      forceCallUp: false,
     },
     ending: null,
   };

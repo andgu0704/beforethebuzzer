@@ -105,6 +105,7 @@ export const engine = {
     seniorCallUp: 'Called up to the senior national team.',
     u20CallUp: 'Called up to the under-20 team.',
     declinedCallUp: 'Turned down the national team.',
+    godMode: 'God Mode was used. This career no longer counts for records.',
   },
   roles: { bench: 'bench player', rotation: 'rotation player', starter: 'starter', star: 'star' },
   levels: { senior: 'senior', u20: 'under-20' },
@@ -173,5 +174,5 @@ export const engine = {
       academic: 'Strong classrooms, demanding professors, a team that wins quietly.',
     },
   },
-  teams: { showcaseEast: 'East Select', showcaseWest: 'West Select' },
+  teams: { showcaseEast: 'East Select', showcaseWest: 'West Select', u20: '{nation} U20' },
 } satisfies Catalog;

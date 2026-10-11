@@ -96,7 +96,11 @@ export function startUserGame(state: GameState, index: ContentIndex, game: GameR
   const rules = rulesForGame(game);
   const userCtx = {
     ...(reason ? { exclude: new Set([state.career.playerId]) } : {}),
-    ...(game.league === 'college' ? { userRole: state.career.role } : {}),
+    ...(game.league === 'college'
+      ? { userRole: state.career.role }
+      : game.kind === 'showcase'
+        ? { userRole: 'starter' as const }
+        : {}),
     modifiers: userModifiers(state, index),
   };
   const ownTeam = prepareFor(state.world, side === 0 ? game.home : game.away, rules, userCtx);

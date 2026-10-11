@@ -77,7 +77,7 @@ export function pickMoment(moments: readonly MomentDef[], c: MomentCandidate): M
   const late =
     live.period >= rules.periods && live.clock <= 75 && Math.abs(marginFor(live, c.userSide)) <= 6;
   const neverHadOne = live.momentsUsed === 0 && live.period >= rules.periods && live.clock < 360;
-  const chance = late ? 0.7 : neverHadOne ? 0.25 : 0.022;
+  const chance = late ? 0.7 : neverHadOne ? 0.25 : c.context === 'showcase' ? 0.06 : 0.022;
   if (!rng.chance(chance)) return null;
   return rng.weighted(matching, (m) => m.weight);
 }

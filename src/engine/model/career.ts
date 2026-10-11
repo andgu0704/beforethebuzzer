@@ -240,6 +240,8 @@ export interface GodModeState {
   revealHidden: boolean;
   /** The team that will draft him, if God Mode chose one. */
   draftTeam: TeamId | null;
+  /** Puts him on his national team at the next tournament, whatever the selectors think. */
+  forceCallUp: boolean;
 }
 
 export interface Career {

@@ -19,3 +19,5 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
       - run: npm test
+      - name: Simulation smoke run
+        run: npm run sim -- --careers 2 --seasons 1 --seed ci --out ${{ runner.temp }}/balance

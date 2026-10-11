@@ -8,6 +8,7 @@ import { cause, msg, pushFeed, pushTimeline, userOf, type GameState } from './st
 /** After national squads are picked: if the user is in one, he is asked. */
 export function raiseCallUps(state: GameState, tournamentIds: readonly TournamentId[]): void {
   const user = userOf(state);
+  if (state.career.godMode.forceCallUp) forceOntoSquad(state, tournamentIds);
   for (const id of tournamentIds) {
     const t = state.world.tournaments[id];
     if (!t) continue;
@@ -62,4 +63,20 @@ export function resolveCallUp(
   career.flags['declined_national'] = { setAt: 0, cause: why };
   pushTimeline(state, msg('timeline.declinedCallUp'), why, true);
   pushFeed(state, 'news', msg('feed.declinedCallUp'));
+}
+
+/** God Mode: his nation's team in a new tournament makes room for him. */
+function forceOntoSquad(state: GameState, tournamentIds: readonly TournamentId[]): void {
+  const user = userOf(state);
+  for (const id of tournamentIds) {
+    const t = state.world.tournaments[id];
+    const team = t?.teams
+      .map((teamId) => state.world.teams[teamId])
+      .find((x) => x?.kind === 'national' && x.nation === user.nation);
+    if (team?.kind !== 'national' || team.roster.includes(user.id)) continue;
+    const age = state.world.date.year - user.birthYear;
+    if (team.level === 'u20' && age > 20) continue;
+    team.roster = [...team.roster.slice(0, 11), user.id];
+    state.career.godMode.forceCallUp = false;
+  }
 }
