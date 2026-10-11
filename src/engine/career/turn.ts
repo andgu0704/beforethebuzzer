@@ -26,7 +26,14 @@ import {
 import { maybeRaiseEvent, resolveEvent, runConsequences } from './events';
 import { continueUserGame, isUserGame, resolveKeyMoment, startUserGame } from './game';
 import { raiseCallUps, resolveCallUp } from './national';
-import { applyPlan, checkTraitUnlocks, gradeCheck, updateProjection, updateRole } from './progress';
+import {
+  applyPlan,
+  checkTraitUnlocks,
+  gradeCheck,
+  quietWeekReaction,
+  updateProjection,
+  updateRole,
+} from './progress';
 import { clearShowcase, commitTo, raiseOffers } from './recruiting';
 import { socialReactions } from './social';
 import { msg, pushFeed, userTeamId, type GameState } from './state';
@@ -142,8 +149,9 @@ function endWeek(state: GameState, index: ContentIndex): void {
   gradeCheck(state);
   checkTraitUnlocks(state, index);
   if (state.career.stage === 'college' || state.career.stage === 'prospect')
-    updateProjection(state);
+    updateProjection(state, index);
   rivalNews(state, index);
+  quietWeekReaction(state, index);
   endLeagueWeek(state.world, leagueContext(state, index));
 }
 

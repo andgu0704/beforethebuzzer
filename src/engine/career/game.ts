@@ -6,6 +6,7 @@ import type { ContentIndex } from '../content/registry';
 import type { GameContext, SocialTrigger } from '../content/story-types';
 import {
   availableOptions,
+  finalMomentWindow,
   pickMoment,
   resolveMoment,
   userIndexOn,
@@ -146,7 +147,15 @@ export function continueUserGame(state: GameState, index: ContentIndex): Interru
   const picked: { id: string | null } = { id: null };
   let knocked = false;
   const paused = runGame(live, (check) => {
-    if (current.momentBudget <= 0) return false;
+    // One extra moment is allowed in the closing seconds of a close game, once the budget is spent.
+    const extra =
+      !current.absent &&
+      !forced &&
+      current.momentBudget === 0 &&
+      finalMomentWindow(check.live, userSide)
+        ? 1
+        : 0;
+    if (current.momentBudget + extra <= 0) return false;
     const knockRng = createRng(state.world.seed, 'knock', live.gameId, Math.round(live.elapsed));
     if (
       !knocked &&
@@ -163,7 +172,7 @@ export function continueUserGame(state: GameState, index: ContentIndex): Interru
       style: user.style,
       traits: user.traits,
       hurt: knocked,
-      budget: current.momentBudget,
+      budget: current.momentBudget + extra,
     });
     if (!moment) return false;
     const usable = availableOptions(moment, (o) => meets(state, index, o.requires));
@@ -315,8 +324,10 @@ export function resolveKeyMoment(
     option.action.kind === 'shot' &&
     scoreBefore <= 0 &&
     scoreBefore >= -2
-  )
+  ) {
     state.career.feats.clutchMisses += 1;
+    socialReactions(state, index, ['clutchMiss'], `clutch-${live.gameId}`, 1);
+  }
 
   const kind = option.action.kind;
   state.career.tendencies[`${kind}:${optionId}`] =

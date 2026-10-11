@@ -201,7 +201,7 @@ export interface LiveUserGame {
   readonly gameId: GameId;
   readonly live: LiveGame;
   readonly userSide: Side;
-  /** Seconds the player's moments may still use. */
+  /** Key moments the player may still get this game (it can reach -1 after a final-seconds extra). */
   momentBudget: number;
   /** Set while waiting for the user to choose. */
   pendingMoment: { readonly momentId: string; readonly offense: Side } | null;
