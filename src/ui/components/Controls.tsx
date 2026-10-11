@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { haptic } from '@/platform/haptics';
 
-import { useTheme } from '../theme/theme';
+import { useLargeText, useTheme } from '../theme/theme';
 import { TOUCH } from '../theme/tokens';
 import { IconButton } from './Button';
 import { Text } from './Text';
@@ -91,12 +91,13 @@ export function Stepper({
   readonly testID?: string | undefined;
 }) {
   const t = useTheme();
+  const large = useLargeText();
   return (
     <View
-      style={[styles.stepper, { borderBottomColor: t.c.hairline }]}
+      style={[styles.stepper, { borderBottomColor: t.c.hairline }, large && { flexWrap: 'wrap' }]}
       accessible
       accessibilityRole="adjustable"
-      accessibilityLabel={`${label}, ${value} blocks`}
+      accessibilityLabel={`${label}, ${detail ?? String(value)}`}
       accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
       onAccessibilityAction={(e) => {
         if (e.nativeEvent.actionName === 'increment' && value < max && canIncrease)
@@ -104,7 +105,7 @@ export function Stepper({
         if (e.nativeEvent.actionName === 'decrement' && value > min) onChange(value - 1);
       }}
     >
-      <View style={{ flex: 1 }}>
+      <View style={large ? { width: '100%' } : { flex: 1 }}>
         <Text variant="subhead">{label}</Text>
         {detail ? (
           <Text variant="footnote" color="inkSecondary">

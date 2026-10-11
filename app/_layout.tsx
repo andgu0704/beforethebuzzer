@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { PerfOverlay } from '@/features/godmode';
 import { loadSkia } from '@/platform/skia';
 import { boot, useGame } from '@/state/game';
 import { ThemeProvider, useTheme } from '@/ui/theme/theme';
@@ -74,6 +75,7 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <ThemeProvider>
           <Root />
+          <PerfOverlay />
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

@@ -678,6 +678,7 @@ export const ui = {
     growth: 'Growth rate {n}',
     ceilingOverall: 'Ceiling overall {n}',
     styleguide: 'Open the style guide',
+    perf: 'Performance overlay on or off',
     portraitLab: 'Open the portrait lab',
     log: 'Log',
     set: 'Set',

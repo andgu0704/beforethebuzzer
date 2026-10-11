@@ -79,3 +79,8 @@ export function makeStyles<T extends StyleSheet.NamedStyles<T>>(fn: (t: Theme) =
     return styles;
   };
 }
+
+/** True at accessibility text sizes, where rows holding several values stack instead of truncating (§10.1). */
+export function useLargeText(): boolean {
+  return useWindowDimensions().fontScale >= 1.35;
+}

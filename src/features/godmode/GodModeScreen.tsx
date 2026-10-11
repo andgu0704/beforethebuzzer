@@ -25,6 +25,7 @@ import { addWeeks } from '@/engine/core/calendar';
 import { SKILLS } from '@/engine/model/skills';
 import { kv } from '@/platform/storage';
 import { mutate, useGame } from '@/state/game';
+import { usePerf } from '@/state/perf';
 import { Button } from '@/ui/components/Button';
 import { Stepper } from '@/ui/components/Controls';
 import { ChipRow, TextField } from '@/ui/components/Field';
@@ -402,6 +403,13 @@ function Panel() {
           >{`${l.date.year}-w${l.date.week} ${l.action}`}</Text>
         ))}
       <View style={{ gap: t.space.s, marginTop: t.space.xl }}>
+        <Button
+          variant="secondary"
+          label={tt('ui.godmode.perf')}
+          onPress={() => {
+            usePerf.setState({ overlay: !usePerf.getState().overlay });
+          }}
+        />
         <Button
           variant="secondary"
           label={tt('ui.godmode.styleguide')}

@@ -11,3 +11,7 @@ export function GodModeScreen() {
 
 export const StyleGuideScreen = GodModeScreen;
 export const PortraitLabScreen = GodModeScreen;
+
+export function PerfOverlay() {
+  return null;
+}

@@ -15,12 +15,13 @@ import { Avatar } from '@/ui/components/Avatar';
 import { Meter } from '@/ui/components/Meter';
 import { Text } from '@/ui/components/Text';
 import { useT } from '@/ui/i18n';
-import { useTheme } from '@/ui/theme/theme';
+import { useLargeText, useTheme } from '@/ui/theme/theme';
 
 /** Portrait, name, team and record, and the five meters with a contextual sixth. */
 export function HomeHeader() {
   const t = useTheme();
   const { t: tt, names } = useT();
+  const large = useLargeText();
   const state = useGame((g) => g.state);
   useGame((g) => g.rev);
   if (!state) return null;
@@ -89,7 +90,7 @@ export function HomeHeader() {
           {status.text}
         </Text>
       ) : null}
-      <View style={styles.meters}>
+      <View style={[styles.meters, large && styles.metersLarge]}>
         <Meter
           label={tt('ui.meters.energy')}
           accessibilityLabel={`${tt('ui.meters.energyLong')} ${Math.round(u.energy)}`}
@@ -139,7 +140,9 @@ export function ordinal(n: number): string {
 }
 
 const styles = StyleSheet.create({
+  topLarge: { flexDirection: 'column', alignItems: 'flex-start' },
   top: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12 },
   who: { flexDirection: 'row', alignItems: 'center', gap: 10, flexShrink: 1, minHeight: 44 },
   meters: { flexDirection: 'row', gap: 12 },
+  metersLarge: { flexWrap: 'wrap', rowGap: 12 },
 });

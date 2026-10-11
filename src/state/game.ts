@@ -18,6 +18,7 @@ import { deserialise, SaveError, serialise, type SaveSummary } from '@/engine/sa
 import { haptic } from '@/platform/haptics';
 import { saveStore } from '@/platform/storage';
 
+import { timed, usePerf } from './perf';
 import { useSettings } from './settings';
 
 let indexCache: ContentIndex | null = null;
@@ -111,7 +112,10 @@ export function save(): Promise<void> {
     try {
       await frame();
       const summary = summaryOf(state);
-      await saveStore.write(summary, serialise(state));
+      const start = performance.now();
+      const text = serialise(state);
+      await saveStore.write(summary, text);
+      usePerf.setState({ lastSaveMs: performance.now() - start });
       const saves = get().saves.filter((s) => s.id !== summary.id);
       set({ saves: [summary, ...saves] });
     } catch (e) {
@@ -212,7 +216,7 @@ export async function playOn(): Promise<void> {
   await frame();
   try {
     const mark = state.career.feed.length;
-    advance(state, contentIndex());
+    timed('lastEngineMs', () => advance(state, contentIndex()));
     feelNews(state, mark);
     bump({ busy: null });
     await save();
@@ -239,7 +243,9 @@ export async function playAhead(maxWeeks = 12): Promise<void> {
     for (let weeks = 0; weeks < maxWeeks;) {
       await frame();
       const mark = state.career.feed.length;
-      const r = simulateAhead(state, contentIndex(), { maxWeeks: 1, stopAtEveryMoment });
+      const r = timed('lastEngineMs', () =>
+        simulateAhead(state, contentIndex(), { maxWeeks: 1, stopAtEveryMoment }),
+      );
       feelNews(state, mark);
       weeks += r.weeks;
       bump({ busy: { kind: 'ahead', weeks, of: maxWeeks } });
