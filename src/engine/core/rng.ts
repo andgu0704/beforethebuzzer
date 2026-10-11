@@ -18,6 +18,13 @@ export interface Rng {
   shuffle<T>(items: readonly T[]): T[];
   /** A child stream, independent of this one's future draws. */
   fork(...label: readonly (string | number)[]): Rng;
+  /** Serialisable position in the stream, for resuming mid-game after a save. */
+  snapshot(): RngSnapshot;
+}
+
+export interface RngSnapshot {
+  readonly base: string;
+  readonly state: readonly [number, number, number, number];
 }
 
 export type Seed = readonly [number, number, number, number];
@@ -59,9 +66,14 @@ class Sfc32 implements Rng {
   constructor(
     seed: Seed,
     private readonly base: string,
+    warm = true,
   ) {
     [this.a, this.b, this.c, this.d] = seed;
-    for (let i = 0; i < 12; i++) this.nextUint();
+    if (warm) for (let i = 0; i < 12; i++) this.nextUint();
+  }
+
+  snapshot(): RngSnapshot {
+    return { base: this.base, state: [this.a >>> 0, this.b >>> 0, this.c >>> 0, this.d >>> 0] };
   }
 
   private nextUint(): number {
@@ -137,4 +149,9 @@ class Sfc32 implements Rng {
 export function createRng(worldSeed: string, ...label: readonly (string | number)[]): Rng {
   const base = label.length === 0 ? worldSeed : `${worldSeed}\u001d${labelText(label)}`;
   return new Sfc32(hashSeed(base), base);
+}
+
+/** Continues a stream exactly where `snapshot()` left it. */
+export function restoreRng(snapshot: RngSnapshot): Rng {
+  return new Sfc32(snapshot.state, snapshot.base, false);
 }

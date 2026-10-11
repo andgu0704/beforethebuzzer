@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { createRng } from './rng';
+import { createRng, restoreRng } from './rng';
 
 describe('rng', () => {
   it('repeats a sequence for the same seed and label', () => {
@@ -57,5 +57,13 @@ describe('rng', () => {
     const a = createRng('seed').fork('child');
     const b = createRng('seed').fork('child');
     expect(a.next()).toBe(b.next());
+  });
+
+  it('resumes from a snapshot', () => {
+    const a = createRng('seed', 'resume');
+    a.next();
+    const snap = a.snapshot();
+    const b = restoreRng(JSON.parse(JSON.stringify(snap)) as typeof snap);
+    for (let i = 0; i < 20; i++) expect(b.next()).toBe(a.next());
   });
 });
