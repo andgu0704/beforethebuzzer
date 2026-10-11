@@ -17,7 +17,8 @@
     "play": "tsx scripts/play/main.ts",
     "check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
     "start": "expo start",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "portraits": "tsx scripts/portraits/sheet.ts"
   },
   "dependencies": {
     "@expo-google-fonts/antonio": "^0.4.2",
