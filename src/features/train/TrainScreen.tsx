@@ -42,7 +42,9 @@ export function TrainScreen() {
   const state = useGame((g) => g.state);
   useGame((g) => g.rev);
   const tipSeen = useSettings((s) => !!s.tipsSeen['plan']);
-  const markTip = useSettings((s) => s.markTip);
+  const markTip = (id: string) => {
+    useSettings.getState().markTip(id);
+  };
   const [draft, setDraft] = useState<WeekPlan | null>(null);
   if (!state) return null;
   const u = userOf(state);

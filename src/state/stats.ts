@@ -43,4 +43,4 @@ export function seasonLines(world: World, p: Player): SeasonLine[] {
 }
 
 export const one = (n: number) => n.toFixed(1);
-export const pct = (n: number) => `${(n * 100).toFixed(1)}`;
+export const pct = (n: number) => (n * 100).toFixed(1);

@@ -112,7 +112,7 @@ export function ListRow({
   readonly subtitle?: string | undefined;
   readonly value?: string | undefined;
   readonly leading?: ReactNode | undefined;
-  readonly onPress?: () => void | undefined;
+  readonly onPress?: (() => void) | undefined;
   readonly icon?: Icon | undefined;
   readonly chevron?: boolean | undefined;
   readonly testID?: string | undefined;

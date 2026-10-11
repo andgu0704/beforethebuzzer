@@ -1,17 +1,19 @@
 import { View } from 'react-native';
 import Svg, { Circle, Line, Path } from 'react-native-svg';
 
+import { userOf } from '@/engine/career/state';
 import type { MomentResult } from '@/engine/career/game';
 import type { MomentSituation } from '@/engine/model/career';
+import { haptic } from '@/platform/haptics';
+import { useGame } from '@/state/game';
+import { useSettings } from '@/state/settings';
+import { ClipPlayer } from '@/ui/clips/ClipPlayer';
+import { useT } from '@/ui/i18n';
 import { useTheme } from '@/ui/theme/theme';
 
-/** The court above a key moment: a still before the choice, the clip after it. */
-export function ClipSlot({
-  result: _result,
-}: {
-  readonly situation: MomentSituation;
-  readonly result?: MomentResult | undefined;
-}) {
+import { clipSetup } from './clipProps';
+
+function CourtStill() {
   const t = useTheme();
   return (
     <View
@@ -30,8 +32,42 @@ export function ClipSlot({
         <Circle cx={25} cy={19} r={6} stroke={t.c.courtLine} strokeWidth={0.3} fill="none" />
         <Line x1={22} y1={4} x2={28} y2={4} stroke={t.c.courtLine} strokeWidth={0.4} />
         <Circle cx={25} cy={5.25} r={0.75} stroke="#FF5A1F" strokeWidth={0.3} fill="none" />
-        <Line x1={0} y1={47} x2={50} y2={47} stroke={t.c.courtLine} strokeWidth={0.6} />
       </Svg>
     </View>
+  );
+}
+
+/** The court above a key moment: a still before the choice, the clip after it. */
+export function ClipSlot({
+  situation,
+  result,
+  resultLine,
+}: {
+  readonly situation: MomentSituation;
+  readonly result?: MomentResult | undefined;
+  readonly resultLine?: string | undefined;
+}) {
+  const t = useTheme();
+  const { names } = useT();
+  const state = useGame((g) => g.state);
+  const autoPlay = useSettings((s) => s.clipAutoplay);
+  if (!state || !result) return <CourtStill />;
+  const setup = clipSetup(state, situation.gameId, names);
+  const close = Math.abs(situation.score[0] - situation.score[1]) <= 3;
+  return (
+    <ClipPlayer
+      spec={result.clip}
+      home={setup.home}
+      away={setup.away}
+      params={setup.params}
+      signature={state.career.signature === result.clip.template && result.success}
+      autoPlay={autoPlay}
+      scheme={t.scheme}
+      {...(resultLine ? { resultLine } : {})}
+      onBuzzer={() => {
+        haptic(close ? 'heavy' : 'light');
+      }}
+      key={`${situation.gameId}-${userOf(state).jersey}-${result.clip.clock}`}
+    />
   );
 }

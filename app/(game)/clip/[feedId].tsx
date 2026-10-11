@@ -1,5 +1,3 @@
-import { Text } from '@/ui/components/Text';
+import { ClipScreen } from '@/features/clip/ClipScreen';
 
-export default function Placeholder() {
-  return <Text>Coming next</Text>;
-}
+export default ClipScreen;

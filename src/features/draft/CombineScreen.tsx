@@ -79,7 +79,7 @@ export function CombineScreen() {
                   variant="stat"
                   color={peers.length ? (better ? 'positive' : 'negative') : 'ink'}
                 >
-                  {`${v.toFixed(digits)}`}
+                  {v.toFixed(digits)}
                 </Text>
                 <Text variant="footnote" color="inkSecondary" style={{ width: 28 }}>
                   {unit}
