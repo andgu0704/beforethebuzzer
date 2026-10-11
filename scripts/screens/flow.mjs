@@ -1,11 +1,19 @@
-// Plays the opening of a career in the web build and screenshots each screen.
-//   node scripts/screens/flow.mjs [baseUrl] [outDir] [scheme] [width] [height] [weeks]
+// Plays a career in the web build and screenshots each screen.
+//   node scripts/screens/flow.mjs [baseUrl] [outDir] [scheme] [width] [height] [weeks] [ahead]
+// "ahead" uses simulate ahead between decisions; every decision takes its first option.
 import { mkdirSync } from 'node:fs';
 
 import { chromium } from '@playwright/test';
 
-const [base = 'http://localhost:8081', out = 'docs/screens', scheme = 'light', w = '390', h = '844', weeksArg = '3'] =
-  process.argv.slice(2);
+const [
+  base = 'http://localhost:8081',
+  out = 'docs/screens',
+  scheme = 'light',
+  w = '390',
+  h = '844',
+  weeksArg = '3',
+  mode = 'next',
+] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 const tag = `${scheme}-${w}`;
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
@@ -20,10 +28,12 @@ page.on('console', (m) => {
   if (m.type() === 'error') errors.push(m.text());
 });
 const shot = async (name) => {
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(600);
   await page.screenshot({ path: `${out}/${name}-${tag}.png` });
 };
 const id = (x) => page.getByTestId(x);
+const visible = (loc) => loc.isVisible().catch(() => false);
+const seen = new Set();
 
 await page.goto(base, { waitUntil: 'networkidle' });
 await id('new-career').first().waitFor({ timeout: 30000 });
@@ -41,38 +51,122 @@ await id('create-next').click();
 await id('home').waitFor({ timeout: 120000 });
 await shot('04-home-first');
 
-// Play weeks, answering every decision with its first option.
-const weeks = Number(weeksArg);
-for (let week = 0; week < weeks; week++) {
-  await id('next-week').click();
-  for (let guard = 0; guard < 40; guard++) {
-    await page.waitForTimeout(400);
-    if (await id('decide').last().isVisible().catch(() => false)) {
-      if (guard === 0 || week === 0) await shot(`05-decide-w${week}-${guard}`);
-      const cont = id('decide-continue');
-      if (await cont.isVisible().catch(() => false)) {
-        await shot(`06-outcome-w${week}-${guard}`);
-        await cont.click();
-        continue;
-      }
-      const choice = page.locator('[data-testid^="choice-"], [data-testid^="moment-"], [data-testid^="offer-"]').first();
-      if (await choice.isVisible().catch(() => false)) {
-        await choice.click();
-        continue;
-      }
-      const workout = page.locator('[data-testid^="workout-"]').first();
-      if (await workout.isVisible().catch(() => false)) {
-        await workout.click();
-        await id('confirm-workouts').click();
-        continue;
+async function decide() {
+  for (let guard = 0; guard < 12; guard++) {
+    await page.waitForTimeout(300);
+    if (await visible(id('draft-night'))) {
+      await shot('20-draft-night-early');
+      const skip = page.getByText(/skip to your pick/i);
+      if (await visible(skip)) await skip.click();
+      await page.waitForTimeout(1500);
+      await shot('21-draft-night-reveal');
+      await id('draft-continue').click();
+      return 'ended';
+    }
+    if (!(await visible(id('decide').last()))) return 'none';
+    const cont = id('decide-continue');
+    if (await visible(cont)) {
+      await cont.click();
+      continue;
+    }
+    const kind = await page
+      .locator(
+        '[data-testid^="choice-"], [data-testid^="moment-"], [data-testid^="offer-"], [data-testid^="workout-"]',
+      )
+      .first()
+      .getAttribute('data-testid')
+      .catch(() => null);
+    const prefix = kind ? kind.split('-')[0] : 'x';
+    if (!seen.has(prefix)) {
+      seen.add(prefix);
+      await shot(`10-decide-${prefix}`);
+    }
+    if (prefix === 'workout') {
+      await page.locator('[data-testid^="workout-"]').first().click();
+      await id('confirm-workouts').click();
+      continue;
+    }
+    if (kind) await page.getByTestId(kind).click();
+    if (prefix === 'moment') {
+      await page.waitForTimeout(2500);
+      if (!seen.has('clip')) {
+        seen.add('clip');
+        await shot('11-moment-clip');
       }
     }
-    const label = await id('next-week').innerText({ timeout: 2000 }).catch(() => '');
-    if (process.env.FLOW_DEBUG) console.log(week, guard, page.url(), JSON.stringify(label));
-    if (/next week/i.test(label)) break;
-    if (/decide/i.test(label)) await id('next-week').click();
+  }
+  return 'busy';
+}
+
+const weeks = Number(weeksArg);
+let ended = false;
+for (let turn = 0; turn < weeks && !ended; turn++) {
+  const label = (
+    await id('next-week')
+      .innerText({ timeout: 5000 })
+      .catch(() => '')
+  ).toLowerCase();
+  if (/see how it ended/.test(label)) break;
+  if (/decide/.test(label)) await id('next-week').click();
+  else if (
+    mode === 'ahead' &&
+    (await id('simulate-ahead')
+      .isEnabled()
+      .catch(() => false))
+  )
+    await id('simulate-ahead').click();
+  else await id('next-week').click();
+  for (let guard = 0; guard < 200; guard++) {
+    const r = await decide();
+    if (r === 'ended') {
+      ended = true;
+      break;
+    }
+    const now = (
+      await id('next-week')
+        .innerText({ timeout: 2000 })
+        .catch(() => '')
+    ).toLowerCase();
+    if (process.env.FLOW_DEBUG) console.log(turn, guard, page.url(), now);
+    if (/next week|see how it ended/.test(now) && r === 'none') break;
+    if (/decide/.test(now) && r === 'none') await id('next-week').click();
+    await page.waitForTimeout(250);
   }
 }
-await shot('07-home-after');
-console.log(errors.length ? `ERRORS:\n${errors.slice(0, 15).join('\n')}` : 'no page errors');
+
+if (ended) {
+  await id('ending')
+    .waitFor({ timeout: 10000 })
+    .catch(() => undefined);
+  await shot('22-ending');
+  await page.goto(base, { waitUntil: 'networkidle' }).catch(() => undefined);
+}
+await id('home')
+  .waitFor({ timeout: 30000 })
+  .catch(() => undefined);
+await shot('30-home');
+for (const tab of ['train', 'team', 'career', 'social']) {
+  await id(`tab-${tab}`).click();
+  await page.waitForTimeout(500);
+  await shot(`31-${tab}`);
+  if (tab === 'team') {
+    for (const sub of ['coach', 'schedule', 'standings']) {
+      await id(`team-tabs-${sub}`).click();
+      await shot(`32-team-${sub}`);
+    }
+  }
+  if (tab === 'social') {
+    for (const sub of ['press', 'rival']) {
+      await id(`social-tabs-${sub}`).click();
+      await shot(`33-social-${sub}`);
+    }
+  }
+}
+await id('tab-home').click();
+await id('open-profile').click();
+await shot('40-profile');
+console.log(`ended: ${ended}`);
+console.log(
+  errors.length ? `ERRORS:\n${[...new Set(errors)].slice(0, 15).join('\n')}` : 'no page errors',
+);
 await browser.close();

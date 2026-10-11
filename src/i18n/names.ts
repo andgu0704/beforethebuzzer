@@ -21,7 +21,7 @@ export function worldNames(world: World, t: Translator): NameResolver {
       if (!team && id.startsWith('showcase-')) {
         const side = id.slice('showcase-'.length);
         const name = t.t(`teams.showcase${side.charAt(0).toUpperCase()}${side.slice(1)}`);
-        return part === 'abbr' ? name.slice(0, 1) + 'SEL' : name;
+        return part === 'abbr' ? (name.split(' ')[0] ?? name).slice(0, 4).toUpperCase() : name;
       }
       if (!team) return '';
       const o = world.overrides.teams[id];
@@ -29,7 +29,10 @@ export function worldNames(world: World, t: Translator): NameResolver {
         const nation = t.t(`nations.${team.nation}`);
         return team.level === 'u20' ? t.t('teams.u20', { nation }) : nation;
       }
-      if (team.kind === 'select') return t.t(`teams.${team.name}`);
+      if (team.kind === 'select') {
+        const name = t.t(`teams.${team.name}`);
+        return part === 'abbr' ? (name.split(' ')[0] ?? name).slice(0, 4).toUpperCase() : name;
+      }
       const name = o?.name ?? team.name;
       const nickname = o?.nickname ?? team.nickname;
       const abbr = o?.abbr ?? team.abbr;

@@ -56,7 +56,12 @@ export const CareerCard = forwardRef<View, { readonly state: GameState }>(functi
           <Text variant="label" style={{ color: '#FFFFFF', opacity: 0.8 }}>
             {end?.pick ? tt(`ui.ending.round.${end.pick <= 30 ? 1 : 2}`) : tt('ui.ending.kicker')}
           </Text>
-          <Text variant="scoreboard" style={{ color: '#FFFFFF' }}>
+          <Text
+            variant={end?.pick ? 'scoreboard' : 'displayL'}
+            style={{ color: '#FFFFFF' }}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
             {end?.pick ? `#${end.pick}` : tt('ui.ending.undrafted').toUpperCase()}
           </Text>
           {draftTeam ? (

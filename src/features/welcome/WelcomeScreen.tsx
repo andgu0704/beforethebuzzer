@@ -28,8 +28,8 @@ function SaveRow({
   const d = save.detail;
   const where = d
     ? d.teamName
-      ? tt('ui.welcome.savedAt', { team: d.teamName, week: d.week, year: d.year })
-      : tt('ui.welcome.noTeam', { week: d.week, year: d.year })
+      ? tt('ui.welcome.savedAt', { team: d.teamName, week: d.week, year: String(d.year) })
+      : tt('ui.welcome.noTeam', { week: d.week, year: String(d.year) })
     : '';
   return (
     <Pressable
