@@ -1,0 +1,40 @@
+name: iOS screenshots
+
+# Builds a release app for the iOS Simulator and runs the Maestro flows, uploading the
+# screenshots. Run by hand from the Actions tab; macOS runners are free on public repositories.
+on:
+  workflow_dispatch:
+
+jobs:
+  simulator:
+    runs-on: macos-15
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        device: ['iPhone SE (3rd generation)', 'iPhone 16 Pro Max']
+        appearance: [light, dark]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+      - name: Boot the simulator
+        run: |
+          xcrun simctl boot "${{ matrix.device }}" || true
+          xcrun simctl ui "${{ matrix.device }}" appearance ${{ matrix.appearance }}
+      - name: Build and install a release build
+        run: npx expo run:ios --configuration Release --device "${{ matrix.device }}" --no-bundler
+      - name: Run the flows
+        run: maestro test .maestro --test-output-dir maestro-output
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screens-${{ matrix.device }}-${{ matrix.appearance }}
+          path: maestro-output

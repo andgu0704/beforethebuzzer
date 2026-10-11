@@ -1,0 +1,45 @@
+# Creates a career and plays the opening weeks, taking screenshots on the way.
+appId: app.beforethebuzzer
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: new-career
+- tapOn:
+    id: given
+- inputText: Nika
+- tapOn:
+    id: family
+- inputText: Beridze
+- takeScreenshot: create-who
+- repeat:
+    times: 5
+    commands:
+      - tapOn:
+          id: create-next
+- tapOn:
+    id: create-next
+- extendedWaitUntil:
+    visible:
+      id: next-week
+    timeout: 60000
+- takeScreenshot: home-first
+- tapOn:
+    id: next-week
+- extendedWaitUntil:
+    visible:
+      id: decide
+    timeout: 30000
+- takeScreenshot: decide
+- tapOn:
+    id: tab-train
+- takeScreenshot: train
+- tapOn:
+    id: tab-team
+- takeScreenshot: team
+- tapOn:
+    id: tab-career
+- takeScreenshot: career
+- tapOn:
+    id: tab-social
+- takeScreenshot: social
