@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { ShareNetworkIcon as Share } from 'phosphor-react-native';
+import { Stack, router } from 'expo-router';
+import { GearIcon as Gear, ShareNetworkIcon as Share } from 'phosphor-react-native';
 import { StyleSheet, View } from 'react-native';
 
 import { userOf } from '@/engine/career/state';
@@ -8,7 +8,7 @@ import { useGame } from '@/state/game';
 import { one, pct, perGame } from '@/state/stats';
 import { ageOf, currentTeam } from '@/state/views';
 import { Avatar } from '@/ui/components/Avatar';
-import { Button } from '@/ui/components/Button';
+import { Button, IconButton } from '@/ui/components/Button';
 import { EmptyState, Screen, SectionHeader } from '@/ui/components/Layout';
 import { Flag } from '@/ui/components/Marks';
 import { BoxScoreTable } from '@/ui/components/Stats';
@@ -68,6 +68,22 @@ export function ProfileScreen() {
   const timeline = state.career.timeline.map((e, i) => ({ e, i })).reverse();
   return (
     <Screen testID="profile">
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <IconButton
+              testID="profile-settings"
+              icon={Gear}
+              variant="plain"
+              size={40}
+              label={tt('ui.settings.title')}
+              onPress={() => {
+                router.push('/settings');
+              }}
+            />
+          ),
+        }}
+      />
       <View
         style={[
           styles.card,

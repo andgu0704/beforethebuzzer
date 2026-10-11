@@ -163,8 +163,36 @@ for (const tab of ['train', 'team', 'career', 'social']) {
   }
 }
 await id('tab-home').click();
+const box = page.getByText(/^box score$/i).first();
+if (await visible(box)) {
+  await box.click();
+  await id('game-report')
+    .waitFor({ timeout: 10000 })
+    .catch(() => undefined);
+  await shot('41-game-report');
+  await page.goBack();
+}
+await id('tab-team').click();
+await id('team-tabs-standings').click();
+const tour = page.locator('[data-testid^="tournament-"]').first();
+if (await visible(tour)) {
+  await tour.click();
+  await shot('42-bracket');
+  await page.goBack();
+}
+await id('tab-career').click();
+if (await visible(id('open-combine'))) {
+  await id('open-combine').click();
+  await shot('43-combine');
+  await page.goBack();
+}
+await id('tab-home').click();
 await id('open-profile').click();
 await shot('40-profile');
+await page.mouse.wheel(0, 4000);
+await shot('40-profile-timeline');
+await id('profile-settings').click();
+await shot('50-settings');
 console.log(`ended: ${ended}`);
 console.log(
   errors.length ? `ERRORS:\n${[...new Set(errors)].slice(0, 15).join('\n')}` : 'no page errors',
