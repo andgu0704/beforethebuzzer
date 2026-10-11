@@ -5,10 +5,11 @@ Version 1 runs from the end of high school through draft night; the score is dra
 
 This document is the contract for phases 1–5. It covers scope, architecture, the data model,
 library choices, the game rules for v1, the design system, every screen, the clip system,
-content, God Mode, the phase plan and the open decisions that need your answer.
+content, God Mode, the phase plan and the decisions taken.
 
-> **Status:** awaiting your review. No app code is written until you approve.
-> Decisions that need your call are collected in [§17 Open decisions](#17-open-decisions).
+> **Status:** awaiting your approval. No app code is written until you approve.
+> The four design decisions are settled ([§17 Decisions](#17-decisions)); the defaults listed
+> there stand unless you change them.
 
 ---
 
@@ -30,7 +31,7 @@ content, God Mode, the phase plan and the open decisions that need your answer.
 14. [God Mode](#14-god-mode)
 15. [Phases, deliverables and acceptance](#15-phases-deliverables-and-acceptance)
 16. [Risks](#16-risks)
-17. [Open decisions](#17-open-decisions)
+17. [Decisions](#17-decisions)
 
 ---
 
@@ -365,7 +366,7 @@ One turn is one week. A year has ~52 turns; "Simulate ahead" passes through the 
 
 | Period | Turns | What happens |
 |---|---|---|
-| Recruiting spring (start of the game) | 3–4 | Showcase game, visits, offers, commitment (see decision D3) |
+| Recruiting spring (start of the game) | 3–4 | Showcase game, visits, offers, commitment (decision D3) |
 | Summer | ~10 | Training, under-20 or senior tournaments (2–3 turns each), summer classes |
 | Preseason (Sep–Oct) | 8 | Classes start, practice, the coach sets roles, an exhibition game |
 | Non-conference (Nov–Dec) | 8 | 13 games, 1–3 a week, including an 8-team holiday tournament |
@@ -703,11 +704,11 @@ screen, in both type options, light and dark, small and large:
 
 ### 10.1 Typography
 
-Two typefaces at most. Two options are shown in the study (decision D1):
+Two typefaces at most. Two options were studied (decision D1); **B is chosen**:
 
 - **A:** Archivo in two widths: ExtraCondensed for display, normal width for text. One family,
   very consistent, quieter.
-- **B (recommended):** **Antonio** (display; tall, tight, scoreboard numerals) with
+- **B (chosen):** **Antonio** (display; tall, tight, scoreboard numerals) with
   **Schibsted Grotesk** (text, made for a newspaper group). More character, reads as sport *and*
   newsroom, which is the brief.
 
@@ -809,9 +810,35 @@ buzzer in a close game). A setting turns them off.
   team's colours. Drawn with Skia, sharp at any size.
 - **Flags:** small rectangular flags from an MIT-licensed SVG set, with three-letter codes in the
   broadcast style. No emoji anywhere.
-- **Portraits:** see decision D4.
+- **Portraits:** illustrated faces (decision D4), described in §10.6.
 
-### 10.6 Components
+### 10.6 Portraits
+
+Every person in the game (you, teammates, the rival, coaches, the journalist, agents, GMs) has
+an illustrated face. With thousands of generated people, the only way to keep them good is a
+**parts system with one strict art direction**, not one-off drawings:
+
+- **Style:** flat editorial illustration: clean vector shapes, one shadow tone and one highlight
+  tone per skin colour, no outlines, no gradients, a head-and-shoulders crop with the jersey
+  collar and number in team colours. Drawn as paths and rendered with Skia, sharp at every size
+  from a 32-pt avatar to the ending card.
+- **Parts (first set):** 6 head shapes · 10 skin tones · 8 eye shapes · 6 brow shapes ·
+  8 noses · 8 mouths · 2 ear shapes · 18 hairstyles (fades, waves, curls, twists, locs,
+  braids, buzz, afro, top knot, long, receding…) in natural colours · 8 facial-hair styles ·
+  accessories (headband, earrings, a chain at the collar; glasses for staff).
+- **Expressions:** neutral, smile, focused, frustrated, stunned, built from the same parts
+  (eyes, brows and mouth change). The feed and event cards choose one to suit the moment;
+  draft night gets a dedicated one.
+- **Generation:** generated people get a seeded selection of parts. Skin tone uses broad,
+  overlapping regional weights so every nation's roster looks varied; no other part is tied to
+  nationality. Your player is built in the creation "Look" step from the same parts, with a
+  Randomise button.
+- **Quality control:** a hidden "portrait lab" screen renders 100 random faces at once, light and
+  dark, so weak combinations are caught; certain part pairs are excluded by rule.
+- **Checkpoint:** early in Phase 2 I send you a parts sheet and 24 sample faces for approval
+  before building the rest of the screens on top of them.
+
+### 10.7 Components
 
 Text (typed variants only) · Button (primary, secondary, tertiary, destructive; regular and
 compact) · IconButton · Meter · AnimatedNumber · Scorebug · BoxScoreTable · StatLine ·
@@ -825,7 +852,7 @@ The **style-guide screen** (`dev/styleguide`) renders every token and every comp
 state. It is excluded from release builds like God Mode, and is also reachable from the God Mode
 panel.
 
-### 10.7 Accessibility
+### 10.8 Accessibility
 
 Dynamic Type through the scale in §10.1; VoiceOver labels and hints on every control, with
 stat lines read as sentences ("27 points, 6 rebounds, 4 assists"); 44-point targets; contrast as
@@ -840,7 +867,7 @@ Every screen has one primary action, designed empty, loading and error states, a
 transitions (push, form sheet, cross-fade for tabs).
 
 **Navigation.** Five tabs: Home · Train · Team · Career · Social. Profile opens from your
-portrait in the header (decision D2). Sheets are native form sheets with detents and
+portrait in the header (decision D2, chosen). Sheets are native form sheets with detents and
 swipe-to-dismiss, except decisions that must be made, which cannot be swiped away.
 
 | Screen | Contents | Primary action | States |
@@ -963,8 +990,9 @@ Phase 2), known gaps, and the next phase's first steps. I stop for your review a
   resume mid-turn.
 
 **Phase 2: Interface**
-- Design tokens, theme, components, style guide; every screen in §11; God Mode; persistence
-  wired to SQLite.
+- Design tokens, theme, components, style guide; the portrait system (§10.6, with an
+  approval checkpoint for its parts sheet); every screen in §11; God Mode; persistence wired to
+  SQLite.
 - *Accepted when:* a full career is playable in the app; screenshots of every screen, light and
   dark, iPhone SE and iPhone 17 Pro Max, critiqued and fixed; no dead buttons; every list has
   empty and loading states.
@@ -998,21 +1026,22 @@ Phase 2), known gaps, and the next phase's first steps. I stop for your review a
 | Save size grows with history | Chunked saves; box-score retention rules; size budget enforced by the script |
 | Real-name collisions | Deny-lists, tests, and the name editor as a backstop |
 | Content quality at volume (Phase 4) | Strong schemas, a style guide for the writing, and a read-through pass |
+| Illustrated faces looking cheap at scale | One strict art direction, a parts system, the portrait lab, excluded pairs, and your sign-off on the parts sheet before anything is built on it |
 | Native sheets differ on Android | Form sheets are supported on both; checked again in the Android phase |
 | Balance depends on many interacting systems | Bot policies and distributions from day one, not at the end |
 
 ---
 
-## 17. Open decisions
+## 17. Decisions
 
-Questions where the answer changes what I build. Each has my recommendation.
+Settled on 11 October 2026:
 
-| # | Decision | Options | Recommendation |
+| # | Decision | Options | Chosen |
 |---|---|---|---|
-| D1 | Typefaces | **A** Archivo in two widths · **B** Antonio + Schibsted Grotesk | **B**: more character and closer to "broadcast meets editorial" |
-| D2 | Tabs | **A** Home · Train · Team · Career · Social, with Profile opened from the header portrait · **B** six tabs including Profile | **A**: iOS tab bars hold five; six cramps labels on a 375-pt screen |
-| D3 | Where the game starts | **A** Spring of the last high-school year: a showcase game, visits and offers over 3–4 turns · **B** offers on the table from the first screen | **A**: the first minute teaches the whole loop (plan, game, key moment, event) before the big choice |
-| D4 | Portraits ("basic appearance") | **A** Geometric, faceless busts in one style (skin tone, hair, facial hair, headband), used for everyone · **B** illustrated faces with features and expressions | **A**: consistent at premium quality for thousands of generated people; detailed faces at that scale risk looking cheap |
+| D1 | Typefaces | **A** Archivo in two widths · **B** Antonio + Schibsted Grotesk | **B** (as recommended) |
+| D2 | Tabs | **A** Home · Train · Team · Career · Social, with Profile opened from the header portrait · **B** six tabs including Profile | **A** (as recommended) |
+| D3 | Where the game starts | **A** Spring of the last high-school year: a showcase game, visits and offers over 3–4 turns · **B** offers on the table from the first screen | **A** (as recommended) |
+| D4 | Portraits ("basic appearance") | **A** Geometric, faceless busts · **B** illustrated faces with features and expressions | **B**, built as a parts system (§10.6); I had recommended A |
 
 Defaults I will use unless you say otherwise:
 
