@@ -74,11 +74,11 @@ sync, accounts, analytics, ads and purchases.
 This session runs in a Linux cloud container, which cannot run the iOS Simulator. So that I only
 report what I have seen work, I will verify on three levels:
 
-| Level | What runs | Used for |
-|---|---|---|
-| Engine | Vitest in Node; headless simulation script; a terminal "play" script that drives a full career | Every engine change |
-| Web render | The same app through `react-native-web` in headless Chromium (Playwright), at 375×667 and 440×956 with simulated safe-area insets, light and dark | Fast design iteration and screenshots on every UI change |
-| Real iOS | A GitHub Actions macOS workflow builds a simulator build, runs Maestro flows on an iPhone SE (3rd gen) and an iPhone 17 Pro Max simulator, light and dark, and pushes the screenshots to a `ci-screenshots` branch that I fetch and review | The final screenshots in each phase report |
+| Level      | What runs                                                                                                                                                                                                                                  | Used for                                                 |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- |
+| Engine     | Vitest in Node; headless simulation script; a terminal "play" script that drives a full career                                                                                                                                             | Every engine change                                      |
+| Web render | The same app through `react-native-web` in headless Chromium (Playwright), at 375×667 and 440×956 with simulated safe-area insets, light and dark                                                                                          | Fast design iteration and screenshots on every UI change |
+| Real iOS   | A GitHub Actions macOS workflow builds a simulator build, runs Maestro flows on an iPhone SE (3rd gen) and an iPhone 17 Pro Max simulator, light and dark, and pushes the screenshots to a `ci-screenshots` branch that I fetch and review | The final screenshots in each phase report               |
 
 The repository is public, so macOS runner minutes are free.
 
@@ -95,29 +95,29 @@ built-in frame-time overlay and a checklist so the check takes ten minutes.
 Versions are the current stable releases as of October 2026 (Expo SDK 57 is the latest stable
 SDK; SDK 58 is in beta). All of them are bundled with or supported by SDK 57.
 
-| Concern | Choice | Why | Rejected |
-|---|---|---|---|
-| Framework | **Expo SDK 57** (React Native 0.86, React 19.2, New Architecture) | Latest stable; config plugins, Expo Go for review, EAS when needed | Bare RN (more native upkeep, no benefit here) |
-| Language | **TypeScript ~6.0**, `strict` plus `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes` | The version SDK 57's template pins; strictest useful settings | TypeScript 7 (not yet the SDK's pinned version) |
-| Routing | **expo-router 57** | File-based routing, native stack and tabs, typed routes, native form sheets with detents and swipe-to-dismiss | React Navigation used directly (more wiring for the same result) |
-| State | **Zustand 5** | Small, selector-based, usable outside React by the game controller, no provider tree | Redux Toolkit (heavier for one session store), Jotai (atoms suit this less well) |
-| Persistence | **expo-sqlite 57** | Ships in Expo Go, transactional writes, WAL mode, chunked saves so history is never rewritten, built-in key-value store for settings | MMKV 4 (fast, but needs a dev build; we write once per turn, so its speed advantage does not matter) |
-| Validation | **Zod 4** | Content and saves validated at startup, types inferred from schemas, readable errors for content authors | Valibot (smaller, but fewer tools; size does not matter here) |
-| Animation | **Reanimated 4.5** + **react-native-worklets 0.10** | UI-thread animation at 60 fps, layout animations for the feed, built-in reduced-motion support | Animated API (JS thread) |
-| Gestures | **react-native-gesture-handler 2.32** | Native gestures, pressed states, swipe actions | — |
-| Clips | **@shopify/react-native-skia 2.6** | GPU canvas driven directly by Reanimated shared values, no React re-renders per frame; runs on web (CanvasKit) for screenshots | react-native-svg (too slow for 11 moving objects at 60 fps), Lottie (cannot be parameterised per play) |
-| Lists | **@shopify/flash-list 2** | Recycling lists for the feed, rosters, big board and box scores | FlatList (blank cells on fast scroll) |
-| Icons | **phosphor-react-native 3** (+ react-native-svg 15.15) | One consistent set of ~1,200 icons in matching regular and fill weights, including basketball, barbell and film; same on iOS and Android | SF Symbols (iOS only), Lucide (no fill weight for selected states) |
-| Fonts | **expo-font** with static TTF instances | Two OFL typefaces, subset to Latin plus Latin Extended for names such as Đorđević or Şengün | Variable fonts (React Native cannot set font axes reliably on both platforms) |
-| Haptics | **expo-haptics** | Same API on iOS (Taptic Engine) and Android (vibrator) | — |
-| Locale | **expo-localization** + an in-house typed layer (§8) | Typed keys checked at compile time, plural rules from `Intl.PluralRules`, no runtime parsing, also usable by the engine's reports | i18next (fine, but larger, and keys are only checked through extra typing) |
-| Hashing | **@noble/hashes** | Audited, pure-JS PBKDF2-SHA256 for the God Mode passcode; no native module | expo-crypto (has no PBKDF2) |
-| Sharing | **react-native-view-shot 5** + **expo-sharing** | Renders the career card to a PNG and opens the system share sheet, offline | — |
-| Compiler | **React Compiler** (enabled through Expo) | Automatic memoisation; fewer re-renders without `useMemo` clutter | — |
-| Tests | **Vitest 5** + **fast-check 4** | Fast TypeScript tests for the engine; property tests for box-score invariants | Jest (slower for pure TS) |
-| UI checks | **Playwright** (web), **Maestro** (iOS Simulator in CI) | Screenshots and smoke flows | Detox (heavier set-up for the same coverage) |
-| Scripts | **tsx** | Runs the simulation and play scripts on Node without a build step | ts-node |
-| Lint/format | **ESLint 10** (flat config, `eslint-config-expo`, `typescript-eslint` strict type-checked) + **Prettier 3** | Standard, with custom rules for the engine boundary (§4.3) | Biome (fewer React Native rules) |
+| Concern     | Choice                                                                                                      | Why                                                                                                                                      | Rejected                                                                                               |
+| ----------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Framework   | **Expo SDK 57** (React Native 0.86, React 19.2, New Architecture)                                           | Latest stable; config plugins, Expo Go for review, EAS when needed                                                                       | Bare RN (more native upkeep, no benefit here)                                                          |
+| Language    | **TypeScript ~6.0**, `strict` plus `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`                 | The version SDK 57's template pins; strictest useful settings                                                                            | TypeScript 7 (not yet the SDK's pinned version)                                                        |
+| Routing     | **expo-router 57**                                                                                          | File-based routing, native stack and tabs, typed routes, native form sheets with detents and swipe-to-dismiss                            | React Navigation used directly (more wiring for the same result)                                       |
+| State       | **Zustand 5**                                                                                               | Small, selector-based, usable outside React by the game controller, no provider tree                                                     | Redux Toolkit (heavier for one session store), Jotai (atoms suit this less well)                       |
+| Persistence | **expo-sqlite 57**                                                                                          | Ships in Expo Go, transactional writes, WAL mode, chunked saves so history is never rewritten, built-in key-value store for settings     | MMKV 4 (fast, but needs a dev build; we write once per turn, so its speed advantage does not matter)   |
+| Validation  | **Zod 4**                                                                                                   | Content and saves validated at startup, types inferred from schemas, readable errors for content authors                                 | Valibot (smaller, but fewer tools; size does not matter here)                                          |
+| Animation   | **Reanimated 4.5** + **react-native-worklets 0.10**                                                         | UI-thread animation at 60 fps, layout animations for the feed, built-in reduced-motion support                                           | Animated API (JS thread)                                                                               |
+| Gestures    | **react-native-gesture-handler 2.32**                                                                       | Native gestures, pressed states, swipe actions                                                                                           | —                                                                                                      |
+| Clips       | **@shopify/react-native-skia 2.6**                                                                          | GPU canvas driven directly by Reanimated shared values, no React re-renders per frame; runs on web (CanvasKit) for screenshots           | react-native-svg (too slow for 11 moving objects at 60 fps), Lottie (cannot be parameterised per play) |
+| Lists       | **@shopify/flash-list 2**                                                                                   | Recycling lists for the feed, rosters, big board and box scores                                                                          | FlatList (blank cells on fast scroll)                                                                  |
+| Icons       | **phosphor-react-native 3** (+ react-native-svg 15.15)                                                      | One consistent set of ~1,200 icons in matching regular and fill weights, including basketball, barbell and film; same on iOS and Android | SF Symbols (iOS only), Lucide (no fill weight for selected states)                                     |
+| Fonts       | **expo-font** with static TTF instances                                                                     | Two OFL typefaces, subset to Latin plus Latin Extended for names such as Đorđević or Şengün                                              | Variable fonts (React Native cannot set font axes reliably on both platforms)                          |
+| Haptics     | **expo-haptics**                                                                                            | Same API on iOS (Taptic Engine) and Android (vibrator)                                                                                   | —                                                                                                      |
+| Locale      | **expo-localization** + an in-house typed layer (§8)                                                        | Typed keys checked at compile time, plural rules from `Intl.PluralRules`, no runtime parsing, also usable by the engine's reports        | i18next (fine, but larger, and keys are only checked through extra typing)                             |
+| Hashing     | **@noble/hashes**                                                                                           | Audited, pure-JS PBKDF2-SHA256 for the God Mode passcode; no native module                                                               | expo-crypto (has no PBKDF2)                                                                            |
+| Sharing     | **react-native-view-shot 5** + **expo-sharing**                                                             | Renders the career card to a PNG and opens the system share sheet, offline                                                               | —                                                                                                      |
+| Compiler    | **React Compiler** (enabled through Expo)                                                                   | Automatic memoisation; fewer re-renders without `useMemo` clutter                                                                        | —                                                                                                      |
+| Tests       | **Vitest 5** + **fast-check 4**                                                                             | Fast TypeScript tests for the engine; property tests for box-score invariants                                                            | Jest (slower for pure TS)                                                                              |
+| UI checks   | **Playwright** (web), **Maestro** (iOS Simulator in CI)                                                     | Screenshots and smoke flows                                                                                                              | Detox (heavier set-up for the same coverage)                                                           |
+| Scripts     | **tsx**                                                                                                     | Runs the simulation and play scripts on Node without a build step                                                                        | ts-node                                                                                                |
+| Lint/format | **ESLint 10** (flat config, `eslint-config-expo`, `typescript-eslint` strict type-checked) + **Prettier 3** | Standard, with custom rules for the engine boundary (§4.3)                                                                               | Biome (fewer React Native rules)                                                                       |
 
 Styling is plain `StyleSheet` with typed tokens and a `makeStyles(theme)` helper. No styling
 framework: the design system is ours, and a utility-class dialect would let one-off values in
@@ -148,7 +148,7 @@ through the back door.
 └──────────────────────────────────────────────────────────────┘
 ```
 
-Dependencies only point downward. The engine defines content *interfaces*; `src/content`
+Dependencies only point downward. The engine defines content _interfaces_; `src/content`
 implements them and is passed into the engine as a registry. The engine never imports content,
 so tests can run it against small fixture content.
 
@@ -228,13 +228,13 @@ switches this to "stop at every key moment".
 
 ### 4.5 Performance budget
 
-| Work | Budget (iPhone 12-class, Hermes) |
-|---|---|
+| Work                                                       | Budget (iPhone 12-class, Hermes)                                    |
+| ---------------------------------------------------------- | ------------------------------------------------------------------- |
 | One week of the whole college and pro leagues (~230 games) | < 120 ms, split across frames behind a short "Simulating" animation |
-| Simulate ahead, 10 quiet weeks | < 1.5 s with visible progress |
-| Auto-save (JSON + SQLite transaction) | < 40 ms, off the interaction path |
-| Startup to interactive, including content validation | < 1.5 s |
-| Clip playback | 60 fps, UI thread only |
+| Simulate ahead, 10 quiet weeks                             | < 1.5 s with visible progress                                       |
+| Auto-save (JSON + SQLite transaction)                      | < 40 ms, off the interaction path                                   |
+| Startup to interactive, including content validation       | < 1.5 s                                                             |
+| Clip playback                                              | 60 fps, UI thread only                                              |
 
 The headless script measures the engine numbers on every run; the device numbers are checked in
 Phase 5.
@@ -259,21 +259,21 @@ Phase 5.
 
 ### 5.2 Engine modules
 
-| Module | Responsibility |
-|---|---|
-| `core` | RNG, IDs, calendar, math tables, result types, invariants |
-| `world` | World generation: nations, people, colleges, pro teams, overseas clubs, schedules |
-| `player` | Creation, ratings, potential, growth, ageing, injuries, traits |
-| `turn` | Week pipeline, energy plan, interrupts, simulate ahead, stop rules |
-| `game` | Possession simulation, rotations, fatigue, key-moment triggers and resolution, box scores, play-by-play, clip specs |
-| `college` | Recruiting, offers, academics, eligibility, polls, conference and postseason |
-| `tournament` | Generic formats: groups, knockout, byes, seeding, tiebreaks, multi-turn schedules |
-| `international` | Nation strength, selection, call-ups, the four-year cycle |
-| `draft` | Scouting, big board, combine, workouts, team boards, lottery, draft night |
-| `career` | Relationships, rival, social feed, press, agent, deals, flags, consequences, timeline |
-| `pro` | League structure, contracts model, background season, minimal GM logic for offseasons |
-| `save` | Save format, versions, migrations, serialisation |
-| `godmode` | Pure commands God Mode can apply, and integrity marking |
+| Module          | Responsibility                                                                                                      |
+| --------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `core`          | RNG, IDs, calendar, math tables, result types, invariants                                                           |
+| `world`         | World generation: nations, people, colleges, pro teams, overseas clubs, schedules                                   |
+| `player`        | Creation, ratings, potential, growth, ageing, injuries, traits                                                      |
+| `turn`          | Week pipeline, energy plan, interrupts, simulate ahead, stop rules                                                  |
+| `game`          | Possession simulation, rotations, fatigue, key-moment triggers and resolution, box scores, play-by-play, clip specs |
+| `college`       | Recruiting, offers, academics, eligibility, polls, conference and postseason                                        |
+| `tournament`    | Generic formats: groups, knockout, byes, seeding, tiebreaks, multi-turn schedules                                   |
+| `international` | Nation strength, selection, call-ups, the four-year cycle                                                           |
+| `draft`         | Scouting, big board, combine, workouts, team boards, lottery, draft night                                           |
+| `career`        | Relationships, rival, social feed, press, agent, deals, flags, consequences, timeline                               |
+| `pro`           | League structure, contracts model, background season, minimal GM logic for offseasons                               |
+| `save`          | Save format, versions, migrations, serialisation                                                                    |
+| `godmode`       | Pure commands God Mode can apply, and integrity marking                                                             |
 
 ### 5.3 Game simulation
 
@@ -339,8 +339,8 @@ scout keeps writing 'starter?' in the margin"), and the hints sharpen as scouts 
 ### 5.7 Traits
 
 Three kinds: **gifts** and **flaws** (chosen at creation), and **earned** traits, unlocked by
-feats tracked as counters. Example: three game-winners earns *Clutch*; ten games with ten or more
-rebounds earns *Glass Cleaner*; a chronic injury from playing hurt can earn *Brittle*. A trait
+feats tracked as counters. Example: three game-winners earns _Clutch_; ten games with ten or more
+rebounds earns _Glass Cleaner_; a chronic injury from playing hurt can earn _Brittle_. A trait
 changes simulation modifiers, unlocks event responses, and appears in scout reports and the feed.
 
 ### 5.8 Consequences and timeline
@@ -364,19 +364,19 @@ rivalry game with more key moments.
 
 One turn is one week. A year has ~52 turns; "Simulate ahead" passes through the quiet ones.
 
-| Period | Turns | What happens |
-|---|---|---|
-| Recruiting spring (start of the game) | 3–4 | Showcase game, visits, offers, commitment (decision D3) |
-| Summer | ~10 | Training, under-20 or senior tournaments (2–3 turns each), summer classes |
-| Preseason (Sep–Oct) | 8 | Classes start, practice, the coach sets roles, an exhibition game |
-| Non-conference (Nov–Dec) | 8 | 13 games, 1–3 a week, including an 8-team holiday tournament |
-| Fall grades (mid-Dec) | — | Grade point average checked; below 2.0 means ineligible next semester |
-| Conference season (Jan–early Mar) | 9 | 18 conference games, 2 a week |
-| Conference tournament | 1 | Up to 4 games in a week |
-| National tournament | 3 | 64 teams; two rounds per turn |
-| Draft decision (Apr) | 2 | Declare, stay, or "test the waters" and withdraw by the deadline |
-| Combine and workouts (May) | 3 | Measurements, drills, team workouts |
-| Draft night (late Jun) | 1 | Sixty picks, two rounds; the career's v1 ending |
+| Period                                | Turns | What happens                                                              |
+| ------------------------------------- | ----- | ------------------------------------------------------------------------- |
+| Recruiting spring (start of the game) | 3–4   | Showcase game, visits, offers, commitment (decision D3)                   |
+| Summer                                | ~10   | Training, under-20 or senior tournaments (2–3 turns each), summer classes |
+| Preseason (Sep–Oct)                   | 8     | Classes start, practice, the coach sets roles, an exhibition game         |
+| Non-conference (Nov–Dec)              | 8     | 13 games, 1–3 a week, including an 8-team holiday tournament              |
+| Fall grades (mid-Dec)                 | —     | Grade point average checked; below 2.0 means ineligible next semester     |
+| Conference season (Jan–early Mar)     | 9     | 18 conference games, 2 a week                                             |
+| Conference tournament                 | 1     | Up to 4 games in a week                                                   |
+| National tournament                   | 3     | 64 teams; two rounds per turn                                             |
+| Draft decision (Apr)                  | 2     | Declare, stay, or "test the waters" and withdraw by the deadline          |
+| Combine and workouts (May)            | 3     | Measurements, drills, team workouts                                       |
+| Draft night (late Jun)                | 1     | Sixty picks, two rounds; the career's v1 ending                           |
 
 Draft eligibility: one year after high school and 19 during the draft year. Players leave after
 four seasons at most.
@@ -397,14 +397,14 @@ Poor Student, Soft Hands, Loner, Spotlight Nerves.
 
 Ten blocks to place each week. The plan carries over until you change it.
 
-| Activity | Effect | Energy |
-|---|---|---|
-| Train a skill (7 options) | Skill growth (diminishing within the week) | −6 per block |
-| Rest | Energy and health back; injury risk down | +10 |
-| Film study | Game sense; better key-moment reads for the week; can break a slump | −2 |
-| Team bonding | Chemistry, teammate trust | −2 |
-| Study (college) | Grades | −3 |
-| Media and sponsor work | Money, reputation; small hit to coach trust if overdone | −3 |
+| Activity                  | Effect                                                              | Energy       |
+| ------------------------- | ------------------------------------------------------------------- | ------------ |
+| Train a skill (7 options) | Skill growth (diminishing within the week)                          | −6 per block |
+| Rest                      | Energy and health back; injury risk down                            | +10          |
+| Film study                | Game sense; better key-moment reads for the week; can break a slump | −2           |
+| Team bonding              | Chemistry, teammate trust                                           | −2           |
+| Study (college)           | Grades                                                              | −3           |
+| Media and sponsor work    | Money, reputation; small hit to coach trust if overdone             | −3           |
 
 A preview shows energy at the end of the week and the expected changes before you commit.
 Low energy lowers game performance and raises injury risk.
@@ -494,46 +494,51 @@ Entities are normalised, keyed by stable string IDs with branded types (`PersonI
 
 ```ts
 interface SaveFile {
-  format: number;                 // save format version
-  meta: SaveMeta;                 // ids, timestamps, app + content versions, seed, integrity
+  format: number; // save format version
+  meta: SaveMeta; // ids, timestamps, app + content versions, seed, integrity
   world: World;
-  career: Career | null;          // the user's career; null between careers
+  career: Career | null; // the user's career; null between careers
 }
 
 interface SaveMeta {
-  saveId: string; createdAt: string; updatedAt: string;
-  appVersion: string; contentVersion: string; seed: string;
-  integrity: { godMode: boolean; log: GodModeAction[] };   // permanent once true
+  saveId: string;
+  createdAt: string;
+  updatedAt: string;
+  appVersion: string;
+  contentVersion: string;
+  seed: string;
+  integrity: { godMode: boolean; log: GodModeAction[] }; // permanent once true
 }
 
 interface World {
   calendar: { year: number; week: number; phase: SeasonPhase };
-  nations: Record<NationCode, NationState>;      // ranking, cycle, national-team ids
-  people: Record<PersonId, Person>;              // players, coaches, scouts, agents, GMs, journalists
-  teams: Record<TeamId, Team>;                   // college, pro, national, overseas club
+  nations: Record<NationCode, NationState>; // ranking, cycle, national-team ids
+  people: Record<PersonId, Person>; // players, coaches, scouts, agents, GMs, journalists
+  teams: Record<TeamId, Team>; // college, pro, national, overseas club
   leagues: { college: CollegeLeague; pro: ProLeague };
-  seasons: Record<SeasonId, Season>;             // current season, standings, polls, awards
-  games: Record<GameId, GameRecord>;             // schedule + results (see retention)
+  seasons: Record<SeasonId, Season>; // current season, standings, polls, awards
+  games: Record<GameId, GameRecord>; // schedule + results (see retention)
   tournaments: Record<TournamentId, Tournament>;
   draft: DraftState | null;
-  contracts: Record<ContractId, Contract>;       // pro; rookie scale used at the draft
-  transactions: Transaction[];                   // signings, releases, trades, retirements
-  history: HistoryIndex;                         // pointers to archived chunks
-  overrides: NameOverrides;                      // name editor; originals kept
+  contracts: Record<ContractId, Contract>; // pro; rookie scale used at the draft
+  transactions: Transaction[]; // signings, releases, trades, retirements
+  history: HistoryIndex; // pointers to archived chunks
+  overrides: NameOverrides; // name editor; originals kept
 }
 
 interface Player extends PersonBase {
   kind: 'player';
   body: { heightCm: number; wingspanCm: number; weightKg: number; hand: 'L' | 'R' };
-  position: Position; style: PlayStyle;
-  skills: Skills;                     // the seven visible skills, 1–100
-  potential: Potential;               // hidden ceilings per skill + growth shape
+  position: Position;
+  style: PlayStyle;
+  skills: Skills; // the seven visible skills, 1–100
+  potential: Potential; // hidden ceilings per skill + growth shape
   traits: TraitId[];
   condition: { health: number; energy: number; injuries: Injury[] };
   form: { confidence: number; streak: StreakState };
-  affiliation: Affiliation;           // college | pro | overseas | free agent | retired
-  stints: Stint[];                    // career history across teams
-  eligibility: Eligibility;           // class year, draft eligibility, academic standing
+  affiliation: Affiliation; // college | pro | overseas | free agent | retired
+  stints: Stint[]; // career history across teams
+  eligibility: Eligibility; // class year, draft eligibility, academic standing
   appearance: Appearance;
 }
 
@@ -545,13 +550,17 @@ interface Career {
   flags: Record<FlagId, FlagRecord>;
   scheduled: ScheduledConsequence[];
   timeline: TimelineEntry[];
-  feed: FeedEntry[];                  // message descriptors, never rendered text
-  pending: Interrupt[];               // key moment, event, offer, call-up, draft choice…
-  cursor: TurnCursor;                 // resumable mid-turn position
-  tendencies: ChoiceTendencies;       // used by simulate ahead
-  rivalId: PersonId; agentId?: PersonId; deals: Deal[];
-  scouting: DraftProfile; nationalTeam: NationalTeamRecord;
-  feats: FeatCounters; ending?: Ending;
+  feed: FeedEntry[]; // message descriptors, never rendered text
+  pending: Interrupt[]; // key moment, event, offer, call-up, draft choice…
+  cursor: TurnCursor; // resumable mid-turn position
+  tendencies: ChoiceTendencies; // used by simulate ahead
+  rivalId: PersonId;
+  agentId?: PersonId;
+  deals: Deal[];
+  scouting: DraftProfile;
+  nationalTeam: NationalTeamRecord;
+  feats: FeatCounters;
+  ending?: Ending;
 }
 ```
 
@@ -592,18 +601,18 @@ history, and the previous user player stays in it as an ordinary simulated perso
 All content lives in `src/content/<kind>/*.ts`, defined with helper functions that give type
 checking while authoring and are validated with Zod at startup.
 
-| Kind | Example fields |
-|---|---|
-| Events | id, category, conditions (phase, week window, flags, traits, stats), weight, cooldown, once, choices (each with visibility requirements and effects: deltas, flags, scheduled consequences, feed posts) |
-| Key moments | id, trigger (clock, margin, possession type, user role), options (resolution model, modifiers, clip template and variant) |
-| Play templates | actors, keyframes, ball events, branches (success and failure variants), parameter slots |
-| Traits | kind, effects (simulation modifiers, event unlocks), unlock rule (feat counter) |
-| Social templates | trigger (game outcome, stat line, event), tone, author archetype, reply options |
-| Name pools | naming cultures (given and family names, with weights); nations map to cultures |
-| Nations | code, continent, talent depth, cities, naming-culture weights, colours |
-| Teams | colleges and pro teams: city, name, nickname, abbreviation, colours, mark |
-| Tournaments | format definition, field rules, calendar slots |
-| Deny-lists | real players, real teams and schools, used by tests and generators |
+| Kind             | Example fields                                                                                                                                                                                          |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Events           | id, category, conditions (phase, week window, flags, traits, stats), weight, cooldown, once, choices (each with visibility requirements and effects: deltas, flags, scheduled consequences, feed posts) |
+| Key moments      | id, trigger (clock, margin, possession type, user role), options (resolution model, modifiers, clip template and variant)                                                                               |
+| Play templates   | actors, keyframes, ball events, branches (success and failure variants), parameter slots                                                                                                                |
+| Traits           | kind, effects (simulation modifiers, event unlocks), unlock rule (feat counter)                                                                                                                         |
+| Social templates | trigger (game outcome, stat line, event), tone, author archetype, reply options                                                                                                                         |
+| Name pools       | naming cultures (given and family names, with weights); nations map to cultures                                                                                                                         |
+| Nations          | code, continent, talent depth, cities, naming-culture weights, colours                                                                                                                                  |
+| Teams            | colleges and pro teams: city, name, nickname, abbreviation, colours, mark                                                                                                                               |
+| Tournaments      | format definition, field rules, calendar slots                                                                                                                                                          |
+| Deny-lists       | real players, real teams and schools, used by tests and generators                                                                                                                                      |
 
 Text is never stored in content. An event refers to string keys; the English text is in
 `src/i18n/en/events.ts`. A test asserts that every referenced key exists, every key is used, and
@@ -618,11 +627,16 @@ export default defineEvent({
   weight: 3,
   once: true,
   choices: [
-    { id: 'own_it',         effects: [rel('coach', +4), flag('owned_party')] },
-    { id: 'blame_teammate', effects: [rel('teammates', -8),
-                                      later('locker_room_leak', { inWeeks: [2, 6], chance: 0.5 })] },
-    { id: 'offer_film',     requires: { trait: 'gym_rat' },
-                            effects: [rel('coach', +6), plan('film', +2)] },
+    { id: 'own_it', effects: [rel('coach', +4), flag('owned_party')] },
+    {
+      id: 'blame_teammate',
+      effects: [rel('teammates', -8), later('locker_room_leak', { inWeeks: [2, 6], chance: 0.5 })],
+    },
+    {
+      id: 'offer_film',
+      requires: { trait: 'gym_rat' },
+      effects: [rel('coach', +6), plan('film', +2)],
+    },
   ],
 });
 ```
@@ -646,17 +660,17 @@ export default defineEvent({
 `npm run sim -- --seasons 2000 --careers 5000 --policy casual --seed 42` plays seasons and full
 careers without UI and writes `docs/balance/<date>.md` plus JSON, with distributions and bands.
 
-| Metric | Target band (college) |
-|---|---|
-| Team points per game | 69–76 mean, s.d. 10–13 |
-| Possessions per team per game | 66–71 |
-| FG% / 3P% / FT% | 43–45% / 33–35% / 69–73% |
-| Three-point attempt share | 36–41% of field-goal attempts |
-| Turnovers per team | 11–13.5 |
-| Home win rate | 58–63% |
-| Final regular-season win % spread | best teams ~.85+, worst ~.15 |
-| League's top scorer | 22–27 points per game |
-| Pro (background) | 108–116 points, pace 97–101 |
+| Metric                            | Target band (college)         |
+| --------------------------------- | ----------------------------- |
+| Team points per game              | 69–76 mean, s.d. 10–13        |
+| Possessions per team per game     | 66–71                         |
+| FG% / 3P% / FT%                   | 43–45% / 33–35% / 69–73%      |
+| Three-point attempt share         | 36–41% of field-goal attempts |
+| Turnovers per team                | 11–13.5                       |
+| Home win rate                     | 58–63%                        |
+| Final regular-season win % spread | best teams ~.85+, worst ~.15  |
+| League's top scorer               | 22–27 points per game         |
+| Pro (background)                  | 108–116 points, pace 97–101   |
 
 The pro numbers matter in v1 only for believable standings, but they are tuned now.
 
@@ -700,7 +714,7 @@ screen, in both type options, light and dark, small and large:
 
 ![Direction study](docs/design/direction-study.png)
 
-*This is a design study to choose a direction, not the final screen.*
+_This is a design study to choose a direction, not the final screen._
 
 ### 10.1 Typography
 
@@ -709,7 +723,7 @@ Two typefaces at most. Two options were studied (decision D1); **B is chosen**:
 - **A:** Archivo in two widths: ExtraCondensed for display, normal width for text. One family,
   very consistent, quieter.
 - **B (chosen):** **Antonio** (display; tall, tight, scoreboard numerals) with
-  **Schibsted Grotesk** (text, made for a newspaper group). More character, reads as sport *and*
+  **Schibsted Grotesk** (text, made for a newspaper group). More character, reads as sport _and_
   newsroom, which is the brief.
 
 Both options are SIL Open Font License and cover Latin Extended, and in both the figures are
@@ -718,20 +732,20 @@ Big Shoulders, Oswald, Saira and Teko were considered and dropped because their 
 proportional, which would break "tabular numerals for all figures". The fonts ship as static
 instances, subset by `scripts/fonts`.
 
-| Token | Face | Size/line (pt) | Use | Dynamic Type cap |
-|---|---|---|---|---|
-| `scoreboard` | Display heavy, tabular | 56/52 | Game report hero score | 1.2× |
-| `displayL` | Display heavy | 34/34 | Screen titles, week headers | 1.4× |
-| `displayM` | Display heavy | 25/27 | Headlines | 1.6× |
-| `displayS` | Display bold | 21/23 | Card titles | 1.8× |
-| `stat` | Display heavy, tabular | 24/26 | Meters, stat lines | 1.4× |
-| `label` | Display bold, caps, +8% tracking | 11/14 | Kickers, meter labels | 1.6× |
-| `body` | Text 400 | 17/24 | Feed and card body | 2.5× |
-| `bodyStrong` | Text 600 | 17/24 | Names, emphasis | 2.5× |
-| `callout` | Text 400 | 16/22 | Secondary paragraphs | 2.5× |
-| `subhead` | Text 600 | 15/20 | List titles, buttons in lists | 2.5× |
-| `footnote` | Text 400 | 13/18 | Metadata | 2.0× |
-| `caption` | Text 600 | 11/13 | Tab labels | 1.4× |
+| Token        | Face                             | Size/line (pt) | Use                           | Dynamic Type cap |
+| ------------ | -------------------------------- | -------------- | ----------------------------- | ---------------- |
+| `scoreboard` | Display heavy, tabular           | 56/52          | Game report hero score        | 1.2×             |
+| `displayL`   | Display heavy                    | 34/34          | Screen titles, week headers   | 1.4×             |
+| `displayM`   | Display heavy                    | 25/27          | Headlines                     | 1.6×             |
+| `displayS`   | Display bold                     | 21/23          | Card titles                   | 1.8×             |
+| `stat`       | Display heavy, tabular           | 24/26          | Meters, stat lines            | 1.4×             |
+| `label`      | Display bold, caps, +8% tracking | 11/14          | Kickers, meter labels         | 1.6×             |
+| `body`       | Text 400                         | 17/24          | Feed and card body            | 2.5×             |
+| `bodyStrong` | Text 600                         | 17/24          | Names, emphasis               | 2.5×             |
+| `callout`    | Text 400                         | 16/22          | Secondary paragraphs          | 2.5×             |
+| `subhead`    | Text 600                         | 15/20          | List titles, buttons in lists | 2.5×             |
+| `footnote`   | Text 400                         | 13/18          | Metadata                      | 2.0×             |
+| `caption`    | Text 600                         | 11/13          | Tab labels                    | 1.4×             |
 
 Each token maps to an iOS text style for scaling. At accessibility sizes, rows that hold several
 values stack vertically instead of truncating.
@@ -741,21 +755,21 @@ values stack vertically instead of truncating.
 Tokens are semantic; screens never use raw values. Measured contrast against the canvas is shown
 in brackets.
 
-| Token | Light | Dark | Use |
-|---|---|---|---|
-| `canvas` | `#F3F1EC` | `#0F0F10` | App background |
-| `surface` | `#FFFFFF` | `#19191B` | Cards, sheets, raised controls |
-| `sunken` | `#E7E4DD` | `#242427` | Tracks, inputs, avatars |
-| `ink` | `#141414` (16.3:1) | `#F1EFEA` (16.7:1) | Primary text, rules |
-| `inkSecondary` | `#5D5952` (6.2:1) | `#A8A49C` (7.7:1) | Secondary text |
-| `inkTertiary` | `#6F6B64` (4.7:1) | `#858179` (4.9:1) | Metadata, never on `sunken` |
-| `hairline` | `#DAD6CD` | `#2A2A2D` | Separators |
-| `positive` | `#1B7540` (5.1:1) | `#4CC38A` (8.7:1) | Gains, wins |
-| `negative` | `#C2382B` (4.8:1) | `#FF6B5E` (6.9:1) | Losses, injuries |
-| `caution` | `#8F5B00` (5.1:1) | `#F2B544` (10.5:1) | Warnings, eligibility |
-| `brand` | `#FF5A1F` | `#FF5A1F` | "Buzzer" orange: icon, splash, creation flow, live moments; never body text on light |
-| `brandText` | `#B83A12` (5.1:1) | `#FF5A1F` (6.1:1) | Brand colour as text |
-| `accent`, `onAccent`, `accentText`, `accentTint` | derived | derived | From the current team (below) |
+| Token                                            | Light              | Dark               | Use                                                                                  |
+| ------------------------------------------------ | ------------------ | ------------------ | ------------------------------------------------------------------------------------ |
+| `canvas`                                         | `#F3F1EC`          | `#0F0F10`          | App background                                                                       |
+| `surface`                                        | `#FFFFFF`          | `#19191B`          | Cards, sheets, raised controls                                                       |
+| `sunken`                                         | `#E7E4DD`          | `#242427`          | Tracks, inputs, avatars                                                              |
+| `ink`                                            | `#141414` (16.3:1) | `#F1EFEA` (16.7:1) | Primary text, rules                                                                  |
+| `inkSecondary`                                   | `#5D5952` (6.2:1)  | `#A8A49C` (7.7:1)  | Secondary text                                                                       |
+| `inkTertiary`                                    | `#6F6B64` (4.7:1)  | `#858179` (4.9:1)  | Metadata, never on `sunken`                                                          |
+| `hairline`                                       | `#DAD6CD`          | `#2A2A2D`          | Separators                                                                           |
+| `positive`                                       | `#1B7540` (5.1:1)  | `#4CC38A` (8.7:1)  | Gains, wins                                                                          |
+| `negative`                                       | `#C2382B` (4.8:1)  | `#FF6B5E` (6.9:1)  | Losses, injuries                                                                     |
+| `caution`                                        | `#8F5B00` (5.1:1)  | `#F2B544` (10.5:1) | Warnings, eligibility                                                                |
+| `brand`                                          | `#FF5A1F`          | `#FF5A1F`          | "Buzzer" orange: icon, splash, creation flow, live moments; never body text on light |
+| `brandText`                                      | `#B83A12` (5.1:1)  | `#FF5A1F` (6.1:1)  | Brand colour as text                                                                 |
+| `accent`, `onAccent`, `accentText`, `accentTint` | derived            | derived            | From the current team (below)                                                        |
 
 **Team accents.** Each team defines a primary and a secondary colour. At runtime they are turned
 into tokens in OKLCH: `accent` (button fill, lightness clamped so `onAccent` text reaches 4.5:1,
@@ -778,19 +792,19 @@ also has a dark version.
 
 ### 10.4 Motion and haptics
 
-| Token | Value | Use |
-|---|---|---|
-| `instant` | 90 ms | Pressed state |
-| `fast` | 150 ms | Small state changes, tab icon swap |
-| `base` | 220 ms | Feed entries in, toggles |
-| `slow` | 320 ms | Screen-level transitions not handled natively |
-| `count` | 600 ms | Numbers counting to a new value |
-| `reveal` | 450 ms | Result reveals |
-| `ease.standard` | cubic-bezier(0.2, 0, 0, 1) | Default |
-| `ease.enter` | cubic-bezier(0.05, 0.7, 0.1, 1) | Entering elements |
-| `ease.exit` | cubic-bezier(0.3, 0, 0.8, 0.15) | Leaving elements |
-| `spring.press` | damping 30, stiffness 400 | Button press |
-| `spring.celebrate` | damping 14, stiffness 180 | Draft pick, game-winner |
+| Token              | Value                           | Use                                           |
+| ------------------ | ------------------------------- | --------------------------------------------- |
+| `instant`          | 90 ms                           | Pressed state                                 |
+| `fast`             | 150 ms                          | Small state changes, tab icon swap            |
+| `base`             | 220 ms                          | Feed entries in, toggles                      |
+| `slow`             | 320 ms                          | Screen-level transitions not handled natively |
+| `count`            | 600 ms                          | Numbers counting to a new value               |
+| `reveal`           | 450 ms                          | Result reveals                                |
+| `ease.standard`    | cubic-bezier(0.2, 0, 0, 1)      | Default                                       |
+| `ease.enter`       | cubic-bezier(0.05, 0.7, 0.1, 1) | Entering elements                             |
+| `ease.exit`        | cubic-bezier(0.3, 0, 0.8, 0.15) | Leaving elements                              |
+| `spring.press`     | damping 30, stiffness 400       | Button press                                  |
+| `spring.celebrate` | damping 14, stiffness 180       | Draft pick, game-winner                       |
 
 **Reduced motion:** movement becomes 150 ms cross-fades, counters jump to the new value, clips
 show the final frame and result line with a play button.
@@ -870,28 +884,28 @@ transitions (push, form sheet, cross-fade for tabs).
 portrait in the header (decision D2, chosen). Sheets are native form sheets with detents and
 swipe-to-dismiss, except decisions that must be made, which cannot be swiped away.
 
-| Screen | Contents | Primary action | States |
-|---|---|---|---|
-| **Welcome / saves** | Saves with portrait, team, week and badges; new career | Continue | First launch: a one-line invitation and the creation button; damaged save: restore from backup |
-| **Creation (6 steps)** | Live player card on top; one decision per step; Randomise | Next / Start career | Validation inline, never in alerts |
-| **Home** | Header (portrait, name, team and record, 5 meters with a contextual slot, e.g. grades at risk); feed grouped by week; action dock (Simulate ahead + Next week) above the tab bar | Next week (becomes "Decide: 1 pending" when something blocks) | Empty first week teaches by doing; "Simulating…" progress; error toast with retry |
-| **Train** | Weekly planner (10 blocks, steppers, stacked plan bar, end-of-week energy forecast); skills with trend; traits earned and locked, with progress | Save plan | — |
-| **Team** | Segmented: Roster (roles, grades as letters, not raw numbers) · Coach (trust, style, quotes) · Schedule · Standings (conference, poll) | Context-dependent | Off-season roster empty state |
-| **Career** | Draft stock (rank, trend sparkline, scout reports), agent, deals, contract (an amateur empty state until drafted), national team (status, call-ups, caps, medals) | Context-dependent | Each section has a written empty state |
-| **Social** | Segmented: Feed (reply or ignore) · Press · Rival (side-by-side comparison) | Reply | Quiet-week empty state |
-| **Profile** | Player card, seasons table, awards, timeline (cause → effect) | Share card | — |
-| **Event card** (sheet) | Kicker, title, body, 3–4 choices; then the outcome with numbers counting | Choose | — |
-| **Key moment** (sheet) | Clock and score, a still of the court, 2–4 options with reads; clip plays; result | Choose | Reduced motion: still and result |
-| **Clip player** | Court, scoreboard overlay, skip, replay | Skip / replay | — |
-| **Game report** | Scorebug hero, your line, key moments with replays, box scores for both teams, play-by-play highlights | Back to the week | — |
-| **Bracket** | 64-team bracket (scroll and zoom, your path highlighted) or group tables and knockout | — | Pre-tournament projected bracket |
-| **Combine / workouts** | Measurements against position averages; workout picks | Confirm | — |
-| **Draft night** | Board, pick ticker, on the clock, phone moments, reveal | Continue | — |
-| **Ending card** | Draft result, college line, medals, rival, badges | Share | — |
-| **Name editor** | Search teams and players, edit names, reset to original | Save | — |
-| **Settings** | Theme (system, light, dark), haptics, simulate-ahead stops, clip autoplay, about and version | — | — |
-| **God Mode** | Passcode prompt; panel (§14) | Unlock / apply | Locked-out countdown |
-| **Style guide** | Every token and component | — | — |
+| Screen                 | Contents                                                                                                                                                                         | Primary action                                                | States                                                                                         |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Welcome / saves**    | Saves with portrait, team, week and badges; new career                                                                                                                           | Continue                                                      | First launch: a one-line invitation and the creation button; damaged save: restore from backup |
+| **Creation (6 steps)** | Live player card on top; one decision per step; Randomise                                                                                                                        | Next / Start career                                           | Validation inline, never in alerts                                                             |
+| **Home**               | Header (portrait, name, team and record, 5 meters with a contextual slot, e.g. grades at risk); feed grouped by week; action dock (Simulate ahead + Next week) above the tab bar | Next week (becomes "Decide: 1 pending" when something blocks) | Empty first week teaches by doing; "Simulating…" progress; error toast with retry              |
+| **Train**              | Weekly planner (10 blocks, steppers, stacked plan bar, end-of-week energy forecast); skills with trend; traits earned and locked, with progress                                  | Save plan                                                     | —                                                                                              |
+| **Team**               | Segmented: Roster (roles, grades as letters, not raw numbers) · Coach (trust, style, quotes) · Schedule · Standings (conference, poll)                                           | Context-dependent                                             | Off-season roster empty state                                                                  |
+| **Career**             | Draft stock (rank, trend sparkline, scout reports), agent, deals, contract (an amateur empty state until drafted), national team (status, call-ups, caps, medals)                | Context-dependent                                             | Each section has a written empty state                                                         |
+| **Social**             | Segmented: Feed (reply or ignore) · Press · Rival (side-by-side comparison)                                                                                                      | Reply                                                         | Quiet-week empty state                                                                         |
+| **Profile**            | Player card, seasons table, awards, timeline (cause → effect)                                                                                                                    | Share card                                                    | —                                                                                              |
+| **Event card** (sheet) | Kicker, title, body, 3–4 choices; then the outcome with numbers counting                                                                                                         | Choose                                                        | —                                                                                              |
+| **Key moment** (sheet) | Clock and score, a still of the court, 2–4 options with reads; clip plays; result                                                                                                | Choose                                                        | Reduced motion: still and result                                                               |
+| **Clip player**        | Court, scoreboard overlay, skip, replay                                                                                                                                          | Skip / replay                                                 | —                                                                                              |
+| **Game report**        | Scorebug hero, your line, key moments with replays, box scores for both teams, play-by-play highlights                                                                           | Back to the week                                              | —                                                                                              |
+| **Bracket**            | 64-team bracket (scroll and zoom, your path highlighted) or group tables and knockout                                                                                            | —                                                             | Pre-tournament projected bracket                                                               |
+| **Combine / workouts** | Measurements against position averages; workout picks                                                                                                                            | Confirm                                                       | —                                                                                              |
+| **Draft night**        | Board, pick ticker, on the clock, phone moments, reveal                                                                                                                          | Continue                                                      | —                                                                                              |
+| **Ending card**        | Draft result, college line, medals, rival, badges                                                                                                                                | Share                                                         | —                                                                                              |
+| **Name editor**        | Search teams and players, edit names, reset to original                                                                                                                          | Save                                                          | —                                                                                              |
+| **Settings**           | Theme (system, light, dark), haptics, simulate-ahead stops, clip autoplay, about and version                                                                                     | —                                                             | —                                                                                              |
+| **God Mode**           | Passcode prompt; panel (§14)                                                                                                                                                     | Unlock / apply                                                | Locked-out countdown                                                                           |
+| **Style guide**        | Every token and component                                                                                                                                                        | —                                                             | —                                                                                              |
 
 **Onboarding by doing.** No tutorial screens. Creation is short and has defaults. The first turn
 is the showcase week: a coach mark on the planner ("Put three blocks into shooting"), a showcase
@@ -936,8 +950,8 @@ detail, not from punchlines. Examples:
 **Naming rules, enforced.**
 
 - Real city and country names only for places.
-- Invented leagues, teams, schools, clubs, colours and marks. Examples: *Los Angeles Comets*,
-  *Halcyon State Herons* (Savannah), *Tulsa Plains Wranglers*.
+- Invented leagues, teams, schools, clubs, colours and marks. Examples: _Los Angeles Comets_,
+  _Halcyon State Herons_ (Savannah), _Tulsa Plains Wranglers_.
 - People are generated from naming cultures per nation (France draws on French and Francophone
   African cultures, the United States on many). A deny-list of real players (current and
   retired stars from the major leagues and international play) and of real team and school
@@ -981,54 +995,59 @@ Each phase ends with a report: what was built, test and simulation results, scre
 Phase 2), known gaps, and the next phase's first steps. I stop for your review after each one.
 
 **Phase 1: Engine**
+
 - Project scaffolding (Expo SDK 57, TypeScript, lint, format, CI); engine modules (§5); content
   schemas with enough seed content to run (name pools for ~45 nations, 160 colleges, 30 pro
   teams, tournament definitions, ~15 events, ~10 key moments, ~12 traits).
 - Headless simulation with the first balance report; terminal play script.
-- *Accepted when:* tests pass; a seeded career runs from creation to draft night in the terminal;
+- _Accepted when:_ tests pass; a seeded career runs from creation to draft night in the terminal;
   the simulation report is inside the bands (or the gaps are explained); saves round-trip and
   resume mid-turn.
 
 **Phase 2: Interface**
+
 - Design tokens, theme, components, style guide; the portrait system (§10.6, with an
   approval checkpoint for its parts sheet); every screen in §11; God Mode; persistence wired to
   SQLite.
-- *Accepted when:* a full career is playable in the app; screenshots of every screen, light and
+- _Accepted when:_ a full career is playable in the app; screenshots of every screen, light and
   dark, iPhone SE and iPhone 17 Pro Max, critiqued and fixed; no dead buttons; every list has
   empty and loading states.
 
 **Phase 3: 2D clips**
+
 - Court renderer, ~15 templates with variants, overlay, signature move, reduced-motion path.
-- *Accepted when:* each template renders in each variant; frame timing is measured on the web
+- _Accepted when:_ each template renders in each variant; frame timing is measured on the web
   build and on the iOS Simulator; skip and replay work.
 
 **Phase 4: Content and balance**
+
 - At least 60 events, 40 key-moment situations, 25 traits, 150 social templates; tuning with the
   bots until casual and expert outcomes hit §9.2.
-- *Accepted when:* content integrity tests pass; the balance report meets the targets; a
+- _Accepted when:_ content integrity tests pass; the balance report meets the targets; a
   read-through finds no repeated or filler text.
 
 **Phase 5: Polish**
+
 - Motion and haptics pass, accessibility pass (Dynamic Type at the largest sizes, VoiceOver
   walkthrough), app icon and splash screen, development build, performance overlay and
   real-device check with you.
-- *Accepted when:* 60 fps in clips and feed scrolling on a real device; all accessibility checks
+- _Accepted when:_ 60 fps in clips and feed scrolling on a real device; all accessibility checks
   pass; icon and splash approved.
 
 ---
 
 ## 16. Risks
 
-| Risk | Mitigation |
-|---|---|
-| No iOS Simulator in this container | Web render for iteration; macOS CI for real simulator screenshots; Expo Go on your phone |
-| Hermes is slower than Node for the full-league simulation | Measured budget (§4.5); work split across frames; a lighter path for games nobody watches if needed |
-| Save size grows with history | Chunked saves; box-score retention rules; size budget enforced by the script |
-| Real-name collisions | Deny-lists, tests, and the name editor as a backstop |
-| Content quality at volume (Phase 4) | Strong schemas, a style guide for the writing, and a read-through pass |
-| Illustrated faces looking cheap at scale | One strict art direction, a parts system, the portrait lab, excluded pairs, and your sign-off on the parts sheet before anything is built on it |
-| Native sheets differ on Android | Form sheets are supported on both; checked again in the Android phase |
-| Balance depends on many interacting systems | Bot policies and distributions from day one, not at the end |
+| Risk                                                      | Mitigation                                                                                                                                      |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| No iOS Simulator in this container                        | Web render for iteration; macOS CI for real simulator screenshots; Expo Go on your phone                                                        |
+| Hermes is slower than Node for the full-league simulation | Measured budget (§4.5); work split across frames; a lighter path for games nobody watches if needed                                             |
+| Save size grows with history                              | Chunked saves; box-score retention rules; size budget enforced by the script                                                                    |
+| Real-name collisions                                      | Deny-lists, tests, and the name editor as a backstop                                                                                            |
+| Content quality at volume (Phase 4)                       | Strong schemas, a style guide for the writing, and a read-through pass                                                                          |
+| Illustrated faces looking cheap at scale                  | One strict art direction, a parts system, the portrait lab, excluded pairs, and your sign-off on the parts sheet before anything is built on it |
+| Native sheets differ on Android                           | Form sheets are supported on both; checked again in the Android phase                                                                           |
+| Balance depends on many interacting systems               | Bot policies and distributions from day one, not at the end                                                                                     |
 
 ---
 
@@ -1036,12 +1055,12 @@ Phase 2), known gaps, and the next phase's first steps. I stop for your review a
 
 Settled on 11 October 2026:
 
-| # | Decision | Options | Chosen |
-|---|---|---|---|
-| D1 | Typefaces | **A** Archivo in two widths · **B** Antonio + Schibsted Grotesk | **B** (as recommended) |
-| D2 | Tabs | **A** Home · Train · Team · Career · Social, with Profile opened from the header portrait · **B** six tabs including Profile | **A** (as recommended) |
-| D3 | Where the game starts | **A** Spring of the last high-school year: a showcase game, visits and offers over 3–4 turns · **B** offers on the table from the first screen | **A** (as recommended) |
-| D4 | Portraits ("basic appearance") | **A** Geometric, faceless busts · **B** illustrated faces with features and expressions | **B**, built as a parts system (§10.6); I had recommended A |
+| #   | Decision                       | Options                                                                                                                                        | Chosen                                                      |
+| --- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| D1  | Typefaces                      | **A** Archivo in two widths · **B** Antonio + Schibsted Grotesk                                                                                | **B** (as recommended)                                      |
+| D2  | Tabs                           | **A** Home · Train · Team · Career · Social, with Profile opened from the header portrait · **B** six tabs including Profile                   | **A** (as recommended)                                      |
+| D3  | Where the game starts          | **A** Spring of the last high-school year: a showcase game, visits and offers over 3–4 turns · **B** offers on the table from the first screen | **A** (as recommended)                                      |
+| D4  | Portraits ("basic appearance") | **A** Geometric, faceless busts · **B** illustrated faces with features and expressions                                                        | **B**, built as a parts system (§10.6); I had recommended A |
 
 Defaults I will use unless you say otherwise:
 
