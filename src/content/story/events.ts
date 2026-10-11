@@ -629,7 +629,7 @@ export const events: readonly EventDef[] = [
   {
     id: 'rival_ranking_post',
     category: 'rival',
-    when: { stages: ['highSchool'], weeks: [14, 26] },
+    when: { stages: ['highSchool'], weeks: [17, 26] },
     weight: 3,
     once: true,
     cast: ['rival'],
@@ -666,7 +666,7 @@ export const events: readonly EventDef[] = [
   {
     id: 'hometown_paper',
     category: 'media',
-    when: { stages: ['highSchool'], weeks: [14, 26] },
+    when: { stages: ['highSchool'], weeks: [17, 26] },
     weight: 2,
     once: true,
     cast: ['journalist'],

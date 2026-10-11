@@ -85,7 +85,7 @@ export const social = {
     'They showed the game at the community hall. Halfway through the second half somebody switched to the football. Nobody complained.',
   bad_game_teammate: 'my guy. we go again tomorrow. i’ll rebound for you at 7',
   bad_game_hater_slump:
-    '{surname} slump watch, day whatever. i have stopped counting. so has he, mostly the points',
+    '{surname} slump watch, day whatever. i stopped counting. he stopped scoring',
   bad_game_journalist:
     'Not {player}’s night. He stayed at his locker and answered every question, which is more than some do after nights like that.',
   bad_game_star_fan:
@@ -238,7 +238,7 @@ export const social = {
     '{surname} standing by his cereal takes is the most honest thing an athlete has said all year',
   event_feud: 'Graphic designers "thrilled" as {surname} and {rival} agree to keep glaring.',
   event_viral_dunk:
-    'watched {surname} jump off a trampoline forty times. i have work tomorrow. no regrets',
+    'watched {surname} jump off a trampoline thirty times. i have work tomorrow. no regrets',
   event_tyre_ad:
     '{surname}’s tyre commercial is now the most-watched video in the athletic department. Nobody can agree what the slogan is.',
   event_rival_reply: 'cute highlight. check the rankings again',

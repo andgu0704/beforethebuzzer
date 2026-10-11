@@ -398,7 +398,7 @@ export const events = {
     choices: {
       prom: {
         label: 'Go to prom',
-        outcome: 'You danced badly and on purpose. Your mother took forty photos and framed two.',
+        outcome: 'You danced badly and on purpose. Your aunt took forty photos and framed two.',
         timeline: 'Went to prom.',
       },
       elite_camp: {
@@ -410,7 +410,7 @@ export const events = {
       both: {
         label: 'Do both',
         outcome:
-          'Prom until eleven, four hours in the car, check-in at six. You played the morning session with glitter in your hair.',
+          'Prom until midnight, four hours in the car, check-in at six. You played the morning session with glitter in your hair.',
         timeline: 'Drove overnight from prom to camp.',
       },
     },
@@ -458,7 +458,7 @@ export const events = {
       decline: {
         label: 'Let someone else speak',
         outcome:
-          'The class president spoke for eleven minutes. Your grandmother asked twice why it was not you.',
+          'The class president spoke for a quarter of an hour. Your grandmother asked, audibly, why it was not you.',
         timeline: 'Declined to speak at graduation.',
       },
     },
@@ -570,7 +570,7 @@ export const events = {
       play_all_night: {
         label: 'Play until the lights go off',
         outcome:
-          'The lights went off at ten. You played by phone torches until eleven. Nobody kept score and everybody remembers it.',
+          'The lights went off at ten. You played by phone torches until the batteries died. Nobody kept score and everybody remembers it.',
         timeline: 'Played one last night at the park.',
       },
       referee: {
@@ -580,7 +580,8 @@ export const events = {
       },
       skip_it: {
         label: 'Say you are too tired',
-        outcome: 'You stayed in. Somebody posted a video of the game. You watched it twice.',
+        outcome:
+          'You stayed in. Somebody posted a video of the game. You have watched it more than once.',
         timeline: 'Skipped the last pickup game.',
       },
     },
@@ -657,7 +658,7 @@ export const events = {
       call_from_the_porch: {
         label: 'Go, and call home from the porch',
         outcome:
-          'Dinner inside, family on speaker outside. Your mother asked to say hello to the coach. It lasted twenty minutes.',
+          'Dinner inside, family on speaker outside. Your grandfather asked to say hello to the coach. It lasted twenty minutes.',
         timeline: 'Split the holiday between the coach and home.',
       },
     },
@@ -757,7 +758,7 @@ export const events = {
       forward_to_coach: {
         label: 'Show the coach first',
         outcome:
-          'The coach watched it twice without moving his face. The team knew who had shown him by the afternoon.',
+          'The coach watched it to the end without moving his face. The team knew who had shown him by the afternoon.',
         timeline: 'Showed the coach a teammate’s video.',
       },
       say_nothing: {
@@ -920,7 +921,7 @@ export const events = {
       go_on: {
         label: 'Go on the show',
         outcome:
-          'Forty minutes on everything from the offence to which teammate cannot swim. Mostly harmless. Mostly.',
+          'Fifty minutes on everything from the offence to which teammate cannot swim. Mostly harmless. Mostly.',
         timeline: 'Went on a student podcast.',
       },
       send_a_teammate: {
@@ -1003,7 +1004,7 @@ export const events = {
       full_access: {
         label: 'Give them everything',
         outcome:
-          'You stared out of the window eleven times before they were happy. Everyone back home will see your room.',
+          'You stared out of the window nine times before they were happy. Everyone back home will see your room.',
         timeline: 'Gave a documentary crew full access.',
       },
       games_only: {
@@ -1042,7 +1043,7 @@ export const events = {
   },
   fan_letter: {
     title: 'A letter in green crayon',
-    body: 'A nine-year-old has written to you. The letter lists your three best moves and one thing you should work on, underlined twice.',
+    body: 'A nine-year-old has written to you. The letter lists your three best moves and one thing you should work on, underlined in red.',
     choices: {
       visit_the_school: {
         label: 'Visit her school',
@@ -1132,7 +1133,7 @@ export const events = {
       meet_the_coach: {
         label: 'Introduce them to the coach',
         outcome:
-          'The coach told them you are coachable. Your mother has repeated the word to everyone she knows.',
+          'The coach told them you are coachable. Your father has repeated the word to everyone he knows.',
         timeline: 'Introduced the parents to the coach.',
       },
     },
@@ -1196,8 +1197,7 @@ export const events = {
     choices: {
       listen_to_all: {
         label: 'Listen to the whole thing',
-        outcome:
-          'Eleven minutes. He was wrong about the zone and right about your hips on closeouts.',
+        outcome: 'All of it. He was wrong about the zone and right about your hips on closeouts.',
         timeline: 'Listened to his father’s game review.',
       },
       mute_him: {
@@ -1291,10 +1291,10 @@ export const events = {
   },
   sleep_scores: {
     title: 'Sleep score',
-    body: 'The athletic department gave everyone a sleep-tracking ring. Yours reports five hours and eleven minutes a night and has started to sound worried.',
+    body: 'The athletic department gave everyone a sleep-tracking ring. Yours reports five hours and six minutes a night and has started to sound worried.',
     choices: {
       phone_out_of_room: {
-        label: 'Phone out of the room at eleven',
+        label: 'Phone out of the room at night',
         outcome:
           'Seven and a half hours by the second week. You have missed several memes and you are fine.',
         timeline: 'Fixed his sleep.',
@@ -1323,7 +1323,7 @@ export const events = {
       },
       sleep_it_off: {
         label: 'Sleep it off',
-        outcome: 'You slept twelve hours and woke up better. Mostly better.',
+        outcome: 'You slept twelve hours and woke up better, or close enough to better.',
         timeline: 'Slept off a headache without telling anyone.',
       },
       skip_film_rest: {
@@ -1405,7 +1405,7 @@ export const events = {
       bury_it: {
         label: 'Call him and end it',
         outcome:
-          'Ten minutes on the phone. It turns out you both hate the graphic. It is over, mostly.',
+          'Ten minutes on the phone. It turns out you both hate the graphic. It is over, more or less.',
         timeline: 'Ended the feud with the rival.',
       },
       let_the_game_talk: {
@@ -1605,7 +1605,7 @@ export const events = {
       },
       watch_alone: {
         label: 'Watch it alone',
-        outcome: 'Your mother said she understood, then booked a restaurant for the day after.',
+        outcome: 'Your family agreed, then booked a restaurant for the day after, just in case.',
         timeline: 'Planned to watch the draft alone.',
       },
       invite_the_team: {
@@ -1621,7 +1621,8 @@ export const events = {
     choices: {
       go_to_dinner: {
         label: 'Go to dinner',
-        outcome: 'The steak was enormous. He paid in cash and said "no strings" twice.',
+        outcome:
+          'The steak was enormous. He paid in cash and said "no strings" in a way that suggested strings.',
         timeline: 'Had dinner with an agent’s runner.',
       },
       tell_compliance: {
@@ -1707,7 +1708,7 @@ export const events = {
   },
   host_recruit: {
     title: 'The recruit',
-    body: '{coach} asks you to host a recruit on his official visit. The recruit is six foot eight, very polite, and has asked twice where the waterfall is.',
+    body: '{coach} asks you to host a recruit on his official visit. The recruit is six foot eight, very polite, and has already asked where the waterfall is.',
     choices: {
       honest_tour: {
         label: 'Show him the real campus',
