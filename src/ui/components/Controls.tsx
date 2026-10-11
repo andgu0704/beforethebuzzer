@@ -56,7 +56,12 @@ export function SegmentedControl<T extends string>({
                 },
             ]}
           >
-            <Text variant="subhead" color={on ? 'ink' : 'inkSecondary'} numberOfLines={1}>
+            <Text
+              variant="subhead"
+              color={on ? 'ink' : 'inkSecondary'}
+              numberOfLines={1}
+              style={options.length > 3 ? { fontSize: 14, letterSpacing: -0.2 } : undefined}
+            >
               {o.label}
             </Text>
           </Pressable>

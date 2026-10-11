@@ -140,7 +140,7 @@ export function BoxScoreTable({
             key={r.id}
             style={[
               styles.boxCell,
-              { borderBottomColor: t.c.hairline },
+              { borderBottomColor: t.c.hairline, alignItems: 'flex-start' },
               r.id === highlight && { backgroundColor: t.c.accentTint },
             ]}
           >

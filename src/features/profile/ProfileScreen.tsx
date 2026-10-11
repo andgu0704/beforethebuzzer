@@ -46,11 +46,7 @@ export function ProfileScreen() {
   const seasonRows = [...groups.entries()].map(([key, lines]) => {
     const pg = perGame(lines);
     const first = lines[0];
-    const teamName = first
-      ? state.world.teams[String(first.team)]
-        ? names.team(String(first.team), 'abbr')
-        : String(first.team)
-      : '';
+    const teamName = first ? names.team(String(first.team), 'abbr') || String(first.team) : '';
     return {
       id: key,
       name: `${first?.season ?? ''} ${teamName}${first?.competition ? ' *' : ''}`,
