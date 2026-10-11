@@ -42,7 +42,15 @@ export const useSettings = create<SettingsStore>()((set, get) => ({
   ...load(),
   update(patch) {
     set(patch);
-    const { update: _u, markTip: _m, ...plain } = { ...get(), ...patch };
+    const s = get();
+    const plain: Settings = {
+      theme: s.theme,
+      haptics: s.haptics,
+      stopAtEveryMoment: s.stopAtEveryMoment,
+      clipAutoplay: s.clipAutoplay,
+      tipsSeen: s.tipsSeen,
+      lastCareer: s.lastCareer,
+    };
     kv.set(KEY, JSON.stringify(plain));
   },
   markTip(id) {

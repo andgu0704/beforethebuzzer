@@ -17,6 +17,12 @@ export function worldNames(world: World, t: Translator): NameResolver {
     },
     team(id, part) {
       const team = world.teams[id];
+      // Showcase sides are removed after the showcase; old feed entries still name them.
+      if (!team && id.startsWith('showcase-')) {
+        const side = id.slice('showcase-'.length);
+        const name = t.t(`teams.showcase${side.charAt(0).toUpperCase()}${side.slice(1)}`);
+        return part === 'abbr' ? name.slice(0, 1) + 'SEL' : name;
+      }
       if (!team) return '';
       const o = world.overrides.teams[id];
       if (team.kind === 'national') {

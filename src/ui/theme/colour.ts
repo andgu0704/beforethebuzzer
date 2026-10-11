@@ -7,7 +7,7 @@ export type Rgb = readonly [number, number, number];
 
 export function parseHex(hex: string): Rgb {
   const h = hex.replace('#', '');
-  const full = h.length === 3 ? [...h].map((c) => c + c).join('') : h;
+  const full = h.length === 3 ? h.replace(/./g, (c) => c + c) : h;
   const n = Number.parseInt(full, 16);
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
 }
@@ -92,5 +92,9 @@ export function withContrast(
 export function mix(hex: string, base: string, amount: number): string {
   const a = parseHex(hex);
   const b = parseHex(base);
-  return toHex([0, 1, 2].map((i) => b[i]! + (a[i]! - b[i]!) * amount) as unknown as Rgb);
+  return toHex([
+    b[0] + (a[0] - b[0]) * amount,
+    b[1] + (a[1] - b[1]) * amount,
+    b[2] + (a[2] - b[2]) * amount,
+  ]);
 }

@@ -12,16 +12,15 @@ export default function Index() {
   const saves = useGame((g) => g.saves);
   const open = useGame((g) => g.state);
   const last = useSettings((s) => s.lastCareer);
-  const [tried, setTried] = useState(false);
   const target = last && saves.some((s) => s.id === last) ? last : null;
+  const [tried, setTried] = useState(!target);
   useEffect(() => {
     if (target && !open && !tried)
       void openCareer(target).finally(() => {
         setTried(true);
       });
-    else setTried(true);
   }, [target, open, tried]);
-  if (!tried) return <View style={{ flex: 1, backgroundColor: t.c.canvas }} />;
+  if (!tried && !open) return <View style={{ flex: 1, backgroundColor: t.c.canvas }} />;
   if (open) return <Redirect href="/home" />;
   return <Redirect href="/welcome" />;
 }

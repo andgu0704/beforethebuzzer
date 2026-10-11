@@ -1,5 +1,8 @@
 import type { Icon } from 'phosphor-react-native';
-import { CaretRight, WarningCircle } from 'phosphor-react-native';
+import {
+  CaretRightIcon as CaretRight,
+  WarningCircleIcon as WarningCircle,
+} from 'phosphor-react-native';
 import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

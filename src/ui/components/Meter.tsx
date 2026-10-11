@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp } from 'phosphor-react-native';
+import { ArrowDownIcon as ArrowDown, ArrowUpIcon as ArrowUp } from 'phosphor-react-native';
 import { StyleSheet, View } from 'react-native';
 
 import { useTheme } from '../theme/theme';
@@ -13,6 +13,7 @@ export function Meter({
   tone = 'ink',
   max = 100,
   accessibilityLabel,
+  format,
 }: {
   readonly label: string;
   readonly value: number;
@@ -21,6 +22,7 @@ export function Meter({
   readonly tone?: 'ink' | 'caution' | 'negative';
   readonly max?: number;
   readonly accessibilityLabel?: string;
+  readonly format?: (n: number) => string;
 }) {
   const t = useTheme();
   const pct = Math.max(0, Math.min(1, value / max));
@@ -35,7 +37,12 @@ export function Meter({
         {label}
       </Text>
       <View style={styles.valueRow}>
-        <AnimatedNumber value={Math.round(value)} variant="stat" style={{ color: colour }} />
+        <AnimatedNumber
+          value={format ? value : Math.round(value)}
+          variant="stat"
+          style={{ color: colour }}
+          {...(format ? { format } : {})}
+        />
         {trend > 0.5 ? (
           <ArrowUp size={14} color={t.c.positive} weight="bold" />
         ) : trend < -0.5 ? (

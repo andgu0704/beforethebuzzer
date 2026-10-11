@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Gear, Plus } from 'phosphor-react-native';
+import { GearIcon as Gear, PlusIcon as Plus } from 'phosphor-react-native';
 import { useState } from 'react';
 import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

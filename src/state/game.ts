@@ -90,7 +90,7 @@ export function summaryOf(state: GameState): SaveSummary {
       week: state.world.date.week,
       stage: state.career.stage,
       teamId: teamId ?? '',
-      teamName: team ? `${team.name}` : '',
+      teamName: team ? team.name : '',
       colour: team?.colours.primary ?? '',
       jersey: user.jersey,
       portrait: user.portrait,

@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import Svg, { Circle, G, Path, Polygon, Rect, SvgXml } from 'react-native-svg';
+import Svg, { Circle, G, Path, Polygon, SvgXml } from 'react-native-svg';
 
 import type { EmblemId } from '@/engine/content/world-types';
 
@@ -154,7 +154,10 @@ export function TeamMark({
       <Svg width={size} height={size} viewBox="0 0 32 32">
         {shape === 'circle' ? <Circle cx={16} cy={16} r={15} fill={primary} /> : null}
         {shape === 'square' ? (
-          <Rect x={1.5} y={1.5} width={29} height={29} rx={6} fill={primary} />
+          <Path
+            d="M7.5 1.5h17a6 6 0 0 1 6 6v17a6 6 0 0 1-6 6h-17a6 6 0 0 1-6-6v-17a6 6 0 0 1 6-6z"
+            fill={primary}
+          />
         ) : null}
         {shape === 'diamond' ? (
           <Polygon points="16,0.5 31.5,16 16,31.5 0.5,16" fill={primary} />

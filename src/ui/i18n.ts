@@ -10,7 +10,7 @@ let shared: Translator | null = null;
 
 /** The translator for the device language (English until more catalogs exist). */
 export function translator(): Translator {
-  shared ??= translatorFor(getLocales()[0]?.languageTag ?? 'en');
+  shared ??= translatorFor(getLocales()[0].languageTag);
   return shared;
 }
 
@@ -28,7 +28,12 @@ export function useT(): {
   const rev = useGame((g) => g.rev);
   return useMemo(() => {
     const names = state ? worldNames(state.world, tr) : NO_NAMES;
-    return { t: tr.t, tr, names, m: (message: Message) => tr.message(message, names) };
+    return {
+      t: (key: string, params?: Parameters<Translator['t']>[1]) => tr.t(key, params),
+      tr,
+      names,
+      m: (message: Message) => tr.message(message, names),
+    };
     // rev changes when names are edited
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state, rev, tr]);

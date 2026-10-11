@@ -1,4 +1,4 @@
-import { Minus, Plus } from 'phosphor-react-native';
+import { MinusIcon as Minus, PlusIcon as Plus } from 'phosphor-react-native';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { haptic } from '@/platform/haptics';
