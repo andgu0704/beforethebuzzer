@@ -22,8 +22,19 @@ const svg = (body, bg) =>
 
 const files = [
   { path: 'assets/icon.png', size: 1024, svg: svg(ball('#FFFFFF', INK), ORANGE) },
-  { path: 'assets/adaptive-icon.png', size: 1024, svg: svg(`<g transform="translate(512 512) scale(0.7) translate(-512 -512)">${ball('#FFFFFF', INK)}</g>`, null) },
-  { path: 'assets/splash.png', size: 512, svg: svg(`<circle cx="512" cy="512" r="470" fill="${ORANGE}"/>${ball('#FFFFFF', INK)}`, null) },
+  {
+    path: 'assets/adaptive-icon.png',
+    size: 1024,
+    svg: svg(
+      `<g transform="translate(512 512) scale(0.7) translate(-512 -512)">${ball('#FFFFFF', INK)}</g>`,
+      null,
+    ),
+  },
+  {
+    path: 'assets/splash.png',
+    size: 512,
+    svg: svg(`<circle cx="512" cy="512" r="470" fill="${ORANGE}"/>${ball('#FFFFFF', INK)}`, null),
+  },
   { path: 'assets/favicon.png', size: 64, svg: svg(ball('#FFFFFF', INK), ORANGE) },
   { path: 'docs/design/icon-preview.png', size: 512, svg: svg(ball('#FFFFFF', INK), ORANGE) },
 ];
