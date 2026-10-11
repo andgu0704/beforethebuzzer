@@ -7,9 +7,9 @@ This document is the contract for phases 1–5. It covers scope, architecture, t
 library choices, the game rules for v1, the design system, every screen, the clip system,
 content, God Mode, the phase plan and the decisions taken.
 
-> **Status:** awaiting your approval. No app code is written until you approve.
-> The four design decisions are settled ([§17 Decisions](#17-decisions)); the defaults listed
-> there stand unless you change them.
+> **Status (12 October 2026):** approved and built through Phase 5. Phase reports are in
+> [docs/reports](docs/reports). What still needs you: the real-device check (60 fps, haptics,
+> VoiceOver) and sign-off on the icon and the portrait parts sheet.
 
 ---
 
