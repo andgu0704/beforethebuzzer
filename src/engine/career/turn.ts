@@ -1,0 +1,231 @@
+/**
+ * The weekly turn as a resumable state machine. `advance` runs until something needs the
+ * user (a key moment, an event card, a decision) or the week is over; `resolve` answers it.
+ * The state can be saved and reloaded at any point between calls.
+ */
+
+import { seasonOf, WEEK, weekIndex } from '../core/calendar';
+import type { PersonId, TeamId, TournamentId } from '../core/ids';
+import type { ContentIndex } from '../content/registry';
+import type { Interrupt } from '../model/career';
+import { isPlayer } from '../model/person';
+import { beginLeagueWeek, endLeagueWeek, playNextSlot, type LeagueContext } from '../season/league';
+import {
+  enterDraftPool,
+  raiseDraftDecision,
+  raiseDraftNight,
+  raiseWithdraw,
+  raiseWorkouts,
+  resolveAgent,
+  resolveDraftDecision,
+  resolveWithdraw,
+  resolveWorkouts,
+  runDraftNight,
+} from './draft-path';
+import { maybeRaiseEvent, resolveEvent, runConsequences } from './events';
+import { continueUserGame, isUserGame, resolveKeyMoment, startUserGame } from './game';
+import { raiseCallUps, resolveCallUp } from './national';
+import { applyPlan, checkTraitUnlocks, gradeCheck, updateProjection, updateRole } from './progress';
+import { clearShowcase, commitTo, raiseOffers } from './recruiting';
+import { socialReactions } from './social';
+import { msg, pushFeed, userTeamId, type GameState } from './state';
+
+export type StepResult =
+  | { readonly kind: 'interrupt'; readonly interrupt: Interrupt }
+  | { readonly kind: 'weekDone' }
+  | { readonly kind: 'ended' };
+
+function leagueContext(state: GameState, index: ContentIndex): LeagueContext {
+  const career = state.career;
+  return {
+    index,
+    userId: career.playerId,
+    userCollege: career.committedTo,
+    stock: { [career.playerId]: career.stock },
+    nationalExclude: new Set<PersonId>(),
+    userDraftNight: career.draft.declared,
+  };
+}
+
+/** Teams whose box scores the career keeps: his own and his rival's. */
+function watchedTeams(state: GameState): Set<TeamId> {
+  const out = new Set<TeamId>();
+  const own = userTeamId(state);
+  if (own) out.add(own);
+  const rival = state.career.rivalId ? state.world.people[state.career.rivalId] : undefined;
+  if (isPlayer(rival) && (rival.affiliation.kind === 'college' || rival.affiliation.kind === 'pro'))
+    out.add(rival.affiliation.teamId);
+  return out;
+}
+
+export function advance(state: GameState, index: ContentIndex): StepResult {
+  const career = state.career;
+  for (let guard = 0; guard < 500; guard++) {
+    if (career.ending) return { kind: 'ended' };
+    const pending = career.pending[0];
+    if (pending) return { kind: 'interrupt', interrupt: pending };
+    const cursor = career.cursor;
+    switch (cursor.stage) {
+      case 'idle':
+        beginWeek(state, index);
+        cursor.stage = 'games';
+        break;
+      case 'games': {
+        if (cursor.live) {
+          const moment = continueUserGame(state, index);
+          if (moment) return { kind: 'interrupt', interrupt: moment };
+          break;
+        }
+        const step = playNextSlot(state.world, (g) => isUserGame(state, g), watchedTeams(state));
+        if (!step) {
+          cursor.stage = 'events';
+          break;
+        }
+        const mine = step.held[0];
+        if (mine) startUserGame(state, index, mine);
+        break;
+      }
+      case 'events':
+        runConsequences(state, index);
+        maybeRaiseEvent(state, index);
+        cursor.stage = 'wrap';
+        break;
+      case 'wrap':
+        endWeek(state, index);
+        cursor.stage = 'idle';
+        return { kind: 'weekDone' };
+    }
+  }
+  throw new Error('the turn did not settle');
+}
+
+function beginWeek(state: GameState, index: ContentIndex): void {
+  const career = state.career;
+  const week = state.world.date.week;
+  const ctx = leagueContext(state, index);
+  const tournamentsBefore = new Set(Object.keys(state.world.tournaments));
+  const wasHighSchool = career.stage === 'highSchool';
+  beginLeagueWeek(state.world, ctx);
+
+  if (week === WEEK.summerStart && wasHighSchool && career.committedTo) {
+    career.stage = 'college';
+    career.coachTrust = 45;
+    updateRole(state);
+    pushFeed(
+      state,
+      'milestone',
+      msg('feed.arrivedOnCampus', { team: { team: career.committedTo } }),
+    );
+  }
+  if (week === WEEK.recruitingStart + 2 && career.stage === 'highSchool' && !career.committedTo)
+    raiseOffers(state);
+  if (week === WEEK.recruitingStart + 1) clearShowcase(state.world);
+  if (week === WEEK.declareDeadline - 2) raiseDraftDecision(state);
+  if (week === WEEK.proPlayoffsStart) enterDraftPool(state, index);
+  if (week === WEEK.withdrawDeadline) {
+    raiseWithdraw(state);
+    raiseWorkouts(state);
+  }
+  if (week === WEEK.draft) raiseDraftNight(state);
+  if (week === WEEK.u20Start || week === WEEK.seniorTournamentStart) {
+    const created = Object.keys(state.world.tournaments).filter(
+      (id) => !tournamentsBefore.has(id),
+    ) as TournamentId[];
+    raiseCallUps(state, created);
+  }
+  if (career.stage === 'college') updateRole(state);
+}
+
+function endWeek(state: GameState, index: ContentIndex): void {
+  applyPlan(state, index);
+  gradeCheck(state);
+  checkTraitUnlocks(state, index);
+  if (state.career.stage === 'college' || state.career.stage === 'prospect')
+    updateProjection(state);
+  rivalNews(state, index);
+  endLeagueWeek(state.world, leagueContext(state, index));
+}
+
+/** Now and then the rival's big night reaches the user's phone. */
+function rivalNews(state: GameState, index: ContentIndex): void {
+  const rivalId = state.career.rivalId;
+  if (!rivalId) return;
+  const now = weekIndex(state.world.date);
+  for (const g of Object.values(state.world.games)) {
+    if (!g.result?.box || weekIndex(g.date) !== now) continue;
+    const line = [...g.result.box.home.players, ...g.result.box.away.players].find(
+      (l) => l.id === rivalId,
+    );
+    if (line && line.pts >= 25) {
+      pushFeed(
+        state,
+        'news',
+        msg('feed.rivalBigGame', { rival: { person: rivalId }, pts: line.pts }),
+      );
+      socialReactions(state, index, ['rivalBigGame'], `rival-${g.id}`, 1);
+      return;
+    }
+  }
+}
+
+export type Choice = string | readonly string[];
+
+/** Answers the pending interrupt with `choice`. */
+export function resolve(
+  state: GameState,
+  index: ContentIndex,
+  interruptId: string,
+  choice: Choice,
+): unknown {
+  const career = state.career;
+  const interrupt = career.pending.find((p) => p.id === interruptId);
+  if (!interrupt) throw new Error(`no pending interrupt ${interruptId}`);
+  const one = typeof choice === 'string' ? choice : (choice[0] ?? '');
+  const done = () => (career.pending = career.pending.filter((p) => p.id !== interruptId));
+  switch (interrupt.kind) {
+    case 'keyMoment':
+      return resolveKeyMoment(state, index, interrupt, one);
+    case 'event': {
+      const outcome = resolveEvent(state, index, interrupt, one);
+      done();
+      return outcome;
+    }
+    case 'offers':
+      commitTo(state, index, one as TeamId);
+      done();
+      return null;
+    case 'callUp':
+      resolveCallUp(state, index, interrupt.tournamentId, interrupt.level, one === 'accept');
+      done();
+      return null;
+    case 'draftDecision':
+      if (!interrupt.options.includes(one as 'declare')) throw new Error('invalid draft decision');
+      resolveDraftDecision(state, index, one as 'declare' | 'testWaters' | 'stay');
+      done();
+      return null;
+    case 'withdraw':
+      resolveWithdraw(state, index, one === 'return' ? 'return' : 'stay');
+      done();
+      return null;
+    case 'workouts': {
+      const picked = (typeof choice === 'string' ? [choice] : [...choice])
+        .filter((t) => interrupt.teams.includes(t as TeamId))
+        .slice(0, interrupt.max) as TeamId[];
+      resolveWorkouts(state, index, picked);
+      done();
+      return null;
+    }
+    case 'agent':
+      resolveAgent(state, one === 'none' ? 'none' : (one as PersonId));
+      done();
+      return null;
+    case 'draftNight':
+      done();
+      runDraftNight(state, index, career.godMode.draftTeam);
+      return null;
+  }
+}
+
+export function currentSeason(state: GameState): number {
+  return seasonOf(state.world.date);
+}

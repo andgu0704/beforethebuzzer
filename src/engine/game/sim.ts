@@ -68,6 +68,7 @@ export function startGame(o: StartOptions): LiveGame {
     transition: false,
     finished: false,
     momentsUsed: 0,
+    out: [[], []],
     recordPlays: o.recordPlays,
     plays: [],
   };
@@ -184,6 +185,7 @@ class Sim {
       const line = stats[i];
       if (!line) return { i, score: -Infinity };
       if (line.pf >= rules.foulOut) return { i, score: -Infinity };
+      if (g.out[side].includes(i)) return { i, score: -Infinity };
       let score: number;
       if (clutch) {
         score = p.targetSec * 2 + p.r.scoring;
@@ -671,7 +673,14 @@ class Sim {
     let bestTarget = -Infinity;
     g.teams[side].players.forEach((p, i) => {
       const line = g.stats[side][i];
-      if (lineup.includes(i) || i === who || !line || line.pf >= this.rules.foulOut) return;
+      if (
+        lineup.includes(i) ||
+        i === who ||
+        !line ||
+        line.pf >= this.rules.foulOut ||
+        g.out[side].includes(i)
+      )
+        return;
       if (p.targetSec > bestTarget) {
         bestTarget = p.targetSec;
         best = i;
@@ -739,4 +748,10 @@ class Sim {
       score: [g.score[0], g.score[1]],
     });
   }
+}
+
+/** Takes a player out for the rest of the game and refills the lineup. */
+export function removeFromGame(live: LiveGame, side: Side, index: number): void {
+  if (!live.out[side].includes(index)) live.out[side].push(index);
+  live.nextSubAt = live.elapsed;
 }

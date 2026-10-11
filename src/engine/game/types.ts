@@ -84,6 +84,8 @@ export interface LiveGame {
   transition: boolean;
   finished: boolean;
   momentsUsed: number;
+  /** Players who can no longer play this game (sent off, or left hurt), by side. */
+  out: [number[], number[]];
   recordPlays: boolean;
   plays: PlayEvent[];
 }

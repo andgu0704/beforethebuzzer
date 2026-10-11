@@ -38,4 +38,9 @@ export interface NationalTeam extends TeamBase {
   readonly level: 'senior' | 'u20';
 }
 
-export type Team = CollegeTeam | ProTeam | NationalTeam;
+/** An invitation-only side, such as a high-school showcase team. */
+export interface SelectTeam extends TeamBase {
+  readonly kind: 'select';
+}
+
+export type Team = CollegeTeam | ProTeam | NationalTeam | SelectTeam;

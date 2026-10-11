@@ -32,6 +32,8 @@ export default tseslint.config(
         { allowConstantLoopConditions: true },
       ],
       'import/no-unresolved': 'off',
+      // Id-keyed records (people, games, flags) are deleted from by key on purpose.
+      '@typescript-eslint/no-dynamic-delete': 'off',
     },
   },
   {

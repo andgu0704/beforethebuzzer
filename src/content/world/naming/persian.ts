@@ -246,5 +246,8 @@ export default {
     'Firouzi',
     'Khosravi',
     'Mirzadeh',
+    'Golestani',
+    'Behzadi',
+    'Ostadi',
   ],
 } satisfies NamingCultureDef;
