@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -86,6 +87,15 @@ export function CareerScreen() {
               </View>
             </View>
             <ListRow title={tt('ui.career.projected')} value={projected} />
+            {state.world.draft?.combine[u.id] || c.draft.workouts.length ? (
+              <ListRow
+                testID="open-combine"
+                title={tt('ui.combine.open')}
+                onPress={() => {
+                  router.push('/draft/combine');
+                }}
+              />
+            ) : null}
           </View>
         ) : (
           <EmptyState title={tt('ui.career.unranked')} body={tt('ui.career.unrankedBody')} />
@@ -213,8 +223,21 @@ export function CareerScreen() {
               <ListRow
                 key={tid}
                 title={tour ? tt(tour.nameKey, tour.nameParams) : tid}
-                subtitle={`${tour?.season ?? ''}`}
-                value={answer === 'accepted' ? tt('ui.career.accepted') : tt('ui.career.declined')}
+                subtitle={
+                  tour
+                    ? `${tour.season} · ${answer === 'accepted' ? tt('ui.career.accepted') : tt('ui.career.declined')}`
+                    : undefined
+                }
+                {...(tour
+                  ? {
+                      onPress: () => {
+                        router.push({
+                          pathname: '/bracket/[tournamentId]',
+                          params: { tournamentId: tid },
+                        });
+                      },
+                    }
+                  : {})}
               />
             );
           })

@@ -1,5 +1,3 @@
-import { Text } from '@/ui/components/Text';
+import { BracketScreen } from '@/features/bracket/BracketScreen';
 
-export default function Placeholder() {
-  return <Text>Coming next</Text>;
-}
+export default BracketScreen;

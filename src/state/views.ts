@@ -16,6 +16,7 @@ import type { TeamId } from '@/engine/core/ids';
 import type { FeedEntry } from '@/engine/model/career';
 import type { GameRecord, TeamRecord } from '@/engine/model/game';
 import type { Team } from '@/engine/model/team';
+import type { Tournament } from '@/engine/model/tournament';
 import { conferenceStandings } from '@/engine/season/standings';
 
 export const MONTHS = [
@@ -186,4 +187,12 @@ export function ageOf(state: GameState): number {
 export const GPA_LINE = 2.0;
 export function gradesAtRisk(state: GameState): boolean {
   return state.career.stage === 'college' && state.career.gpa < GPA_LINE + 0.35;
+}
+
+/** This season's tournaments that include any of these teams, earliest first. */
+export function tournamentsFor(state: GameState, teamIds: readonly string[]): Tournament[] {
+  const season = seasonOf(state.world.date);
+  return Object.values(state.world.tournaments)
+    .filter((t) => t.season === season && t.teams.some((id) => teamIds.includes(id)))
+    .sort((a, b) => a.startYear * 52 + a.startWeek - (b.startYear * 52 + b.startWeek));
 }

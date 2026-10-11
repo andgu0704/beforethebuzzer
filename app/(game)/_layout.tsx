@@ -60,6 +60,8 @@ export default function GameLayout() {
       <Stack.Screen name="profile" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="bracket/[tournamentId]" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="ending" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="draft/night" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="draft/combine" options={{ headerShown: true, title: '' }} />
     </Stack>
   );
 }

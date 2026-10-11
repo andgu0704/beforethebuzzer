@@ -12,10 +12,17 @@ import { isPlayer, type Player } from '@/engine/model/person';
 import type { Team } from '@/engine/model/team';
 import { conferenceStandings } from '@/engine/season/standings';
 import { useGame } from '@/state/game';
-import { currentTeam, dayLabel, recordOf, recordText, teamSchedule } from '@/state/views';
+import {
+  currentTeam,
+  dayLabel,
+  recordOf,
+  recordText,
+  teamSchedule,
+  tournamentsFor,
+} from '@/state/views';
 import { Avatar } from '@/ui/components/Avatar';
 import { SegmentedControl } from '@/ui/components/Controls';
-import { EmptyState, Rule, Screen, SectionHeader } from '@/ui/components/Layout';
+import { EmptyState, ListRow, Rule, Screen, SectionHeader } from '@/ui/components/Layout';
 import { TeamMark } from '@/ui/components/Marks';
 import { Meter } from '@/ui/components/Meter';
 import { Tag } from '@/ui/components/Tag';
@@ -223,8 +230,32 @@ function Standings({ state, team }: { readonly state: GameState; readonly team: 
   const table = s ? conferenceStandings(state.world, season, team.conferenceId) : [];
   const conf = content.conferences.find((c) => c.id === team.conferenceId);
   const poll = s?.college.polls[s.college.polls.length - 1]?.ranking.slice(0, 25) ?? [];
+  const tours = tournamentsFor(state, [team.id]);
   return (
     <View>
+      {tours.length ? (
+        <>
+          <SectionHeader title={tt('ui.bracket.tournaments')} />
+          {tours.map((tour) => (
+            <ListRow
+              key={tour.id}
+              testID={`tournament-${tour.id}`}
+              title={tt(tour.nameKey, tour.nameParams)}
+              subtitle={
+                tour.champion
+                  ? tt('ui.bracket.champion', { team: names.team(tour.champion) })
+                  : undefined
+              }
+              onPress={() => {
+                router.push({
+                  pathname: '/bracket/[tournamentId]',
+                  params: { tournamentId: tour.id },
+                });
+              }}
+            />
+          ))}
+        </>
+      ) : null}
       <SectionHeader
         title={conf?.shortName ?? tt('ui.team.conference')}
         detail={`${tt('ui.team.confRecord')} · ${tt('ui.team.overall')}`}
