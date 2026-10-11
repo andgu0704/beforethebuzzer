@@ -1,5 +1,3 @@
-import { Text } from '@/ui/components/Text';
+import { ProfileScreen } from '@/features/profile/ProfileScreen';
 
-export default function Placeholder() {
-  return <Text>Coming next</Text>;
-}
+export default ProfileScreen;

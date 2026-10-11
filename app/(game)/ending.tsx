@@ -1,5 +1,3 @@
-import { Text } from '@/ui/components/Text';
+import { EndingScreen } from '@/features/ending/EndingScreen';
 
-export default function Placeholder() {
-  return <Text>Coming next</Text>;
-}
+export default EndingScreen;

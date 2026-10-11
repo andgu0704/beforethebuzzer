@@ -451,6 +451,11 @@ export function DecideScreen() {
     if (!pending) return;
     const mark = state.career.feed.length;
     const outcome = choose(pending.id, c);
+    if (pending.kind === 'draftNight') {
+      close();
+      router.push('/draft/night');
+      return;
+    }
     const entries = state.career.feed.slice(mark);
     if (pending.kind === 'keyMoment')
       haptic((outcome as MomentResult).success ? 'success' : 'warning');

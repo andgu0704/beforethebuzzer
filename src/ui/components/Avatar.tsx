@@ -2,6 +2,8 @@ import { View } from 'react-native';
 
 import type { Portrait as PortraitData } from '@/engine/model/person';
 
+import { Portrait } from '../portrait/Portrait';
+
 import { contrast } from '../theme/colour';
 import { useTheme } from '../theme/theme';
 import { Text } from './Text';
@@ -21,8 +23,33 @@ export interface AvatarProps {
 }
 
 /** A person's face. Falls back to initials in the team colour. */
-export function Avatar({ name, size = 40, primary, shape = 'circle' }: AvatarProps) {
+export function Avatar({
+  portrait,
+  name,
+  size = 40,
+  primary,
+  secondary,
+  jersey,
+  expression = 'neutral',
+  staff = false,
+  shape = 'circle',
+}: AvatarProps) {
   const t = useTheme();
+  if (portrait)
+    return (
+      <Portrait
+        portrait={portrait}
+        size={size}
+        expression={expression}
+        primary={primary ?? (t.scheme === 'light' ? '#3A3A3D' : '#5D5952')}
+        secondary={secondary ?? '#F1EFEA'}
+        staff={staff}
+        background={t.c.sunken}
+        shape={shape}
+        accessibilityLabel={name}
+        {...(jersey !== undefined ? { jersey } : {})}
+      />
+    );
   const bg = primary ?? t.c.sunken;
   const fg = primary ? (contrast('#FFFFFF', bg) >= 3 ? '#FFFFFF' : '#141414') : t.c.inkSecondary;
   const initials = name

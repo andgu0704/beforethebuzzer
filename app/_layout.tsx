@@ -8,10 +8,11 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { loadSkia } from '@/platform/skia';
 import { boot, useGame } from '@/state/game';
 import { ThemeProvider, useTheme } from '@/ui/theme/theme';
 
@@ -54,10 +55,16 @@ export default function RootLayout() {
     SchibstedGrotesk_600SemiBold,
   });
   const booted = useGame((g) => g.booted);
+  const [skia, setSkia] = useState(false);
   useEffect(() => {
     void boot();
+    void loadSkia()
+      .catch(() => undefined)
+      .finally(() => {
+        setSkia(true);
+      });
   }, []);
-  const ready = (fontsLoaded || fontError !== null) && booted;
+  const ready = (fontsLoaded || fontError !== null) && booted && skia;
   useEffect(() => {
     if (ready) void SplashScreen.hideAsync().catch(() => undefined);
   }, [ready]);
