@@ -11,15 +11,15 @@ import { Text } from './Text';
 export interface ButtonProps {
   readonly label: string;
   readonly onPress: () => void;
-  readonly variant?: 'primary' | 'secondary' | 'tertiary' | 'destructive';
-  readonly size?: 'regular' | 'compact';
-  readonly icon?: Icon;
-  readonly disabled?: boolean;
-  readonly loading?: boolean;
-  readonly hint?: string;
-  readonly style?: ViewStyle;
+  readonly variant?: 'primary' | 'secondary' | 'tertiary' | 'destructive' | undefined;
+  readonly size?: 'regular' | 'compact' | undefined;
+  readonly icon?: Icon | undefined;
+  readonly disabled?: boolean | undefined;
+  readonly loading?: boolean | undefined;
+  readonly hint?: string | undefined;
+  readonly style?: ViewStyle | undefined;
   readonly testID?: string | undefined;
-  readonly trailing?: ReactNode;
+  readonly trailing?: ReactNode | undefined;
 }
 
 export function Button({
@@ -129,11 +129,11 @@ export function IconButton({
   readonly icon: Icon;
   readonly label: string;
   readonly onPress: () => void;
-  readonly variant?: 'secondary' | 'plain';
-  readonly size?: number;
-  readonly disabled?: boolean;
+  readonly variant?: 'secondary' | 'plain' | undefined;
+  readonly size?: number | undefined;
+  readonly disabled?: boolean | undefined;
   readonly testID?: string | undefined;
-  readonly selected?: boolean;
+  readonly selected?: boolean | undefined;
 }) {
   const t = useTheme();
   return (

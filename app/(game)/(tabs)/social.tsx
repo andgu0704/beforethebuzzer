@@ -1,5 +1,3 @@
-import { Text } from '@/ui/components/Text';
+import { SocialScreen } from '@/features/social/SocialScreen';
 
-export default function Placeholder() {
-  return <Text>social</Text>;
-}
+export default SocialScreen;

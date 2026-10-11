@@ -13,9 +13,9 @@ export function AnimatedNumber({
   style,
 }: {
   readonly value: number;
-  readonly variant?: TypeVariant;
-  readonly format?: (n: number) => string;
-  readonly style?: TextStyle;
+  readonly variant?: TypeVariant | undefined;
+  readonly format?: (n: number) => string | undefined;
+  readonly style?: TextStyle | undefined;
 }) {
   const reduced = useReducedMotion();
   const [shown, setShown] = useState(value);

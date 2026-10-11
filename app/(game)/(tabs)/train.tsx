@@ -1,5 +1,3 @@
-import { Text } from '@/ui/components/Text';
+import { TrainScreen } from '@/features/train/TrainScreen';
 
-export default function Placeholder() {
-  return <Text>train</Text>;
-}
+export default TrainScreen;

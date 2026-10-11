@@ -8,7 +8,7 @@ export interface StatItem {
   readonly value: string | number;
   readonly label: string;
   /** Spoken form, e.g. "27 points". */
-  readonly spoken?: string;
+  readonly spoken?: string | undefined;
 }
 
 /** "27 PTS · 6 REB · 4 AST", read by VoiceOver as a sentence. */
@@ -17,7 +17,7 @@ export function StatLine({
   size = 'regular',
 }: {
   readonly items: readonly StatItem[];
-  readonly size?: 'regular' | 'large';
+  readonly size?: 'regular' | 'large' | undefined;
 }) {
   return (
     <View
@@ -45,7 +45,7 @@ export function StatLine({
 export interface ScorebugSide {
   readonly name: string;
   readonly abbr: string;
-  readonly record?: string;
+  readonly record?: string | undefined;
   readonly score: number;
   readonly colour: string;
   readonly won: boolean;
@@ -61,7 +61,7 @@ export function Scorebug({
   readonly kicker: string;
   readonly home: ScorebugSide;
   readonly away: ScorebugSide;
-  readonly big?: boolean;
+  readonly big?: boolean | undefined;
 }) {
   const t = useTheme();
   const row = (s: ScorebugSide) => (
@@ -108,7 +108,7 @@ export function Scorebug({
 export interface BoxColumn {
   readonly key: string;
   readonly label: string;
-  readonly width?: number;
+  readonly width?: number | undefined;
 }
 
 /** Scrollable box score: the name column stays, numbers scroll sideways. */
@@ -121,10 +121,10 @@ export function BoxScoreTable({
   readonly rows: readonly {
     readonly id: string;
     readonly name: string;
-    readonly starter?: boolean;
+    readonly starter?: boolean | undefined;
     readonly cells: Readonly<Record<string, string | number>>;
   }[];
-  readonly highlight?: string;
+  readonly highlight?: string | undefined;
 }) {
   const t = useTheme();
   return (
@@ -201,9 +201,9 @@ export function Sparkline({
   invert = false,
 }: {
   readonly values: readonly number[];
-  readonly width?: number;
-  readonly height?: number;
-  readonly invert?: boolean;
+  readonly width?: number | undefined;
+  readonly height?: number | undefined;
+  readonly invert?: boolean | undefined;
 }) {
   const t = useTheme();
   if (values.length < 2) return <View style={{ width, height }} />;

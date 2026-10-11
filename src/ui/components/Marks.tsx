@@ -16,9 +16,9 @@ export function Flag({
   label,
 }: {
   readonly code: string;
-  readonly size?: number;
-  readonly showCode?: boolean;
-  readonly label?: string;
+  readonly size?: number | undefined;
+  readonly showCode?: boolean | undefined;
+  readonly label?: string | undefined;
 }) {
   const t = useTheme();
   const xml = FLAGS[code];
@@ -107,8 +107,8 @@ export function TeamMark({
   readonly primary: string;
   readonly secondary: string;
   readonly emblem?: EmblemId | undefined;
-  readonly size?: number;
-  readonly label?: string;
+  readonly size?: number | undefined;
+  readonly label?: string | undefined;
 }) {
   // The secondary colour is used for the glyph only when it reads against the primary.
   const glyph =

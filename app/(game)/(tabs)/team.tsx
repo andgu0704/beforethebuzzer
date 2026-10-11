@@ -1,5 +1,3 @@
-import { Text } from '@/ui/components/Text';
+import { TeamScreen } from '@/features/team/TeamScreen';
 
-export default function Placeholder() {
-  return <Text>team</Text>;
-}
+export default TeamScreen;

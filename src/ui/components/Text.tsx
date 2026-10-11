@@ -4,11 +4,11 @@ import { useTheme, type Colours } from '../theme/theme';
 import { type as typeScale, type TypeVariant } from '../theme/tokens';
 
 export interface Props extends TextProps {
-  readonly variant?: TypeVariant;
-  readonly color?: keyof Colours;
-  readonly align?: TextStyle['textAlign'];
+  readonly variant?: TypeVariant | undefined;
+  readonly color?: keyof Colours | undefined;
+  readonly align?: TextStyle['textAlign'] | undefined;
   /** Forces tabular figures (on by default for scoreboard and stat). */
-  readonly tabular?: boolean;
+  readonly tabular?: boolean | undefined;
 }
 
 /** The only text component. Typed variants only (§10.1); colour by token name. */

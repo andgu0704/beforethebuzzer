@@ -65,8 +65,8 @@ export function OptionRow({
   readonly body?: string | undefined;
   readonly selected: boolean;
   readonly onPress: () => void;
-  readonly leading?: ReactNode;
-  readonly trailing?: ReactNode;
+  readonly leading?: ReactNode | undefined;
+  readonly trailing?: ReactNode | undefined;
   readonly testID?: string | undefined;
   readonly disabled?: boolean | undefined;
 }) {

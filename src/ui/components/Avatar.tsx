@@ -11,13 +11,13 @@ export type Expression = 'neutral' | 'smile' | 'focused' | 'frustrated' | 'stunn
 export interface AvatarProps {
   readonly portrait?: PortraitData | undefined;
   readonly name: string;
-  readonly size?: number;
+  readonly size?: number | undefined;
   readonly primary?: string | undefined;
   readonly secondary?: string | undefined;
   readonly jersey?: number | undefined;
-  readonly expression?: Expression;
-  readonly staff?: boolean;
-  readonly shape?: 'circle' | 'card';
+  readonly expression?: Expression | undefined;
+  readonly staff?: boolean | undefined;
+  readonly shape?: 'circle' | 'card' | undefined;
 }
 
 /** A person's face. Falls back to initials in the team colour. */

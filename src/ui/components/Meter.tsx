@@ -18,11 +18,11 @@ export function Meter({
   readonly label: string;
   readonly value: number;
   /** Change since last week: an arrow shows its sign. */
-  readonly trend?: number;
-  readonly tone?: 'ink' | 'caution' | 'negative';
-  readonly max?: number;
-  readonly accessibilityLabel?: string;
-  readonly format?: (n: number) => string;
+  readonly trend?: number | undefined;
+  readonly tone?: 'ink' | 'caution' | 'negative' | undefined;
+  readonly max?: number | undefined;
+  readonly accessibilityLabel?: string | undefined;
+  readonly format?: (n: number) => string | undefined;
 }) {
   const t = useTheme();
   const pct = Math.max(0, Math.min(1, value / max));

@@ -22,11 +22,11 @@ export function Screen({
   contentStyle,
 }: {
   readonly children: ReactNode;
-  readonly scroll?: boolean;
-  readonly padded?: boolean;
-  readonly bottomInset?: boolean;
+  readonly scroll?: boolean | undefined;
+  readonly padded?: boolean | undefined;
+  readonly bottomInset?: boolean | undefined;
   readonly testID?: string | undefined;
-  readonly contentStyle?: ViewStyle;
+  readonly contentStyle?: ViewStyle | undefined;
 }) {
   const t = useTheme();
   const insets = useSafeAreaInsets();
@@ -58,7 +58,7 @@ export function SectionHeader({
   action,
 }: {
   readonly title: string;
-  readonly detail?: string;
+  readonly detail?: string | undefined;
   readonly action?: { readonly label: string; readonly onPress: () => void };
 }) {
   const t = useTheme();
@@ -109,14 +109,14 @@ export function ListRow({
   accessibilityLabel,
 }: {
   readonly title: string;
-  readonly subtitle?: string;
-  readonly value?: string;
-  readonly leading?: ReactNode;
-  readonly onPress?: () => void;
-  readonly icon?: Icon;
-  readonly chevron?: boolean;
+  readonly subtitle?: string | undefined;
+  readonly value?: string | undefined;
+  readonly leading?: ReactNode | undefined;
+  readonly onPress?: () => void | undefined;
+  readonly icon?: Icon | undefined;
+  readonly chevron?: boolean | undefined;
   readonly testID?: string | undefined;
-  readonly accessibilityLabel?: string;
+  readonly accessibilityLabel?: string | undefined;
 }) {
   const t = useTheme();
   const body = (
@@ -174,9 +174,9 @@ export function EmptyState({
   icon: IconCmp,
 }: {
   readonly title: string;
-  readonly body?: string;
+  readonly body?: string | undefined;
   readonly action?: { readonly label: string; readonly onPress: () => void };
-  readonly icon?: Icon;
+  readonly icon?: Icon | undefined;
 }) {
   const t = useTheme();
   return (
@@ -203,7 +203,7 @@ export function ErrorState({
   retry,
 }: {
   readonly title: string;
-  readonly body?: string;
+  readonly body?: string | undefined;
   readonly retry?: { readonly label: string; readonly onPress: () => void };
 }) {
   return (
@@ -222,9 +222,9 @@ export function Banner({
   body,
   action,
 }: {
-  readonly tone?: 'caution' | 'negative' | 'positive' | 'accent';
+  readonly tone?: 'caution' | 'negative' | 'positive' | 'accent' | undefined;
   readonly title: string;
-  readonly body?: string;
+  readonly body?: string | undefined;
   readonly action?: { readonly label: string; readonly onPress: () => void };
 }) {
   const t = useTheme();
@@ -262,7 +262,7 @@ export function Skeleton({
   height = 16,
 }: {
   readonly width: number | `${number}%`;
-  readonly height?: number;
+  readonly height?: number | undefined;
 }) {
   const t = useTheme();
   return (
@@ -278,7 +278,7 @@ export function Card({
   style,
 }: {
   readonly children: ReactNode;
-  readonly style?: ViewStyle;
+  readonly style?: ViewStyle | undefined;
 }) {
   const t = useTheme();
   return (

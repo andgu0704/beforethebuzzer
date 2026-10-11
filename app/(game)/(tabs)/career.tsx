@@ -1,5 +1,3 @@
-import { Text } from '@/ui/components/Text';
+import { CareerScreen } from '@/features/career/CareerScreen';
 
-export default function Placeholder() {
-  return <Text>career</Text>;
-}
+export default CareerScreen;

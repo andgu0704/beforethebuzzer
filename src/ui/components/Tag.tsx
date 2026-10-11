@@ -8,7 +8,7 @@ export function Tag({
   tone = 'neutral',
 }: {
   readonly label: string;
-  readonly tone?: 'neutral' | 'accent' | 'positive' | 'negative' | 'caution' | 'brand';
+  readonly tone?: 'neutral' | 'accent' | 'positive' | 'negative' | 'caution' | 'brand' | undefined;
 }) {
   const t = useTheme();
   const fg =

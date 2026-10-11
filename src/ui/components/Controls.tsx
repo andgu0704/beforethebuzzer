@@ -79,10 +79,10 @@ export function Stepper({
   readonly label: string;
   readonly value: number;
   readonly onChange: (v: number) => void;
-  readonly min?: number;
+  readonly min?: number | undefined;
   readonly max: number;
-  readonly canIncrease?: boolean;
-  readonly detail?: string;
+  readonly canIncrease?: boolean | undefined;
+  readonly detail?: string | undefined;
   readonly testID?: string | undefined;
 }) {
   const t = useTheme();

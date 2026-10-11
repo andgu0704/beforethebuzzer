@@ -1,5 +1,3 @@
-import { Text } from '@/ui/components/Text';
+import { GameReport } from '@/features/game/GameReport';
 
-export default function Placeholder() {
-  return <Text>Coming next</Text>;
-}
+export default GameReport;
