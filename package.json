@@ -21,7 +21,8 @@
     "portraits": "tsx scripts/portraits/sheet.ts",
     "web:canvaskit": "node -e \"require('node:fs').mkdirSync('public',{recursive:true});require('node:fs').copyFileSync('node_modules/canvaskit-wasm/bin/full/canvaskit.wasm','public/canvaskit.wasm')\"",
     "web:export": "npm run web:canvaskit && expo export --platform web --output-dir dist",
-    "screens": "node scripts/screens/flow.mjs"
+    "screens": "node scripts/screens/flow.mjs",
+    "clips:frames": "tsx scripts/clips/frames.ts"
   },
   "dependencies": {
     "@expo-google-fonts/antonio": "^0.4.2",
