@@ -129,7 +129,17 @@ for (let turn = 0; turn < weeks && !ended; turn++) {
     ).toLowerCase();
     if (process.env.FLOW_DEBUG) console.log(turn, guard, page.url(), now);
     if (/next week|see how it ended/.test(now) && r === 'none') break;
-    if (/decide/.test(now) && r === 'none') await id('next-week').click();
+    if (/decide/.test(now) && r === 'none') {
+      const ok = await id('next-week')
+        .click({ timeout: 8000 })
+        .then(() => true)
+        .catch(() => false);
+      if (!ok) {
+        await shot(`99-stuck-${turn}-${guard}`);
+        console.log('stuck at', page.url(), now);
+        await page.goto(base, { waitUntil: 'networkidle' });
+      }
+    }
     await page.waitForTimeout(250);
   }
 }

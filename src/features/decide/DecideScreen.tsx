@@ -441,6 +441,11 @@ export function DecideScreen() {
     }
   };
 
+  const pendingKey = pending?.id;
+  useEffect(() => {
+    if (pendingKey) closing.current = false;
+  }, [pendingKey]);
+
   useEffect(() => {
     if (!pending && !resolved) close();
   });
