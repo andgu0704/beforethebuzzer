@@ -21,6 +21,19 @@ describe('content', () => {
     expect(content.traits.filter((t) => t.kind === 'flaw').length).toBeGreaterThanOrEqual(6);
   });
 
+  it('has enough story content for a varied career', () => {
+    expect(content.events.length).toBeGreaterThanOrEqual(62);
+    expect(content.moments.length).toBeGreaterThanOrEqual(42);
+    expect(content.traits.length).toBeGreaterThanOrEqual(26);
+    expect(content.social.length).toBeGreaterThanOrEqual(155);
+    for (const stage of ['highSchool', 'college', 'prospect'] as const) {
+      const fitting = content.events.filter((e) => !e.when.stages || e.when.stages.includes(stage));
+      expect(fitting.length, stage).toBeGreaterThanOrEqual(8);
+    }
+    const categories = new Set(content.events.map((e) => e.category));
+    expect(categories.size).toBe(14);
+  });
+
   it('never generates the name of a real player', () => {
     const index = indexContent(content);
     const world = createWorld(index, 'names', { year: 2030, week: 14 });

@@ -152,6 +152,10 @@ export const engine = {
     block: 'chase-down block',
     steal_runout: 'steal and run-out',
     charge: 'charge',
+    floater: 'floater',
+    put_back: 'put-back',
+    last_second_heave: 'last-second heave',
+    free_throws: 'drive for the foul',
     checkup: 'trainer check',
   },
   tournament: {

@@ -13,6 +13,10 @@ export const CLIP_TEMPLATES = [
   'block',
   'steal_runout',
   'charge',
+  'floater',
+  'put_back',
+  'last_second_heave',
+  'free_throws',
   'checkup',
 ] as const;
 
