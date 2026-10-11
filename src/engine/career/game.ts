@@ -158,7 +158,7 @@ export function continueUserGame(state: GameState, index: ContentIndex): Interru
       role: state.career.role,
       style: user.style,
       traits: user.traits,
-      hurt: knocked || !!user.injury?.playedThrough,
+      hurt: knocked,
       budget: current.momentBudget,
     });
     if (!moment) return false;
@@ -350,6 +350,16 @@ export function resolveKeyMoment(
       },
     },
   );
+  // Big moments in big games are what scouts write about.
+  if (
+    kind !== 'pain' &&
+    (current.context === 'tournament' ||
+      current.context === 'international' ||
+      current.context === 'rivalry' ||
+      current.context === 'showcase')
+  ) {
+    state.career.stock += outcome.success ? 0.25 : -0.12;
+  }
   current.momentBudget -= 1;
   current.pendingMoment = null;
   state.career.pending = state.career.pending.filter((p) => p.id !== interrupt.id);

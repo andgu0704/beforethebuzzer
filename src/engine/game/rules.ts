@@ -55,7 +55,7 @@ export const COLLEGE_RULES: LeagueRules = {
   make: { rim: 0.56, post: 0.45, mid: 0.35, three: 0.293 },
   turnover: 0.16,
   offRebound: 0.29,
-  threeAppetite: 1,
+  threeAppetite: 1.3,
   assist: { rim: 0.38, post: 0.24, mid: 0.4, three: 0.72 },
   looseFoul: 0.165,
   homeEdge: 0.07,

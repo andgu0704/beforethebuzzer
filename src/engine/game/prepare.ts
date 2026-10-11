@@ -128,7 +128,7 @@ export function prepareTeam(o: PrepareOptions): PreparedTeam {
     const confidenceMod = ((p.confidence - 50) / 50) * 0.14;
     const energyMod = p.energy < 45 ? -(45 - p.energy) / 140 : 0;
     const roleUsage =
-      role === 'star' ? 1.4 : role === 'starter' ? 1 : role === 'rotation' ? 0.85 : 0.7;
+      role === 'star' ? 1.15 : role === 'starter' ? 1 : role === 'rotation' ? 0.85 : 0.7;
     return {
       id: p.id,
       position: p.position,

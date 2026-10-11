@@ -3,6 +3,7 @@ import { asGameId, nextId, type TeamId, type TournamentId } from '../core/ids';
 import type { GameKind, GameRecord } from '../model/game';
 import type { League } from '../model/person';
 import type { World } from '../model/world';
+import { indexGame } from './game-index';
 
 export interface NewGame {
   readonly date: GameDate;
@@ -31,6 +32,7 @@ export function createGame(world: World, g: NewGame): GameRecord {
     result: null,
   };
   world.games[record.id] = record;
+  indexGame(world, record);
   return record;
 }
 

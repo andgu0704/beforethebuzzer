@@ -12,7 +12,7 @@ export const CLASS_SIZE = 600;
 
 /** Base skill level of the recruit at a given rank in a class of `size`. */
 export function recruitLevel(rank: number, size: number): number {
-  return 30 + 21 * dexp(-rank / 85) + 6 * (1 - rank / size);
+  return 30 + 18 * dexp(-rank / 85) + 6 * (1 - rank / size);
 }
 
 /** How scouts value a prospect: current ability plus a share of what is left to grow. */
@@ -82,7 +82,7 @@ export function assignRecruits(
       }).length;
       const need = positionCount === 0 ? 1.8 : positionCount >= 4 ? 0.4 : 1;
       // Top recruits weigh prestige heavily; lower ones take what is open.
-      const pull = dexp((c.prestige / 100) * 6 * (0.3 + rankFactor));
+      const pull = dexp((c.prestige / 100) * 5 * (0.3 + rankFactor));
       return pull * need * (0.6 + rng.next() * 0.8);
     });
     p.affiliation = { kind: 'college', teamId: team.id, classYear: 1 };

@@ -1,4 +1,4 @@
-import { clamp, shiftProbability } from '../core/math';
+import { clamp, logistic, logit, shiftProbability } from '../core/math';
 import { createRng, restoreRng, type Rng } from '../core/rng';
 import type { GameId } from '../core/ids';
 import {
@@ -8,7 +8,7 @@ import {
   totalRegulationSec,
   type LeagueRules,
 } from './rules';
-import { pickOnCourt, teamAverage } from './sim-helpers';
+import { pickOnCourt, teamAverage, type RatingsKey } from './sim-helpers';
 import {
   emptyLine,
   type LiveGame,
@@ -21,6 +21,22 @@ import {
   type SimTeam,
 } from './types';
 
+const AVERAGE_KEYS: readonly RatingsKey[] = [
+  'three',
+  'mid',
+  'rim',
+  'post',
+  'ft',
+  'pass',
+  'security',
+  'perD',
+  'intD',
+  'reb',
+  'blk',
+  'stl',
+  'discipline',
+  'scoring',
+];
 const SUB_WINDOW: Record<LeagueRules['id'], number> = {
   college: 240,
   pro: 180,
@@ -109,6 +125,23 @@ export function margin(live: LiveGame, side: Side): number {
 
 class Sim {
   private readonly regulation: number;
+  /** Team averages for the current lineups; reset whenever a lineup changes. */
+  private readonly averages = new Float64Array(2 * AVERAGE_KEYS.length * 2).fill(Number.NaN);
+  /** Log-odds of the league's base rates, computed once. */
+  private readonly baseLogit: Readonly<
+    Record<'rim' | 'post' | 'mid' | 'three' | 'turnover' | 'offRebound', number>
+  >;
+
+  private avg(side: Side, key: RatingsKey, mode: 'mean' | 'max' = 'mean'): number {
+    const slot =
+      (side * AVERAGE_KEYS.length + AVERAGE_KEYS.indexOf(key)) * 2 + (mode === 'max' ? 1 : 0);
+    let v = this.averages[slot] ?? Number.NaN;
+    if (Number.isNaN(v)) {
+      v = teamAverage(this.g, side, key, mode);
+      this.averages[slot] = v;
+    }
+    return v;
+  }
 
   constructor(
     private readonly g: LiveGame,
@@ -116,6 +149,14 @@ class Sim {
     private readonly rng: Rng,
   ) {
     this.regulation = totalRegulationSec(rules);
+    this.baseLogit = {
+      rim: logit(rules.make.rim),
+      post: logit(rules.make.post),
+      mid: logit(rules.make.mid),
+      three: logit(rules.make.three),
+      turnover: logit(rules.turnover),
+      offRebound: logit(rules.offRebound),
+    };
   }
 
   run(hook: MomentHook | null): boolean {
@@ -160,6 +201,7 @@ class Sim {
   private substitute(): void {
     const g = this.g;
     for (const side of [0, 1] as const) g.onCourt[side] = this.chooseLineup(side);
+    this.averages.fill(Number.NaN);
     g.nextSubAt = g.elapsed + SUB_WINDOW[this.rules.id] * (0.75 + this.rng.next() * 0.5);
   }
 
@@ -265,9 +307,7 @@ class Sim {
       if (this.rng.chance(this.turnoverChance(offense, defense))) {
         const by = pickOnCourt(this.rng, g, offense, (p) => p.usage * (110 - p.r.security));
         const stealChance =
-          0.42 *
-          (teamAverage(g, defense, 'stl') / 50) *
-          (0.85 + g.teams[defense].tactics.pressure / 330);
+          0.42 * (this.avg(defense, 'stl') / 50) * (0.85 + g.teams[defense].tactics.pressure / 330);
         const stolenBy = this.rng.chance(stealChance)
           ? pickOnCourt(this.rng, g, defense, (p) => p.r.stl * p.r.stl)
           : null;
@@ -340,10 +380,10 @@ class Sim {
 
   private turnoverChance(offense: Side, defense: Side): number {
     const g = this.g;
-    const sec = teamAverage(this.g, offense, 'security');
-    const stl = teamAverage(this.g, defense, 'stl');
+    const sec = this.avg(offense, 'security');
+    const stl = this.avg(defense, 'stl');
     const pressure = (g.teams[defense].tactics.pressure - 50) / 160;
-    return shiftProbability(this.rules.turnover, -(sec - stl) / 60 + pressure);
+    return logistic(this.baseLogit.turnover - (sec - stl) / 60 + pressure);
   }
 
   // ---------------------------------------------------------------- shooting
@@ -390,14 +430,14 @@ class Sim {
     if (!sp) return 'miss';
 
     // Was it set up by a pass?
-    const passerQuality = teamAverage(g, offense, 'pass');
+    const passerQuality = this.avg(offense, 'pass');
     const setUp =
       forcedAssist !== undefined
         ? forcedAssist !== null
         : this.rng.chance(rules.assist[type] * (0.62 + passerQuality / 140));
 
     const defender = this.matchup(defense, sp);
-    const rimProtect = teamAverage(g, defense, 'intD', 'max');
+    const rimProtect = this.avg(defense, 'intD', 'max');
     const offRating = sp.r[type];
     const defRating =
       type === 'rim' || type === 'post' ? defender.intD * 0.55 + rimProtect * 0.45 : defender.perD;
@@ -411,7 +451,7 @@ class Sim {
     const stint = g.stint[offense][shooter] ?? 0;
     const tireAt = 420 + sp.stamina * 3;
     if (stint > tireAt) delta -= Math.min(0.35, (stint - tireAt) / 900);
-    const makeP = shiftProbability(rules.make[type], delta);
+    const makeP = logistic(this.baseLogit[type] + delta);
 
     const foulBase = { rim: 0.19, post: 0.18, mid: 0.065, three: 0.017 }[type];
     const fouled =
@@ -451,7 +491,7 @@ class Sim {
     line.fga += 1;
     if (type === 'three') line.tpa += 1;
     this.record(offense, shooter, type === 'three' ? 'miss3' : 'miss2');
-    const blockEdge = teamAverage(g, defense, 'blk', 'max') / 62;
+    const blockEdge = this.avg(defense, 'blk', 'max') / 62;
     const blockChance =
       { rim: 0.2, post: 0.16, mid: 0.035, three: 0.012 }[type] * blockEdge * Math.sqrt(blockEdge);
     const blocker =
@@ -619,9 +659,9 @@ class Sim {
 
   private offensiveRebound(offense: Side, defense: Side): boolean {
     const g = this.g;
-    const offReb = teamAverage(g, offense, 'reb');
-    const defReb = teamAverage(g, defense, 'reb');
-    const p = shiftProbability(this.rules.offRebound, (offReb - defReb) / 45);
+    const offReb = this.avg(offense, 'reb');
+    const defReb = this.avg(defense, 'reb');
+    const p = logistic(this.baseLogit.offRebound + (offReb - defReb) / 45);
     if (this.rng.chance(p)) {
       const r = pickOnCourt(
         this.rng,
@@ -691,6 +731,7 @@ class Sim {
       g.stint[side][best] = 0;
     }
     g.onCourt[side] = lineup;
+    this.averages.fill(Number.NaN);
   }
 
   private worstShooter(side: Side): number {

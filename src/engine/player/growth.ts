@@ -2,7 +2,7 @@ import { clamp, dpow } from '../core/math';
 import { SKILLS, type Skill, type Skills } from '../model/skills';
 
 /** Diminishing returns on blocks spent on one skill in a week. */
-const BLOCK_RETURNS = [1, 0.8, 0.62, 0.48, 0.37, 0.28, 0.21, 0.16, 0.12, 0.09];
+const BLOCK_RETURNS = [1, 0.72, 0.5, 0.34, 0.23, 0.16, 0.11, 0.08, 0.06, 0.04];
 
 export function trainingEffect(blocks: number): number {
   let total = 0;
@@ -59,7 +59,7 @@ export interface GrowthInput {
   readonly weeks: number;
 }
 
-const TRAIN_RATE = 0.06;
+const TRAIN_RATE = 0.075;
 const PASSIVE_RATE = 0.008;
 const GAME_RATE = 0.00045;
 

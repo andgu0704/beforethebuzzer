@@ -63,12 +63,13 @@ export function createCareer(index: ContentIndex, input: CreationInput): GameSta
   });
   const rng = createRng(input.seed, 'user');
   const start = (gift.effects.startSkills ?? 0) + (flaw.effects.startSkills ?? 0);
-  const level = 43 + start + rng.normal(0, 1);
+  const level = 45 + start + rng.normal(0, 1);
   const skills = rollSkills(rng, level, input.style, 4);
+  // Hidden potential: wide on purpose, so some careers can reach the top of a draft and some cannot.
   const gap = clamp(
-    rng.normal(18, 4.5) + (gift.effects.ceiling ?? 0) + (flaw.effects.ceiling ?? 0),
-    8,
-    32,
+    rng.normal(21, 6) + (gift.effects.ceiling ?? 0) + (flaw.effects.ceiling ?? 0),
+    12,
+    40,
   );
   const user: Player = {
     id: asPersonId(nextId(world.counters, 'person', 'p')),
@@ -86,7 +87,7 @@ export function createCareer(index: ContentIndex, input: CreationInput): GameSta
     style: input.style,
     skills,
     ceiling: rollCeilings(rng, skills, input.style, level + gap),
-    growthRate: 1,
+    growthRate: 1.08,
     traits: [gift.id, flaw.id],
     health: 100,
     energy: 90,

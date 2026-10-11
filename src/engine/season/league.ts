@@ -19,10 +19,12 @@ import {
 } from '../draft/draft';
 import type { StockAdjustments } from '../draft/scouting';
 import { awardRankingPoints, startInternational } from '../international/summer';
+import type { LiveGame } from '../game/types';
 import type { GameRecord } from '../model/game';
 import type { ProTeam } from '../model/team';
 import type { World } from '../model/world';
 import { createTournament } from '../tournament/engine';
+import { gamesInWeek } from '../world/game-index';
 import { FORMATS } from '../tournament/formats';
 import { collegeAwards, proAwards, tournamentStar } from './awards';
 import { createConferenceTournaments, createNationalTournament, updatePoll } from './college-post';
@@ -107,9 +109,8 @@ export function runWholeDraft(world: World, stock: StockAdjustments): void {
 
 /** Games this week still to play, in slot order. */
 export function gamesThisWeek(world: World): GameRecord[] {
-  const now = weekIndex(world.date);
-  return Object.values(world.games)
-    .filter((g) => !g.result && weekIndex(g.date) === now)
+  return gamesInWeek(world, weekIndex(world.date))
+    .filter((g) => !g.result)
     .sort((a, b) => a.slot - b.slot || (a.id < b.id ? -1 : 1));
 }
 
@@ -119,10 +120,13 @@ export function keepBoxFor(game: GameRecord, watched: ReadonlySet<TeamId>): bool
 }
 
 /** Plays every unplayed game in the lowest remaining slot, except those `skip` holds back. */
+export type GameObserver = (game: GameRecord, live: LiveGame) => void;
+
 export function playNextSlot(
   world: World,
   skip: (g: GameRecord) => boolean,
   watched: ReadonlySet<TeamId>,
+  observe?: GameObserver,
 ): { slot: number; held: GameRecord[] } | null {
   const pending = gamesThisWeek(world);
   const first = pending[0];
@@ -132,7 +136,10 @@ export function playNextSlot(
   for (const g of pending) {
     if (g.slot !== slot) break;
     if (skip(g)) held.push(g);
-    else playLeagueGame(world, g, keepBoxFor(g, watched));
+    else {
+      const live = playLeagueGame(world, g, keepBoxFor(g, watched));
+      observe?.(g, live);
+    }
   }
   return { slot, held };
 }
@@ -200,10 +207,10 @@ export function endLeagueWeek(world: World, ctx: LeagueContext): void {
 }
 
 /** A whole week with nobody watching: used by the headless simulation and simulate ahead. */
-export function simulateLeagueWeek(world: World, ctx: LeagueContext): void {
+export function simulateLeagueWeek(world: World, ctx: LeagueContext, observe?: GameObserver): void {
   beginLeagueWeek(world, ctx);
   for (let guard = 0; guard < 40; guard++) {
-    if (!playNextSlot(world, () => false, new Set())) break;
+    if (!playNextSlot(world, () => false, new Set(), observe)) break;
   }
   endLeagueWeek(world, ctx);
 }

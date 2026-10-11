@@ -7,6 +7,7 @@ import { overallOf } from '../game/ratings';
 import { PLAN_BLOCKS, type WeekPlan } from '../model/career';
 import { isPlayer } from '../model/person';
 import { SKILLS } from '../model/skills';
+import { prospectScore } from '../college/recruiting';
 import { eligibleProspects, rankProspects } from '../draft/scouting';
 import { grow } from '../player/growth';
 import { changeStatus } from './effects';
@@ -250,13 +251,21 @@ export function updateProjection(state: GameState): void {
   const career = state.career;
   if (career.stage !== 'college' && career.stage !== 'prospect') return;
   const adjustments = { [user.id]: career.stock };
-  const candidates = eligibleProspects(state.world);
-  if (!candidates.some((p) => p.id === user.id)) candidates.push(user);
-  const ranked = rankProspects(state.world, candidates, adjustments);
+  // A quick, noise-free pass narrows the field before the full scouting view.
+  const quick = eligibleProspects(state.world)
+    .filter((p) => p.id !== user.id)
+    .map((p) => ({ p, score: prospectScore(p) }))
+    .sort((a, b) => b.score - a.score);
+  const userQuick = prospectScore(user) + career.stock;
+  const shortlist = quick.slice(0, 300).map((x) => x.p);
+  shortlist.push(user);
+  const ranked = rankProspects(state.world, shortlist, adjustments);
+  const found = ranked.findIndex((v) => v.playerId === user.id);
+  const view = ranked[found];
+  if (found < 0 || !view) return;
+  const position =
+    found < ranked.length - 1 ? found : quick.filter((x) => x.score > userQuick).length;
   // Only about 55% of the top prospects actually enter a given draft.
-  const position = ranked.findIndex((v) => v.playerId === user.id);
-  const view = ranked[position];
-  if (position < 0 || !view) return;
   const draftRank = Math.round(position * 0.55) + 1;
   const spread = Math.round(2 + view.uncertainty * 1.2 + draftRank * 0.18);
   career.draft.projected = [clamp(draftRank - spread, 1, 61), clamp(draftRank + spread, 1, 61)];

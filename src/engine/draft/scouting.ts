@@ -111,10 +111,10 @@ export function scout(world: World, p: Player, adjustments: StockAdjustments = {
     p.injury && p.injury.severity !== 'minor' ? (p.injury.severity === 'severe' ? -4 : -1.5) : 0;
   const chronic = p.chronic.length * -1.5;
   const score =
-    (current + currentNoise) * 0.42 +
-    estCeiling * 0.46 +
-    prodAdjusted * 0.12 * Math.min(1, prod.minutes / 400) +
-    45 * 0.12 * (1 - Math.min(1, prod.minutes / 400)) +
+    (current + currentNoise) * 0.44 +
+    estCeiling * 0.36 +
+    prodAdjusted * 0.2 * Math.min(1, prod.minutes / 400) +
+    45 * 0.2 * (1 - Math.min(1, prod.minutes / 400)) +
     youth +
     length +
     injury +

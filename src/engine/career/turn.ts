@@ -10,6 +10,7 @@ import type { ContentIndex } from '../content/registry';
 import type { Interrupt } from '../model/career';
 import { isPlayer } from '../model/person';
 import { beginLeagueWeek, endLeagueWeek, playNextSlot, type LeagueContext } from '../season/league';
+import { gamesInWeek } from '../world/game-index';
 import {
   enterDraftPool,
   raiseDraftDecision,
@@ -150,9 +151,8 @@ function endWeek(state: GameState, index: ContentIndex): void {
 function rivalNews(state: GameState, index: ContentIndex): void {
   const rivalId = state.career.rivalId;
   if (!rivalId) return;
-  const now = weekIndex(state.world.date);
-  for (const g of Object.values(state.world.games)) {
-    if (!g.result?.box || weekIndex(g.date) !== now) continue;
+  for (const g of gamesInWeek(state.world, weekIndex(state.world.date))) {
+    if (!g.result?.box) continue;
     const line = [...g.result.box.home.players, ...g.result.box.away.players].find(
       (l) => l.id === rivalId,
     );

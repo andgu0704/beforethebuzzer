@@ -10,6 +10,7 @@ import { isPlayer, type Player } from '../model/person';
 import type { CollegeTeam, ProTeam } from '../model/team';
 import type { World } from '../model/world';
 import { generatePlayer, type GenContext } from '../player/generate';
+import { forgetGameIndex } from '../world/game-index';
 import {
   collegeTeamsOf,
   createHighSchoolClass,
@@ -99,9 +100,18 @@ function archiveSeason(world: World, season: number): void {
 function collegeDepartures(world: World, rng: Rng, season: number, userId: PersonId | null): void {
   const declared = new Set(world.draft?.pool ?? []);
   for (const person of Object.values(world.people)) {
-    if (!isPlayer(person) || person.id === userId || person.affiliation.kind !== 'college')
-      continue;
+    if (!isPlayer(person) || person.affiliation.kind !== 'college') continue;
     const a = person.affiliation;
+    if (person.id === userId) {
+      // The career layer decides when he leaves; here he just moves up a year.
+      if (a.classYear < 4)
+        person.affiliation = {
+          kind: 'college',
+          teamId: a.teamId,
+          classYear: (a.classYear + 1) as 2 | 3 | 4,
+        };
+      continue;
+    }
     if (a.classYear === 4 || declared.has(person.id)) {
       endStint(person, season);
       leaveTeam(world, person);
@@ -335,4 +345,5 @@ function pruneGames(world: World, season: number): void {
   for (const [id, t] of Object.entries(world.tournaments)) {
     if (t.season < season - 1) delete world.tournaments[id];
   }
+  forgetGameIndex(world);
 }

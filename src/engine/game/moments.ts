@@ -340,3 +340,8 @@ export function availableOptions(
 ): MomentOptionDef[] {
   return def.options.filter((o) => !o.requires || meets(o));
 }
+
+/** The odds an option succeeds right now, without rolling for it (used by bots and hints). */
+export function estimateOdds(i: Omit<ResolveInput, 'forced' | 'seed' | 'userJersey'>): number {
+  return resolveMoment({ ...i, forced: 'success', seed: 'estimate', userJersey: 0 }).probability;
+}
