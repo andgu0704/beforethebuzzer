@@ -1,0 +1,50 @@
+import { useEffect, useRef, useState } from 'react';
+import { useReducedMotion } from 'react-native-reanimated';
+import type { TextStyle } from 'react-native';
+
+import { motion, type TypeVariant } from '../theme/tokens';
+import { Text } from './Text';
+
+/** A number that counts to its new value over `motion.count`; jumps under reduced motion. */
+export function AnimatedNumber({
+  value,
+  variant = 'stat',
+  format = (n: number) => String(Math.round(n)),
+  style,
+}: {
+  readonly value: number;
+  readonly variant?: TypeVariant;
+  readonly format?: (n: number) => string;
+  readonly style?: TextStyle;
+}) {
+  const reduced = useReducedMotion();
+  const [shown, setShown] = useState(value);
+  const from = useRef(value);
+  useEffect(() => {
+    if (reduced || from.current === value) {
+      from.current = value;
+      setShown(value);
+      return;
+    }
+    const start = performance.now();
+    const a = from.current;
+    let raf = 0;
+    const tick = () => {
+      const k = Math.min(1, (performance.now() - start) / motion.count);
+      const eased = 1 - (1 - k) ** 3;
+      setShown(a + (value - a) * eased);
+      if (k < 1) raf = requestAnimationFrame(tick);
+      else from.current = value;
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(raf);
+      from.current = value;
+    };
+  }, [value, reduced]);
+  return (
+    <Text variant={variant} tabular style={style}>
+      {format(shown)}
+    </Text>
+  );
+}
