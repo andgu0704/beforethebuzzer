@@ -162,7 +162,7 @@ function OffersCard({
               </View>
             </View>
             <Text variant="subhead">
-              {tt('ui.decide.offers.role', { role: tt(`roles.${o.role}`), minutes: o.minutes })}
+              {tt('ui.decide.offers.role', { role: o.role, minutes: o.minutes })}
             </Text>
             <Text variant="callout" color="inkSecondary">
               {tt(`offers.pitch.${o.pitch}`)}
@@ -299,7 +299,7 @@ function InterruptView({
           kicker={tt('ui.decide.callUp.kicker')}
           title={tt('ui.decide.callUp.title', { nation: tt(`nations.${userOf(state).nation}`) })}
           body={tt('ui.decide.callUp.body', {
-            level: tt(`levels.${i.level}`),
+            level: i.level,
             tournament: tournament ? tt(tournament.nameKey, tournament.nameParams) : '',
           })}
           options={[

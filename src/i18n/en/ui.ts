@@ -209,7 +209,7 @@ export const ui = {
     continue: 'Continue',
     becauseYou: 'Because you: {what}',
     becauseTrait: 'Because you are {trait}',
-    becauseSkill: 'Because your {skill} is {n}+',
+    becauseSkill: 'Because your {skillName} is {n}+',
     becauseStatus: 'Because of your {status}',
     outcome: 'What happened',
     categories: {
