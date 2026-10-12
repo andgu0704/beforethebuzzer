@@ -27,7 +27,10 @@ export const ACTIVITIES = ['rest', 'film', 'bonding', 'study', 'media'] as const
 export type Activity = (typeof ACTIVITIES)[number];
 
 export interface WeekPlan {
+  /** Older plans split practice by skill; it now all earns skill points, so only the sum counts. */
   readonly train: Readonly<Partial<Record<Skill, number>>>;
+  /** Practice blocks: each earns skill points to spend on the skills he chooses. */
+  readonly practice?: number;
   readonly rest: number;
   readonly film: number;
   readonly bonding: number;
@@ -258,6 +261,8 @@ export interface TurnCursor {
   gameIds: GameId[];
   gameIndex: number;
   live: LiveUserGame | null;
+  /** His last finished game, kept (with its play log) until the next one starts, for replays. */
+  finished?: LiveUserGame | null;
   /** League games for the week have been played. */
   leagueDone: boolean;
   eventsDone: boolean;

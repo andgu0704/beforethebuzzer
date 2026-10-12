@@ -10,7 +10,7 @@ import { createRng, type Rng } from '../core/rng';
 import type { ContentIndex } from '../content/registry';
 import { estimateOdds } from '../game/moments';
 import type { ContractOffer, Interrupt, Offer, WeekPlan } from '../model/career';
-import { POSITION_WEIGHTS, SKILLS, type Skill } from '../model/skills';
+import { mapSkills, POSITION_WEIGHTS, SKILLS, type Skill } from '../model/skills';
 import type { GameState } from '../career/state';
 import { userOf } from '../career/state';
 import { mergeTraits } from '../career/traits';
@@ -22,6 +22,15 @@ export interface Bot {
   readonly name: 'naive' | 'casual' | 'expert';
   plan(state: GameState, index: ContentIndex): WeekPlan;
   choose(state: GameState, index: ContentIndex, interrupt: Interrupt): Choice;
+}
+
+/**
+ * How a bot spends skill points: the naive one spreads them evenly, the others follow what
+ * matters for his position (which is also where they used to put their practice).
+ */
+export function spendWeights(bot: Bot, state: GameState): Record<Skill, number> {
+  if (bot.name === 'naive') return mapSkills(() => 1);
+  return { ...POSITION_WEIGHTS[userOf(state).position] };
 }
 
 function rngFor(state: GameState, label: string): Rng {

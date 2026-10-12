@@ -3,7 +3,8 @@ import { createCareer, type CreationInput } from '../career/create';
 import { userOf, userTeamId, type GameState } from '../career/state';
 import { advance, resolve } from '../career/turn';
 import type { Ending, Interrupt } from '../model/career';
-import type { Bot } from './bots';
+import { autoSpend } from '../career/upgrade';
+import { spendWeights, type Bot } from './bots';
 
 export interface CareerRun {
   readonly state: GameState;
@@ -44,6 +45,7 @@ export function playCareer(
     if (step.kind === 'ended') break;
     if (step.kind === 'weekDone') {
       weeks++;
+      autoSpend(state, spendWeights(bot, state));
       continue;
     }
     const interrupt = step.interrupt;

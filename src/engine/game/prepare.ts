@@ -2,7 +2,7 @@ import { clamp } from '../core/math';
 import type { PersonId, TeamId } from '../core/ids';
 import type { CoachTactics } from '../model/person';
 import type { PlayStyle, Position, Skills } from '../model/skills';
-import { deriveRatings, deriveTendencies, overallOf } from './ratings';
+import { deriveRatings, deriveTendencies, overallOf, type GameRatings } from './ratings';
 import type { LeagueRules } from './rules';
 import { totalRegulationSec } from './rules';
 import type { SimPlayer, SimTeam } from './types';
@@ -28,6 +28,8 @@ export interface PlayerModifiers {
   readonly clutchMod?: number;
   readonly usageMul?: number;
   readonly stamina?: number;
+  /** Added to his game ratings (how he means to play tonight). */
+  readonly ratingAdd?: Readonly<Partial<GameRatings>>;
 }
 
 export interface PrepareOptions {
@@ -123,8 +125,8 @@ export function prepareTeam(o: PrepareOptions): PreparedTeam {
             ? 'rotation'
             : 'bench');
     roles.set(p.id, role);
-    const r = deriveRatings(p.skills, p.heightCm, p.wingspanCm);
     const mods = o.modifiers?.get(p.id);
+    const r = withAdded(deriveRatings(p.skills, p.heightCm, p.wingspanCm), mods?.ratingAdd);
     const confidenceMod = ((p.confidence - 50) / 50) * 0.14;
     const energyMod = p.energy < 45 ? -(45 - p.energy) / 140 : 0;
     const roleUsage =
@@ -145,4 +147,12 @@ export function prepareTeam(o: PrepareOptions): PreparedTeam {
   });
 
   return { team: { teamId: o.teamId, players, tactics: o.tactics, acumen: o.acumen }, roles };
+}
+
+function withAdded(r: GameRatings, add: Readonly<Partial<GameRatings>> | undefined): GameRatings {
+  if (!add) return r;
+  const out = { ...r };
+  for (const [k, v] of Object.entries(add) as [keyof GameRatings, number][])
+    out[k] = clamp(out[k] + v, 1, 100);
+  return out;
 }

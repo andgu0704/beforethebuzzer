@@ -12,6 +12,8 @@ import { isRoutineMoment, NOTABLE, tendencyChoice } from '@/engine/career/ahead'
 import { createCareer, type CreationInput } from '@/engine/career/create';
 import { userOf, userTeamId, type GameState } from '@/engine/career/state';
 import { advanceSlice, resolve, type Choice } from '@/engine/career/turn';
+import { upgradeSkill } from '@/engine/career/upgrade';
+import type { Skill } from '@/engine/model/skills';
 import { indexContent, type ContentIndex } from '@/engine/content/registry';
 import type { Interrupt } from '@/engine/model/career';
 import { deserialise, SaveError, serialise, type SaveSummary } from '@/engine/save/store';
@@ -83,6 +85,7 @@ async function runWeek(
       await frame();
       continue;
     }
+    if (step.kind === 'gameStart' || step.kind === 'gameEnd') continue;
     if (
       step.kind === 'interrupt' &&
       auto &&
@@ -294,6 +297,99 @@ export async function playAhead(maxWeeks = 12): Promise<void> {
       error: { kind: 'engine', message: e instanceof Error ? e.message : String(e) },
     });
   }
+}
+
+export type LiveStep = 'gameStart' | 'gameEnd' | 'interrupt' | 'ended' | 'busy';
+
+/**
+ * Plays on to his next tip-off: league games, the rest of the week, quiet weeks, stopping for
+ * any decision on the way. The game itself is then played by `playLive`.
+ */
+export async function toNextGame(maxWeeks = 30): Promise<LiveStep> {
+  const state = get().state;
+  if (!state || get().busy) return 'busy';
+  if (state.career.ending) return 'ended';
+  if (state.career.pending.length > 0) return 'interrupt';
+  if (state.career.cursor.live) return 'gameStart';
+  set({ busy: { kind: 'week' }, error: null, feedMark: state.career.feed.length });
+  await frame();
+  try {
+    const mark = state.career.feed.length;
+    let weeks = 0;
+    for (let guard = 0; guard < 20000; guard++) {
+      const step = timed('lastEngineMs', () =>
+        advanceSlice(state, contentIndex(), SLOTS_PER_FRAME, { gameStart: true }),
+      );
+      if (step.kind === 'yield') {
+        await frame();
+        continue;
+      }
+      if (step.kind === 'gameEnd') continue;
+      if (step.kind === 'weekDone') {
+        weeks += 1;
+        if (weeks >= maxWeeks) break;
+        continue;
+      }
+      feelNews(state, mark);
+      bump({ busy: null });
+      void save();
+      return step.kind;
+    }
+    bump({ busy: null });
+    void save();
+    return 'interrupt';
+  } catch (e) {
+    bump({
+      busy: null,
+      error: { kind: 'engine', message: e instanceof Error ? e.message : String(e) },
+    });
+    return 'busy';
+  }
+}
+
+/** Plays his game on to the next key moment or the final buzzer. */
+export function playLive(): LiveStep {
+  const state = get().state;
+  if (!state) return 'busy';
+  if (state.career.pending.length > 0) return 'interrupt';
+  if (!state.career.cursor.live) return 'gameEnd';
+  const mark = state.career.feed.length;
+  try {
+    for (let guard = 0; guard < 50; guard++) {
+      const step = advanceSlice(state, contentIndex(), Infinity, { gameEnd: true });
+      if (step.kind === 'yield' || step.kind === 'gameStart') continue;
+      feelNews(state, mark);
+      bump();
+      void save();
+      if (step.kind === 'gameEnd') return 'gameEnd';
+      if (step.kind === 'ended') return 'ended';
+      if (step.kind === 'interrupt') return 'interrupt';
+      return 'gameEnd';
+    }
+    return 'gameEnd';
+  } catch (e) {
+    bump({ error: { kind: 'engine', message: e instanceof Error ? e.message : String(e) } });
+    return 'busy';
+  }
+}
+
+/** Sets how he means to play the next game. */
+export function setApproach(approach: GameState['career']['approach']): void {
+  mutate((s) => {
+    s.career.approach = approach;
+  });
+}
+
+/** Spends points on one skill; returns false if he cannot afford it. */
+export function upgrade(skill: Skill): boolean {
+  const state = requireState();
+  const ok = upgradeSkill(state, skill);
+  if (ok) {
+    haptic('success');
+    bump();
+    void save();
+  }
+  return ok;
 }
 
 /** Answers a pending interrupt. Returns the engine's outcome (moment result, event changes). */

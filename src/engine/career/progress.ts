@@ -11,6 +11,7 @@ import { prospectScore } from '../college/recruiting';
 import { eligibleProspects, rankProspects } from '../draft/scouting';
 import { grow } from '../player/growth';
 import { changeStatus } from './effects';
+import { earnPoints, practicePoints } from './upgrade';
 import { socialReactions } from './social';
 import { cause, msg, pushFeed, pushTimeline, userOf, userTeamId, type GameState } from './state';
 import { mergeTraits } from './traits';
@@ -25,20 +26,19 @@ export const ENERGY_PER_BLOCK = {
 } as const;
 const BASE_RECOVERY = 20;
 
+/** Practice blocks in a plan, however they were written down. */
+export function practiceBlocks(plan: WeekPlan): number {
+  return (plan.practice ?? 0) + Object.values(plan.train).reduce((s, v) => s + v, 0);
+}
+
 export function planBlocks(plan: WeekPlan): number {
-  return (
-    Object.values(plan.train).reduce((s, v) => s + v, 0) +
-    plan.rest +
-    plan.film +
-    plan.bonding +
-    plan.study +
-    plan.media
-  );
+  return practiceBlocks(plan) + plan.rest + plan.film + plan.bonding + plan.study + plan.media;
 }
 
 export function validPlan(plan: WeekPlan): boolean {
   const all = [
     ...Object.values(plan.train),
+    plan.practice ?? 0,
     plan.rest,
     plan.film,
     plan.bonding,
@@ -50,7 +50,7 @@ export function validPlan(plan: WeekPlan): boolean {
 
 /** Energy change the plan alone will cause this week (before games). */
 export function planEnergy(plan: WeekPlan): number {
-  const train = Object.values(plan.train).reduce((s, v) => s + v, 0);
+  const train = practiceBlocks(plan);
   return (
     BASE_RECOVERY +
     train * ENERGY_PER_BLOCK.train +
@@ -82,12 +82,14 @@ export function applyPlan(state: GameState, index: ContentIndex): void {
   const minutes =
     career.recent.filter((g) => weekIndex(g.date) === weekIndex(state.world.date)).length * 28;
 
+  // Practice earns points to spend; ageing, film and playing time still move skills directly.
+  earnPoints(state, practicePoints(state, index, practiceBlocks(plan)));
   const before = { ...user.skills };
   user.skills = grow({
     skills: user.skills,
     ceiling: user.ceiling,
     age: ageAt(user.birthYear, state.world.date),
-    train: plan.train,
+    train: {},
     film: plan.film,
     gameMinutes: minutes,
     coachDevelopment: coach?.kind === 'coach' ? coach.development : 50,
@@ -125,7 +127,7 @@ export function applyPlan(state: GameState, index: ContentIndex): void {
     changeStatus(state, index, 'chemistry', plan.bonding * 1.2);
     career.relations.teammates = clamp(career.relations.teammates + plan.bonding * 1.2, 0, 100);
   }
-  const trained = Object.values(plan.train).reduce((s, v) => s + v, 0);
+  const trained = practiceBlocks(plan);
   if (trained >= 6 && (career.role === 'bench' || career.role === 'rotation'))
     changeStatus(state, index, 'coachTrust', 0.5);
   if (plan.media > 0) {
