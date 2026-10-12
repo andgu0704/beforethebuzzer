@@ -119,6 +119,10 @@ appId: app.beforethebuzzer
 - tapOn:
     id: tab-train
 - takeScreenshot: train
+- scrollUntilVisible:
+    element:
+      id: upgrade-shooting
+    direction: DOWN
 - tapOn:
     id: upgrade-shooting
 - takeScreenshot: train-upgraded
