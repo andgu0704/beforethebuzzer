@@ -79,4 +79,10 @@ const summary = {
   },
 };
 writeFileSync(out, JSON.stringify({ summary, body: serialise(state) }));
-console.log(situation, state.career.stage, state.world.date, 'pending', state.career.pending.map((p) => p.kind));
+console.log(
+  situation,
+  state.career.stage,
+  state.world.date,
+  'pending',
+  state.career.pending.map((p) => p.kind),
+);
