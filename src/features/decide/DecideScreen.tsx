@@ -10,7 +10,7 @@ import type { FeedEntry, Interrupt } from '@/engine/model/career';
 import { haptic } from '@/platform/haptics';
 import { decideMounted, liveActive } from '@/state/decide';
 import { choose, contentIndex, playOn, useGame } from '@/state/game';
-import { tournamentName } from '@/state/views';
+import { fullTeamName, tournamentName } from '@/state/views';
 import { Avatar } from '@/ui/components/Avatar';
 import { Button } from '@/ui/components/Button';
 import { TeamMark } from '@/ui/components/Marks';
@@ -151,7 +151,7 @@ function OffersCard({
                 />
               ) : null}
               <View style={{ flex: 1 }}>
-                <Text variant="displayS">{`${names.team(o.teamId)} ${names.team(o.teamId, 'nickname')}`}</Text>
+                <Text variant="displayS">{fullTeamName(names, o.teamId)}</Text>
                 <Text variant="footnote" color="inkSecondary">
                   {[
                     team?.city,
@@ -224,7 +224,7 @@ function ContractCard({
                 />
               ) : null}
               <View style={{ flex: 1 }}>
-                <Text variant="displayS">{`${names.team(o.teamId)} ${names.team(o.teamId, 'nickname')}`}</Text>
+                <Text variant="displayS">{fullTeamName(names, o.teamId)}</Text>
                 {o.current ? (
                   <Text variant="footnote" color="accentText">
                     {tt('ui.decide.contract.stay')}

@@ -46,7 +46,7 @@ export function GameBoard({
           <Text variant="label" style={{ color: DIM }} numberOfLines={1}>
             {neutral
               ? names.team(teams[side], 'abbr')
-              : tt(side === 0 ? 'ui.live.home' : 'ui.live.visitor')}
+              : `${names.team(teams[side], 'abbr')} · ${tt(side === 0 ? 'ui.live.home' : 'ui.live.visitor')}`}
           </Text>
           <Text
             variant="scoreboard"

@@ -11,7 +11,7 @@ import { scout } from '@/engine/draft/scouting';
 import { SKILLS } from '@/engine/model/skills';
 import { useGame } from '@/state/game';
 import { one, perGame } from '@/state/stats';
-import { tournamentName } from '@/state/views';
+import { fullTeamName, tournamentName } from '@/state/views';
 import { Avatar } from '@/ui/components/Avatar';
 import { EmptyState, ListRow, Screen, SectionHeader } from '@/ui/components/Layout';
 import { Flag } from '@/ui/components/Marks';
@@ -58,7 +58,7 @@ function ProSection() {
       <View style={{ gap: t.space.s, marginTop: t.space.s }}>
         {team ? (
           <ListRow
-            title={`${names.team(team.id)} ${names.team(team.id, 'nickname')}`}
+            title={fullTeamName(names, team.id)}
             subtitle={tt('ui.career.pro.place', {
               role: c.role,
               n: better + 1,
@@ -261,8 +261,8 @@ export function CareerScreen() {
             title={names.team(contract.teamId)}
             subtitle={tt('ui.career.contractLine', {
               salary: money(contract.salary),
-              first: contract.firstSeason,
-              last: contract.lastSeason,
+              first: String(contract.firstSeason),
+              last: String(contract.lastSeason),
             })}
           />
         ) : (
