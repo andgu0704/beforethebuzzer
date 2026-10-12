@@ -5,6 +5,7 @@ import { userOf } from '@/engine/career/state';
 import { haptic } from '@/platform/haptics';
 import { useGame } from '@/state/game';
 import { ClipPlayer } from '@/ui/clips/ClipPlayer';
+import { useClipText } from '@/ui/clips/useClipText';
 import { Button } from '@/ui/components/Button';
 import { EmptyState, Screen } from '@/ui/components/Layout';
 import { Text } from '@/ui/components/Text';
@@ -19,6 +20,7 @@ export function ClipScreen() {
   const { t: tt, m, names } = useT();
   const { feedId } = useLocalSearchParams<{ feedId: string }>();
   const state = useGame((g) => g.state);
+  const clipText = useClipText();
   const entry = state?.career.feed.find((f) => f.id === feedId);
   if (!state || !entry?.data) return <EmptyState title={tt('ui.game.missing')} />;
   const setup = clipSetup(state, entry.gameId, names);
@@ -36,6 +38,7 @@ export function ClipScreen() {
             away={setup.away}
             params={setup.params}
             scheme={t.scheme}
+            text={clipText}
             signature={state.career.signature === spec.template && spec.success}
             resultLine={m(entry.message)}
             onBuzzer={() => {

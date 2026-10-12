@@ -8,6 +8,7 @@ import { haptic } from '@/platform/haptics';
 import { useGame } from '@/state/game';
 import { useSettings } from '@/state/settings';
 import { ClipPlayer } from '@/ui/clips/ClipPlayer';
+import { useClipText } from '@/ui/clips/useClipText';
 import { useT } from '@/ui/i18n';
 import { useTheme } from '@/ui/theme/theme';
 
@@ -51,6 +52,7 @@ export function ClipSlot({
   const t = useTheme();
   const { names } = useT();
   const state = useGame((g) => g.state);
+  const clipText = useClipText();
   const autoPlay = useSettings((s) => s.clipAutoplay);
   if (!state || !result) return <CourtStill />;
   const setup = clipSetup(state, situation.gameId, names);
@@ -64,6 +66,7 @@ export function ClipSlot({
       signature={state.career.signature === result.clip.template && result.success}
       autoPlay={autoPlay}
       scheme={t.scheme}
+      text={clipText}
       {...(resultLine ? { resultLine } : {})}
       onBuzzer={() => {
         haptic(close ? 'heavy' : 'light');
