@@ -456,6 +456,19 @@ function FinalView({
         {won ? tt('ui.live.won') : tt('ui.live.lost')}
       </Text>
       {entry ? <Text variant="body">{m(entry.message)}</Text> : null}
+      {entry && d && Number(d['min']) > 0 ? (
+        <View
+          style={[styles.coach, { borderLeftColor: t.c.accent, backgroundColor: t.c.surface }]}
+          testID="live-coach"
+        >
+          <Text variant="label" color="inkSecondary">
+            {tt('ui.live.coach.kicker')}
+          </Text>
+          <Text variant="callout">
+            {tt(`ui.live.coach.${state.career.approach}.${verdictOf(entry.message.key, won)}`)}
+          </Text>
+        </View>
+      ) : null}
       {d && Number(d['min']) > 0 ? (
         <View style={styles.statRow}>
           {(
@@ -512,6 +525,13 @@ function FinalView({
       </View>
     </ScrollView>
   );
+}
+
+/** How the night went, from the feed headline: a big game, a poor one, or somewhere between. */
+function verdictOf(key: string, won: boolean): 'good' | 'bad' | 'ok' {
+  if (/bigGame|gameWinner/.test(key)) return 'good';
+  if (/badGame/.test(key)) return 'bad';
+  return won ? 'ok' : 'bad';
 }
 
 /** Both teams, their records, where and when, and what is at stake. */
@@ -623,4 +643,5 @@ const styles = StyleSheet.create({
   },
   matchRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
   statRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  coach: { gap: 4, padding: 12, borderLeftWidth: 3, borderRadius: 6 },
 });

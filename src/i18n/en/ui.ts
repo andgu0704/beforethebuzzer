@@ -166,6 +166,29 @@ export const ui = {
     upgrade: { by: 'n', one: 'Spend 1 skill point', other: 'Spend {n} skill points' },
     boxScore: 'Box score',
     done: 'Done',
+    coach: {
+      kicker: 'Coach, on the way out',
+      team: {
+        good: '“That is how you play the game. Took what they gave you and it was a lot.”',
+        ok: '“Solid. Nobody will write about it, and that is fine.”',
+        bad: '“Rough one. You stayed in the offence, though. I noticed.”',
+      },
+      score: {
+        good: '“Keep shooting like that and I will keep calling your number.”',
+        ok: '“You got your shots. Next time make them count a little more.”',
+        bad: '“Heavy night on the shot count. We will talk about it on film.”',
+      },
+      facilitate: {
+        good: '“Everybody ate tonight because of you. The room knows it.”',
+        ok: '“Good feel for the ball. Look for your own a bit more.”',
+        bad: '“Unselfish is good. Invisible is not. Find the balance.”',
+      },
+      defend: {
+        good: '“Their best player will see you in his sleep. Good.”',
+        ok: '“Your legs are going to hate you tomorrow. Keep it up.”',
+        bad: '“Effort was there. The footwork was not. Film at nine.”',
+      },
+    },
     approach: {
       title: 'How you will play it',
       team: 'Play within the team',
@@ -519,6 +542,13 @@ export const ui = {
   },
   career: {
     title: 'Career',
+    pro: {
+      title: 'Pro career',
+      year: { by: 'n', one: 'Rookie year', other: 'Year {n}' },
+      place: 'You are a {role} · overall {ovr}, number {n} on the roster',
+      gp: 'GP',
+      noHonours: 'No titles or awards yet. The season is long.',
+    },
     stock: 'Draft stock',
     rank: 'Board rank',
     unranked: 'Not on the board yet',

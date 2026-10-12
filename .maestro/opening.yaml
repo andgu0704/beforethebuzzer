@@ -1,4 +1,5 @@
-# Creates a career and plays the opening weeks, taking screenshots on the way.
+# Creates a career, plays the first game on the live screen, spends a skill point and visits
+# every tab, taking screenshots on the way.
 appId: app.beforethebuzzer
 ---
 - launchApp:
@@ -31,45 +32,67 @@ appId: app.beforethebuzzer
       id: next-week
     timeout: 60000
 - takeScreenshot: home-first
+# The first game: pre-game, tip-off, watch, any key moment, the final.
 - tapOn:
     id: next-week
 - extendedWaitUntil:
     visible:
-      id: decide
+      id: tip-off
     timeout: 30000
-- takeScreenshot: decide
-# Answer every decision the week brings: the first option, then the outcome's Continue.
+- takeScreenshot: pregame
+- tapOn:
+    id: approach-score
+- tapOn:
+    id: tip-off
+- extendedWaitUntil:
+    visible:
+      id: live-board
+    timeout: 60000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: live
 - repeat:
     while:
-      visible:
-        id: decide
+      notVisible:
+        id: live-final
     commands:
       - runFlow:
           when:
             visible:
-              id: '(choice|moment|offer)-.*'
+              id: 'moment-(?!continue).*'
           commands:
+            - takeScreenshot: moment
             - tapOn:
-                id: '(choice|moment|offer)-.*'
+                id: 'moment-(?!continue).*'
                 index: 0
+            - waitForAnimationToEnd:
+                timeout: 4000
+            - tapOn:
+                id: moment-continue
       - runFlow:
           when:
             visible:
-              id: decide-continue
+              id: live-skip
           commands:
-            - takeScreenshot: decide-outcome
             - tapOn:
-                id: decide-continue
+                id: live-skip
       - waitForAnimationToEnd:
-          timeout: 5000
+          timeout: 2000
+- takeScreenshot: final
+- tapOn:
+    id: live-done
 - extendedWaitUntil:
     visible:
       id: next-week
-    timeout: 60000
-- takeScreenshot: home-after-week
+    timeout: 30000
+- takeScreenshot: home-after-game
+# Spend a skill point.
 - tapOn:
     id: tab-train
 - takeScreenshot: train
+- tapOn:
+    id: upgrade-shooting
+- takeScreenshot: train-upgraded
 - tapOn:
     id: tab-team
 - takeScreenshot: team

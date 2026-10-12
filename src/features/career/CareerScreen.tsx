@@ -2,10 +2,15 @@ import { router } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { userOf } from '@/engine/career/state';
+import { currentContract } from '@/engine/career/pro';
+import { userOf, userTeamId } from '@/engine/career/state';
+import { seasonOf } from '@/engine/core/calendar';
+import { overallOf } from '@/engine/game/ratings';
+import { isPlayer } from '@/engine/model/person';
 import { scout } from '@/engine/draft/scouting';
 import { SKILLS } from '@/engine/model/skills';
 import { useGame } from '@/state/game';
+import { one, perGame } from '@/state/stats';
 import { tournamentName } from '@/state/views';
 import { Avatar } from '@/ui/components/Avatar';
 import { EmptyState, ListRow, Screen, SectionHeader } from '@/ui/components/Layout';
@@ -19,6 +24,79 @@ import { useTheme } from '@/ui/theme/theme';
 import { letter } from '../team/grades';
 
 const money = (n: number) => Math.round(n).toLocaleString('en-US');
+
+/** The pro years: where he stands on his team, this season's line, and what he has won. */
+function ProSection() {
+  const t = useTheme();
+  const { t: tt, names } = useT();
+  const state = useGame((g) => g.state);
+  useGame((g) => g.rev);
+  if (!state) return null;
+  const u = userOf(state);
+  const c = state.career;
+  const season = seasonOf(state.world.date);
+  const proLines = u.lines.filter((l) => l.league === 'pro' && !l.competition);
+  const years = new Set([...proLines.map((l) => l.season), season]).size;
+  const now = perGame(proLines.filter((l) => l.season === season));
+  const teamId = userTeamId(state);
+  const team = teamId ? state.world.teams[teamId] : undefined;
+  const mine = overallOf(u.skills, u.position, u.heightCm);
+  const better = (team?.roster ?? [])
+    .map((id) => state.world.people[id])
+    .filter(isPlayer)
+    .filter((p) => p.id !== u.id && overallOf(p.skills, p.position, p.heightCm) > mine).length;
+  const honours = Object.values(state.world.seasons)
+    .flatMap((s) => s.awards)
+    .filter((a) => a.personId === u.id && (a.kind === 'proMvp' || a.kind === 'proRookie'));
+  const titles = c.timeline.filter((e) => e.message.key === 'timeline.award.proChampion').length;
+  return (
+    <View testID="pro-section">
+      <SectionHeader
+        title={tt('ui.career.pro.title')}
+        detail={tt('ui.career.pro.year', { n: years })}
+      />
+      <View style={{ gap: t.space.s, marginTop: t.space.s }}>
+        {team ? (
+          <ListRow
+            title={`${names.team(team.id)} ${names.team(team.id, 'nickname')}`}
+            subtitle={tt('ui.career.pro.place', {
+              role: c.role,
+              n: better + 1,
+              ovr: Math.round(mine),
+            })}
+          />
+        ) : null}
+        <View style={styles.stockRow}>
+          {[
+            { k: 'gp', v: String(now.gp), l: tt('ui.career.pro.gp') },
+            { k: 'pts', v: one(now.pts), l: tt('ui.game.pts') },
+            { k: 'reb', v: one(now.reb), l: tt('ui.game.reb') },
+            { k: 'ast', v: one(now.ast), l: tt('ui.game.ast') },
+          ].map((x) => (
+            <View key={x.k} style={{ gap: 2 }}>
+              <Text variant="label" color="inkSecondary">
+                {x.l}
+              </Text>
+              <Text variant="stat">{x.v}</Text>
+            </View>
+          ))}
+        </View>
+        {titles || honours.length ? (
+          <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
+            {titles ? <Tag tone="caution" label={tt('ui.ending.titles', { n: titles })} /> : null}
+            {honours.map((a, i) => (
+              <Tag key={i} tone="accent" label={tt(`ui.profile.award.${a.kind}`)} />
+            ))}
+          </View>
+        ) : (
+          <Text variant="footnote" color="inkSecondary">
+            {tt('ui.career.pro.noHonours')}
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+}
 
 export function CareerScreen() {
   const t = useTheme();
@@ -36,7 +114,7 @@ export function CareerScreen() {
   const view = scout(state.world, u);
   const sorted = [...SKILLS].sort((a, b) => u.skills[b] - u.skills[a]);
   const agent = c.agentId ? state.world.people[c.agentId] : undefined;
-  const contract = Object.values(state.world.contracts).find((k) => k.playerId === u.id);
+  const contract = currentContract(state);
   const medals = Object.values(state.world.seasons)
     .flatMap((s) => s.awards)
     .filter(
@@ -59,81 +137,87 @@ export function CareerScreen() {
           {tt('ui.career.title').toUpperCase()}
         </Text>
 
-        <SectionHeader
-          title={tt('ui.career.stock')}
-          detail={
-            c.draft.declared
-              ? tt('ui.career.declared')
-              : c.draft.testingWaters
-                ? tt('ui.career.testing')
-                : undefined
-          }
-        />
-        {rank > 0 || history.length > 0 ? (
-          <View style={{ gap: t.space.m, marginTop: t.space.s }}>
-            <View style={styles.stockRow}>
-              <View>
-                <Text variant="label" color="inkSecondary">
-                  {tt('ui.career.rank')}
-                </Text>
-                <Text variant="scoreboard">
-                  {rank > 0 ? rank : (history[history.length - 1] ?? '—')}
-                </Text>
-              </View>
-              <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                <Sparkline values={history} invert width={140} height={40} />
-                <Text variant="footnote" color="inkSecondary">
-                  {tt('ui.career.trend', { n: history.length })}
-                </Text>
-              </View>
-            </View>
-            <ListRow title={tt('ui.career.projected')} value={projected} />
-            {state.world.draft?.combine[u.id] || c.draft.workouts.length ? (
-              <ListRow
-                testID="open-combine"
-                title={tt('ui.combine.open')}
-                onPress={() => {
-                  router.push('/draft/combine');
-                }}
-              />
-            ) : null}
-          </View>
-        ) : (
-          <EmptyState title={tt('ui.career.unranked')} body={tt('ui.career.unrankedBody')} />
-        )}
+        {c.stage === 'pro' ? <ProSection /> : null}
 
-        <Text variant="label" color="inkSecondary" style={{ marginTop: t.space.l }}>
-          {tt('ui.career.scouts')}
-        </Text>
-        <View style={[styles.grades, { marginTop: t.space.s }]}>
-          {[
-            { k: 'ceiling', v: view.ceiling },
-            { k: 'readiness', v: view.current },
-            { k: 'production', v: view.production },
-          ].map((g) => (
-            <View
-              key={g.k}
-              style={[styles.grade, { backgroundColor: t.c.surface, borderRadius: t.radii.md }]}
-            >
-              <Text variant="label" color="inkSecondary">
-                {tt(`ui.career.${g.k}`)}
-              </Text>
-              <Text variant="stat">{letter(g.v)}</Text>
+        {c.stage === 'pro' ? null : (
+          <>
+            <SectionHeader
+              title={tt('ui.career.stock')}
+              detail={
+                c.draft.declared
+                  ? tt('ui.career.declared')
+                  : c.draft.testingWaters
+                    ? tt('ui.career.testing')
+                    : undefined
+              }
+            />
+            {rank > 0 || history.length > 0 ? (
+              <View style={{ gap: t.space.m, marginTop: t.space.s }}>
+                <View style={styles.stockRow}>
+                  <View>
+                    <Text variant="label" color="inkSecondary">
+                      {tt('ui.career.rank')}
+                    </Text>
+                    <Text variant="scoreboard">
+                      {rank > 0 ? rank : (history[history.length - 1] ?? '—')}
+                    </Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end', gap: 4 }}>
+                    <Sparkline values={history} invert width={140} height={40} />
+                    <Text variant="footnote" color="inkSecondary">
+                      {tt('ui.career.trend', { n: history.length })}
+                    </Text>
+                  </View>
+                </View>
+                <ListRow title={tt('ui.career.projected')} value={projected} />
+                {state.world.draft?.combine[u.id] || c.draft.workouts.length ? (
+                  <ListRow
+                    testID="open-combine"
+                    title={tt('ui.combine.open')}
+                    onPress={() => {
+                      router.push('/draft/combine');
+                    }}
+                  />
+                ) : null}
+              </View>
+            ) : (
+              <EmptyState title={tt('ui.career.unranked')} body={tt('ui.career.unrankedBody')} />
+            )}
+
+            <Text variant="label" color="inkSecondary" style={{ marginTop: t.space.l }}>
+              {tt('ui.career.scouts')}
+            </Text>
+            <View style={[styles.grades, { marginTop: t.space.s }]}>
+              {[
+                { k: 'ceiling', v: view.ceiling },
+                { k: 'readiness', v: view.current },
+                { k: 'production', v: view.production },
+              ].map((g) => (
+                <View
+                  key={g.k}
+                  style={[styles.grade, { backgroundColor: t.c.surface, borderRadius: t.radii.md }]}
+                >
+                  <Text variant="label" color="inkSecondary">
+                    {tt(`ui.career.${g.k}`)}
+                  </Text>
+                  <Text variant="stat">{letter(g.v)}</Text>
+                </View>
+              ))}
             </View>
-          ))}
-        </View>
-        <Text variant="callout" style={{ marginTop: t.space.m }}>
-          {`${tt('ui.career.likes')}: ${sorted
-            .slice(0, 2)
-            .map((s) => tt(`skills.${s}`).toLowerCase())
-            .join(', ')}.`}
-        </Text>
-        <Text variant="callout" color="inkSecondary">
-          {`${tt('ui.career.questions')}: ${sorted
-            .slice(-2)
-            .map((s) => tt(`skills.${s}`).toLowerCase())
-            .join(', ')}.`}
-        </Text>
+            <Text variant="callout" style={{ marginTop: t.space.m }}>
+              {`${tt('ui.career.likes')}: ${sorted
+                .slice(0, 2)
+                .map((s) => tt(`skills.${s}`).toLowerCase())
+                .join(', ')}.`}
+            </Text>
+            <Text variant="callout" color="inkSecondary">
+              {`${tt('ui.career.questions')}: ${sorted
+                .slice(-2)
+                .map((s) => tt(`skills.${s}`).toLowerCase())
+                .join(', ')}.`}
+            </Text>
+          </>
+        )}
 
         <SectionHeader title={tt('ui.career.agent')} />
         {agent?.kind === 'agent' ? (
