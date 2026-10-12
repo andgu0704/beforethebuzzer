@@ -1,19 +1,27 @@
 name: iOS screenshots
 
 # Builds a release app for the iOS Simulator and runs the Maestro flows, uploading the
-# screenshots. Run by hand from the Actions tab; macOS runners are free on public repositories.
+# screenshots. Runs from the Actions tab, or when this workflow or the flows change.
+# macOS runners are free on public repositories.
 on:
   workflow_dispatch:
+  push:
+    branches: ['claude/**']
+    paths:
+      - '.github/workflows/ios-screens.yml'
+      - '.maestro/**'
 
 jobs:
   simulator:
     runs-on: macos-15
-    timeout-minutes: 90
+    timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
-        device: ['iPhone SE (3rd generation)', 'iPhone 16 Pro Max']
-        appearance: [light, dark]
+        include:
+          - device: 'iPhone 16 Pro Max'
+            appearance: light
+            textSize: large
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -21,6 +29,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: List simulators
+        run: xcrun simctl list devices available
       - name: Install Maestro
         run: |
           curl -fsSL "https://get.maestro.mobile.dev" | bash
@@ -28,13 +38,20 @@ jobs:
       - name: Boot the simulator
         run: |
           xcrun simctl boot "${{ matrix.device }}" || true
+          xcrun simctl bootstatus "${{ matrix.device }}" -b
           xcrun simctl ui "${{ matrix.device }}" appearance ${{ matrix.appearance }}
+          xcrun simctl ui "${{ matrix.device }}" content_size ${{ matrix.textSize }}
       - name: Build and install a release build
         run: npx expo run:ios --configuration Release --device "${{ matrix.device }}" --no-bundler
+        env:
+          CI: '1'
       - name: Run the flows
         run: maestro test .maestro --test-output-dir maestro-output
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: screens-${{ matrix.device }}-${{ matrix.appearance }}
-          path: maestro-output
+          name: screens-${{ matrix.device }}-${{ matrix.appearance }}-${{ matrix.textSize }}
+          path: |
+            maestro-output
+            *.png
+            .maestro/*.png
