@@ -11,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { FeedEntry } from '@/engine/model/career';
 import { dismissError, playAhead, playOn, useGame } from '@/state/game';
+import { openDecide } from '@/state/decide';
 import { useSettings } from '@/state/settings';
 import { feedByWeek, phaseOf, weekRange } from '@/state/views';
 import { Button, IconButton } from '@/ui/components/Button';
@@ -125,7 +126,7 @@ export function ActionDock() {
           onPress={() => {
             if (tip === 'next') useSettings.getState().markTip('next');
             if (ended) router.push('/ending');
-            else if (pending) router.push('/decide');
+            else if (pending) openDecide();
             else void playOn();
           }}
           trailing={busy ? <Basketball size={18} color={t.c.onAccent} weight="fill" /> : undefined}

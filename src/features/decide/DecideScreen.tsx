@@ -8,6 +8,7 @@ import { castParams } from '@/engine/career/events';
 import { userOf } from '@/engine/career/state';
 import type { FeedEntry, Interrupt } from '@/engine/model/career';
 import { haptic } from '@/platform/haptics';
+import { decideMounted } from '@/state/decide';
 import { choose, contentIndex, playOn, useGame } from '@/state/game';
 import { Avatar } from '@/ui/components/Avatar';
 import { Button } from '@/ui/components/Button';
@@ -440,6 +441,13 @@ export function DecideScreen() {
       else if (s.career.cursor.stage !== 'idle') void playOn();
     }
   };
+
+  useEffect(() => {
+    decideMounted(true);
+    return () => {
+      decideMounted(false);
+    };
+  }, []);
 
   const pendingKey = pending?.id;
   useEffect(() => {
