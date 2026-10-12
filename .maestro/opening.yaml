@@ -49,9 +49,10 @@ appId: app.beforethebuzzer
     id: approach-score
 - tapOn:
     id: tip-off
+# The live screen: the board, or a key moment straight away (it hides the board).
 - extendedWaitUntil:
     visible:
-      id: live-board
+      id: live-line
     timeout: 60000
 - waitForAnimationToEnd:
     timeout: 4000
