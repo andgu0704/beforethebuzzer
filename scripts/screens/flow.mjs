@@ -63,7 +63,9 @@ async function decide() {
       await id('draft-continue').click();
       return 'ended';
     }
-    if (!(await visible(id('decide').last()))) return 'none';
+    const sheets = await page.locator('[data-testid="decide"]').count();
+    if (sheets > 1) console.log(`warning: ${sheets} decision sheets mounted`);
+    if (!(await visible(page.locator('[data-testid="decide"]:visible').first()))) return 'none';
     const cont = id('decide-continue');
     if (await visible(cont)) {
       await cont.click();
