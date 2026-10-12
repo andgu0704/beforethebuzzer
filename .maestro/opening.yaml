@@ -127,6 +127,12 @@ appId: app.beforethebuzzer
 - tapOn:
     id: upgrade-shooting
 - takeScreenshot: train-upgraded
+# Scrolled to the last skill: the content passes under a backdrop, not the status bar.
+- scrollUntilVisible:
+    element:
+      id: upgrade-gameSense
+    direction: DOWN
+- takeScreenshot: train-scrolled
 - tapOn:
     id: tab-team
 - takeScreenshot: team
