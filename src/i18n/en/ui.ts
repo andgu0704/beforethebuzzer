@@ -394,6 +394,7 @@ export const ui = {
     played: 'Played',
     conference: 'Conference',
     poll: 'Top 25',
+    proConference: { east: 'Eastern Conference', west: 'Western Conference' },
     noPoll: 'The first poll comes out in November.',
     confRecord: 'Conf',
     overall: 'Overall',

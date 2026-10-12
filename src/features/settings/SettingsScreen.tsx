@@ -40,6 +40,8 @@ function Toggle({
         value={value}
         onValueChange={onChange}
         trackColor={{ true: t.c.accent, false: t.c.sunken }}
+        thumbColor={t.c.surface}
+        {...{ activeThumbColor: t.c.surface }}
       />
     </View>
   );
