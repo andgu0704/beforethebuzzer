@@ -88,13 +88,19 @@ The engine now records more in each game's play log, without touching its random
   - pro saves at three points: mid-season, a free-agency summer, and a veteran's summer.
     `scripts/screens/pro-save.ts` writes these saves without playing four college seasons
     first.
-- **On the iOS Simulator** (iPhone 17 Pro Max, light):
-  - the release build compiles and runs;
-  - the opening flow passes, including the live game and an upgrade.
+- **On the iOS Simulator**, with release builds, both devices pass the whole Maestro flow (run
+  17 of `ios-screens.yml`; screenshots in `docs/screens/ios/`):
+  - iPhone 17 Pro Max, light mode;
+  - iPhone 17e, dark mode, at the largest accessibility text size.
+
+  The flow creates a career and plays the first game live, through a key moment with the skill
+  check and the final. It then spends a skill point and visits every tab.
+
 - **Bugs found on iOS and fixed:**
   - a launch crash: Hermes has no `Intl.PluralRules`;
   - a decision sheet that drew blank: a form sheet in release builds;
-  - a family-name field hidden under the keyboard at the largest text size.
+  - a family-name field hidden under the keyboard at the largest text size;
+  - a week header that ran off the screen at that size.
 
 ## Balance
 
