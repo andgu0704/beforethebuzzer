@@ -111,7 +111,7 @@ export function scout(world: World, p: Player, adjustments: StockAdjustments = {
   const estCeiling = Math.max(current, trueCeiling + ceilingNoise);
   const level = competitionLevel(world, p);
   const prodAdjusted = 45 + (prod.score - 45) * level;
-  const youth = (20 - age) * 1.6;
+  const youth = (20 - age) * 1.0;
   const length = clamp(p.wingspanCm - p.heightCm, -6, 14) * 0.18;
   const injury =
     p.injury && p.injury.severity !== 'minor' ? (p.injury.severity === 'severe' ? -4 : -1.5) : 0;

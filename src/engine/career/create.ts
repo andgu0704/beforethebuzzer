@@ -68,7 +68,7 @@ export function createCareer(index: ContentIndex, input: CreationInput): GameSta
   // Hidden potential: wide enough that some careers can reach the top of a draft and some
   // cannot, but not so wide that the roll decides more than the way he is played.
   const gap = clamp(
-    rng.normal(23, 5) + (gift.effects.ceiling ?? 0) + (flaw.effects.ceiling ?? 0),
+    rng.normal(22.5, 4) + (gift.effects.ceiling ?? 0) + (flaw.effects.ceiling ?? 0),
     15,
     38,
   );

@@ -247,7 +247,7 @@ export function checkTraitUnlocks(state: GameState, index: ContentIndex): void {
 }
 
 /** Share of draft stock that carries over into a new season. */
-export const STOCK_CARRY = 0.5;
+export const STOCK_CARRY = 0.65;
 
 /**
  * A new season starts: scouts weigh this year's form most, so last year's buzz (good or bad)

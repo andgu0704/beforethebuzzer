@@ -233,7 +233,7 @@ function expertTraining(
 function leaveThreshold(state: GameState): number {
   const user = userOf(state);
   const year = user.affiliation.kind === 'college' ? user.affiliation.classYear : 4;
-  return year <= 1 ? 6 : year === 2 ? 10 : 30;
+  return year <= 1 ? 4 : year === 2 ? 8 : 30;
 }
 
 function expectedPick(state: GameState): number {
