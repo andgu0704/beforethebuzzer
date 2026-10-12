@@ -6,6 +6,7 @@ import { replySocial } from '@/engine/career/social';
 import type { FeedEntry, SocialPost } from '@/engine/model/career';
 import { mutate, useGame } from '@/state/game';
 import { Avatar } from '@/ui/components/Avatar';
+import { AnimatedNumber } from '@/ui/components/AnimatedNumber';
 import { Button } from '@/ui/components/Button';
 import { StatLine, Scorebug } from '@/ui/components/Stats';
 import { Text } from '@/ui/components/Text';
@@ -178,18 +179,18 @@ function Changes({ data }: { readonly data: Readonly<Record<string, number | str
       const [kind, key] = k.split(':') as [string, string];
       const label = kind === 'skill' ? tt(`skills.${key}`) : tt(`ui.feed.changes.${key}`);
       const n = v as number;
-      const shown =
-        key === 'gpa'
-          ? n.toFixed(2)
-          : key === 'money'
-            ? `$${Math.abs(Math.round(n))}`
-            : String(Math.round(n * 10) / 10);
-      const sign = n > 0 ? '+' : key === 'money' ? '−' : '';
-      return {
-        label,
-        value: `${sign}${shown}`,
-        good: key === 'energy' || key === 'money' ? n > 0 : n > 0,
+      const format = (x: number) => {
+        const sign = x > 0 ? '+' : x < 0 ? '−' : '';
+        const abs = Math.abs(x);
+        const body =
+          key === 'gpa'
+            ? abs.toFixed(2)
+            : key === 'money'
+              ? `$${Math.round(abs)}`
+              : String(Math.round(abs * 10) / 10);
+        return `${sign}${body}`;
       };
+      return { label, n, format, good: n > 0 };
     });
   if (!items.length) return null;
   return (
@@ -202,9 +203,13 @@ function Changes({ data }: { readonly data: Readonly<Record<string, number | str
           <Text variant="footnote" color="inkSecondary">
             {i.label}
           </Text>
-          <Text variant="subhead" color={i.good ? 'positive' : 'negative'} tabular>
-            {i.value}
-          </Text>
+          <AnimatedNumber
+            value={i.n}
+            from={0}
+            format={i.format}
+            variant="subhead"
+            style={{ color: i.good ? t.c.positive : t.c.negative }}
+          />
         </View>
       ))}
     </View>
