@@ -1,7 +1,7 @@
 # Balance report
 
-Seed `phase6` · 2 league seasons · 60 careers per policy · 884 s on 3 workers.
-College engine time per in-season week (Node): median 280 ms, p90 442 ms.
+Seed `phase6` · 2 league seasons · 60 careers per policy · 588 s on 4 workers.
+College engine time per in-season week (Node): median 174 ms, p90 287 ms.
 
 
 ## College league
@@ -65,7 +65,7 @@ College engine time per in-season week (Node): median 280 ms, p90 442 ms.
 | International caps (avg) | 5.6 | — |  |
 | Games missed while ineligible (avg) | 34.8 | — |  |
 | Save size MB (avg) | 5.6 | — |  |
-| Seconds per career (avg) | 19.3 | — |  |
+| Seconds per career (avg) | 15.9 | — |  |
 
 ## Careers: casual
 
@@ -74,19 +74,19 @@ College engine time per in-season week (Node): median 280 ms, p90 442 ms.
 | Careers | 60.0 | — |  |
 | Top-five picks | 3.3% | 0.0%–3.0% | **out of band** |
 | Lottery (top 14) | 13.3% | — |  |
-| First round | 31.7% | 12.0%–35.0% | in band |
-| Second round | 66.7% | — |  |
+| First round | 33.3% | 12.0%–35.0% | in band |
+| Second round | 65.0% | — |  |
 | Undrafted | 1.7% | — |  |
 | Median pick | 42.0 | 31.0–61.0 | in band |
 | Seasons in college (avg) | 2.0 | — |  |
-| Last season points per game (avg) | 16.3 | — |  |
-| Last season minutes per game (avg) | 27.0 | — |  |
+| Last season points per game (avg) | 16.2 | — |  |
+| Last season minutes per game (avg) | 27.1 | — |  |
 | Key moments per career (avg) | 110 | — |  |
-| Key-moment success | 53.6% | — |  |
+| Key-moment success | 53.5% | — |  |
 | International caps (avg) | 6.1 | — |  |
 | Games missed while ineligible (avg) | 0.3 | — |  |
 | Save size MB (avg) | 4.5 | — |  |
-| Seconds per career (avg) | 8.5 | — |  |
+| Seconds per career (avg) | 8.7 | — |  |
 
 ## Careers: expert
 
@@ -98,15 +98,15 @@ College engine time per in-season week (Node): median 280 ms, p90 442 ms.
 | First round | 91.7% | 70.0%–100.0% | in band |
 | Second round | 8.3% | — |  |
 | Undrafted | 0.0% | — |  |
-| Median pick | 8.0 | — |  |
+| Median pick | 9.0 | — |  |
 | Seasons in college (avg) | 2.8 | — |  |
 | Last season points per game (avg) | 23.2 | — |  |
-| Last season minutes per game (avg) | 28.6 | — |  |
+| Last season minutes per game (avg) | 28.5 | — |  |
 | Key moments per career (avg) | 151 | — |  |
-| Key-moment success | 57.6% | — |  |
+| Key-moment success | 57.4% | — |  |
 | International caps (avg) | 7.9 | — |  |
 | Games missed while ineligible (avg) | 0.0 | — |  |
 | Save size MB (avg) | 5.2 | — |  |
-| Seconds per career (avg) | 12.3 | — |  |
+| Seconds per career (avg) | 12.2 | — |  |
 
 2 metric(s) outside their bands.
