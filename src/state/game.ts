@@ -8,10 +8,10 @@
 import { create } from 'zustand';
 
 import { content } from '@/content';
-import { simulateAhead } from '@/engine/career/ahead';
+import { isRoutineMoment, NOTABLE, tendencyChoice } from '@/engine/career/ahead';
 import { createCareer, type CreationInput } from '@/engine/career/create';
 import { userOf, userTeamId, type GameState } from '@/engine/career/state';
-import { advance, resolve, type Choice } from '@/engine/career/turn';
+import { advanceSlice, resolve, type Choice } from '@/engine/career/turn';
 import { indexContent, type ContentIndex } from '@/engine/content/registry';
 import type { Interrupt } from '@/engine/model/career';
 import { deserialise, SaveError, serialise, type SaveSummary } from '@/engine/save/store';
@@ -63,6 +63,42 @@ const get = useGame.getState;
 
 function bump(extra: Partial<GameStore> = {}): void {
   set({ ...extra, rev: get().rev + 1 });
+}
+
+/** Game slots played between frames; a slot is one round of league games. */
+const SLOTS_PER_FRAME = 2;
+
+/**
+ * Plays until something needs the user, the week ends or the career ends, painting between
+ * slices so a heavy week never freezes the screen. Routine key moments can be answered on the
+ * way (simulate ahead).
+ */
+async function runWeek(
+  state: GameState,
+  auto: { readonly stopAtEveryMoment: boolean } | null,
+): Promise<'interrupt' | 'weekDone' | 'ended'> {
+  for (let guard = 0; guard < 5000; guard++) {
+    const step = timed('lastEngineMs', () => advanceSlice(state, contentIndex(), SLOTS_PER_FRAME));
+    if (step.kind === 'yield') {
+      await frame();
+      continue;
+    }
+    if (
+      step.kind === 'interrupt' &&
+      auto &&
+      isRoutineMoment(state, step.interrupt, auto.stopAtEveryMoment)
+    ) {
+      resolve(
+        state,
+        contentIndex(),
+        step.interrupt.id,
+        tendencyChoice(state, contentIndex(), step.interrupt),
+      );
+      continue;
+    }
+    return step.kind;
+  }
+  return 'weekDone';
 }
 
 /** Lets the UI paint (the "Simulating" state) before a long synchronous engine call. */
@@ -216,7 +252,7 @@ export async function playOn(): Promise<void> {
   await frame();
   try {
     const mark = state.career.feed.length;
-    timed('lastEngineMs', () => advance(state, contentIndex()));
+    await runWeek(state, null);
     feelNews(state, mark);
     bump({ busy: null });
     await save();
@@ -243,13 +279,12 @@ export async function playAhead(maxWeeks = 12): Promise<void> {
     for (let weeks = 0; weeks < maxWeeks;) {
       await frame();
       const mark = state.career.feed.length;
-      const r = timed('lastEngineMs', () =>
-        simulateAhead(state, contentIndex(), { maxWeeks: 1, stopAtEveryMoment }),
-      );
+      const r = await runWeek(state, { stopAtEveryMoment });
       feelNews(state, mark);
-      weeks += r.weeks;
+      if (r !== 'weekDone') break;
+      weeks += 1;
       bump({ busy: { kind: 'ahead', weeks, of: maxWeeks } });
-      if (r.stop !== 'limit') break;
+      if (state.career.feed.slice(mark).some((f) => NOTABLE.has(f.kind))) break;
     }
     bump({ busy: null });
     await save();

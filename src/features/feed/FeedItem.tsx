@@ -208,6 +208,7 @@ function Changes({ data }: { readonly data: Readonly<Record<string, number | str
             from={0}
             format={i.format}
             variant="subhead"
+            tabular={false}
             style={{ color: i.good ? t.c.positive : t.c.negative }}
           />
         </View>

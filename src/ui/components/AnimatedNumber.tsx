@@ -12,6 +12,7 @@ export function AnimatedNumber({
   format = (n: number) => String(Math.round(n)),
   style,
   from: start,
+  tabular = true,
 }: {
   readonly value: number;
   readonly variant?: TypeVariant | undefined;
@@ -19,6 +20,7 @@ export function AnimatedNumber({
   readonly style?: TextStyle | undefined;
   /** Count up from this value on first show instead of starting at `value`. */
   readonly from?: number | undefined;
+  readonly tabular?: boolean | undefined;
 }) {
   const reduced = useReducedMotion();
   const [shown, setShown] = useState(start ?? value);
@@ -46,7 +48,7 @@ export function AnimatedNumber({
     };
   }, [value, reduced]);
   return (
-    <Text variant={variant} tabular style={style}>
+    <Text variant={variant} tabular={tabular} style={style}>
       {format(shown)}
     </Text>
   );

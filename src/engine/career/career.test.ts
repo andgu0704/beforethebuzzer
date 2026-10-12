@@ -7,6 +7,8 @@ import { playCareer } from '../bots/run';
 import { indexContent } from '../content/registry';
 import { deserialise, serialise } from '../save/store';
 import { testPlayer } from '../testing/creation';
+import { createCareer } from './create';
+import { advance, advanceSlice, resolve } from './turn';
 
 const index = indexContent(content);
 
@@ -41,4 +43,26 @@ describe('a whole career', () => {
     for (const bot of Object.values(BOTS))
       expect(planSize(bot.plan(run.state, index))).toBeLessThanOrEqual(10);
   }, 120_000);
+});
+
+describe('sliced weeks', () => {
+  it('end in the same state as whole weeks', () => {
+    const a = createCareer(index, testPlayer('slices'));
+    const b = createCareer(index, testPlayer('slices'));
+    const bot = BOTS.expert;
+    for (let week = 0; week < 30; week++) {
+      for (let guard = 0; guard < 50; guard++) {
+        const step = advance(a, index);
+        if (step.kind !== 'interrupt') break;
+        resolve(a, index, step.interrupt.id, bot.choose(a, index, step.interrupt));
+      }
+      for (let guard = 0; guard < 500; guard++) {
+        const step = advanceSlice(b, index, 1);
+        if (step.kind === 'yield') continue;
+        if (step.kind !== 'interrupt') break;
+        resolve(b, index, step.interrupt.id, bot.choose(b, index, step.interrupt));
+      }
+    }
+    expect(serialise(b)).toBe(serialise(a));
+  });
 });
