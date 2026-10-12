@@ -30,8 +30,21 @@ export interface Bot {
  */
 export function spendWeights(bot: Bot, state: GameState): Record<Skill, number> {
   if (bot.name === 'naive') return mapSkills(() => 1);
-  return { ...POSITION_WEIGHTS[userOf(state).position] };
+  const position = POSITION_WEIGHTS[userOf(state).position];
+  if (bot.name === 'expert') return { ...position };
+  // A casual player half follows what his position needs and half chases the fun skills.
+  return mapSkills((s) => 0.5 * position[s] + 0.5 * CASUAL_TASTE[s]);
 }
+
+const CASUAL_TASTE: Record<Skill, number> = {
+  shooting: 0.35,
+  athleticism: 0.25,
+  handling: 0.15,
+  playmaking: 0.1,
+  defence: 0.05,
+  rebounding: 0.05,
+  gameSense: 0.05,
+};
 
 function rngFor(state: GameState, label: string): Rng {
   return createRng(

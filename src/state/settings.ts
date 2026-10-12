@@ -8,6 +8,8 @@ export interface Settings {
   /** Simulate ahead stops at every key moment instead of resolving routine ones. */
   stopAtEveryMoment: boolean;
   clipAutoplay: boolean;
+  /** Key moments end in a timing skill check (off: the odds alone decide). */
+  skillChecks: boolean;
   /** One-line tips already shown, by id. */
   tipsSeen: Record<string, true>;
   lastCareer: string | null;
@@ -18,6 +20,7 @@ const DEFAULTS: Settings = {
   haptics: true,
   stopAtEveryMoment: false,
   clipAutoplay: true,
+  skillChecks: true,
   tipsSeen: {},
   lastCareer: null,
 };
@@ -48,6 +51,7 @@ export const useSettings = create<SettingsStore>()((set, get) => ({
       haptics: s.haptics,
       stopAtEveryMoment: s.stopAtEveryMoment,
       clipAutoplay: s.clipAutoplay,
+      skillChecks: s.skillChecks,
       tipsSeen: s.tipsSeen,
       lastCareer: s.lastCareer,
     };

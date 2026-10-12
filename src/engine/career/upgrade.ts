@@ -14,7 +14,7 @@ import { msg, pushFeed, userOf, userTeamId, type GameState } from './state';
 import { mergeTraits } from './traits';
 
 /** Points per practice block for a young player with an average coach, before tiredness. */
-export const PRACTICE_RATE = 0.27;
+export const PRACTICE_RATE = 0.25;
 /** Practice blocks beyond this earn less each. */
 const FULL_RETURN_BLOCKS = 4;
 export const MAX_SKILL = 99;

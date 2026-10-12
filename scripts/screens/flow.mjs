@@ -76,6 +76,10 @@ async function decide() {
       await page.waitForTimeout(800);
       continue;
     }
+    if (await visible(id('skill-release'))) {
+      await id('skill-release').click();
+      continue;
+    }
     if (await visible(id('moment-continue'))) {
       await id('moment-continue').click();
       continue;
@@ -132,6 +136,13 @@ async function decide() {
       continue;
     }
     if (kind) await page.getByTestId(kind).click();
+    if (await visible(id('skill-check'))) {
+      if (!seen.has('skill')) {
+        seen.add('skill');
+        await shot('10-skill-check');
+      }
+      await id('skill-release').click();
+    }
     if (prefix === 'moment') {
       await page.waitForTimeout(2500);
       if (!seen.has('clip')) {

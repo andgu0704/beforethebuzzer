@@ -1,13 +1,18 @@
-import { StyleSheet, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { AccessibilityInfo, Platform, StyleSheet, View } from 'react-native';
 
 import type { MomentResult } from '@/engine/career/game';
 import type { FeedEntry, Interrupt } from '@/engine/model/career';
+import { userOf } from '@/engine/career/state';
 import { contentIndex, useGame } from '@/state/game';
+import { useSettings } from '@/state/settings';
 import { Text } from '@/ui/components/Text';
 import { useT } from '@/ui/i18n';
 import { useTheme } from '@/ui/theme/theme';
 
 import { ClipSlot } from './ClipSlot';
+import { skillFor, type SkillKind } from './skill';
+import { SkillCheck } from './SkillCheck';
 import { ChoiceButton } from './ChoiceButton';
 import { becauseOf, clockText, periodText } from './labels';
 
@@ -21,11 +26,16 @@ export function MomentView({
   readonly i: Extract<Interrupt, { kind: 'keyMoment' }>;
   readonly result?: MomentResult | undefined;
   readonly entry?: FeedEntry | undefined;
-  readonly onChoose: (c: string) => void;
+  readonly onChoose: (c: string, timing?: number) => void;
 }) {
   const t = useTheme();
   const { t: tt, m, names, tr } = useT();
   const state = useGame((g) => g.state);
+  const skillChecks = useSettings((x) => x.skillChecks);
+  const reader = useScreenReader();
+  const [picked, setPicked] = useState<{ readonly id: string; readonly kind: SkillKind } | null>(
+    null,
+  );
   if (!state) return null;
   const s = i.situation;
   const game = state.world.games[s.gameId];
@@ -95,7 +105,17 @@ export function MomentView({
         {result ? null : <Text variant="body">{tt(`moments.${i.momentId}.body`)}</Text>}
       </View>
 
-      {result ? (
+      {picked && !result ? (
+        <SkillCheck
+          player={userOf(state)}
+          kind={picked.kind}
+          seed={hashOf(i.id)}
+          colour={usTeam?.colours.primary}
+          onRelease={(q) => {
+            onChoose(picked.id, q);
+          }}
+        />
+      ) : result ? (
         <View
           style={[styles.result, { borderLeftColor: result.success ? t.c.positive : t.c.negative }]}
           accessibilityLiveRegion="polite"
@@ -119,7 +139,9 @@ export function MomentView({
                   tr.message({ key }, names),
                 )}
                 onPress={() => {
-                  onChoose(o);
+                  const kind = option ? skillFor(option.action) : null;
+                  if (kind && skillChecks && !reader) setPicked({ id: o, kind });
+                  else onChoose(o);
                 }}
               />
             );
@@ -142,3 +164,29 @@ const styles = StyleSheet.create({
   boardTick: { width: 4, height: 22, borderRadius: 1 },
   result: { borderLeftWidth: 3, paddingLeft: 12, gap: 4 },
 });
+
+/** A number from an id, to place the skill-check zone the same way for the same moment. */
+function hashOf(id: string): number {
+  let h = 0;
+  for (let k = 0; k < id.length; k++) h = (h * 31 + id.charCodeAt(k)) % 233280;
+  return h;
+}
+
+/** True while VoiceOver (or TalkBack) is on: timing a meter by ear is no fun, so it is skipped. */
+function useScreenReader(): boolean {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    // react-native-web always answers yes, so only native platforms are asked.
+    if (Platform.OS === 'web') return;
+    let live = true;
+    void AccessibilityInfo.isScreenReaderEnabled().then((v) => {
+      if (live) setOn(v);
+    });
+    const sub = AccessibilityInfo.addEventListener('screenReaderChanged', setOn);
+    return () => {
+      live = false;
+      sub.remove();
+    };
+  }, []);
+  return on;
+}

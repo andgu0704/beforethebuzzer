@@ -1,22 +1,20 @@
 import { router } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { MomentResult } from '@/engine/career/game';
+import type { GameState } from '@/engine/career/state';
+import { asTeamId, type TeamId } from '@/engine/core/ids';
 import { APPROACHES, type Approach, type FeedEntry, type Interrupt } from '@/engine/model/career';
-import type { PlayEvent } from '@/engine/game/types';
+import { isPlayer } from '@/engine/model/person';
 import { haptic } from '@/platform/haptics';
 import { liveMounted } from '@/state/decide';
 import { choose, playLive, setApproach, toNextGame, useGame, type LiveStep } from '@/state/game';
 import {
-  clockAt,
-  lineSoFar,
   nextUserGame,
   opponentOf,
   ownTeamOf,
-  playerOf,
-  pointsOf,
   shownGame,
   sideOf,
   venueOf,
@@ -33,6 +31,11 @@ import { useTheme } from '@/ui/theme/theme';
 import { ChoiceButton } from '../decide/ChoiceButton';
 import { MomentView } from '../decide/MomentView';
 import { clockText, periodText } from '../decide/labels';
+import { GameBoard } from './GameBoard';
+import { Lineups } from './Lineups';
+import { PlayList } from './PlayList';
+import { ShotChart } from './ShotChart';
+import { liveView } from './view';
 
 type Phase = 'pregame' | 'starting' | 'waiting' | 'watching' | 'moment' | 'final';
 type Speed = '1' | '2' | '4';
@@ -52,6 +55,8 @@ export function LiveScreen() {
   );
   const [shown, setShown] = useState(0);
   const [speed, setSpeed] = useState<Speed>('2');
+  const [paused, setPaused] = useState(false);
+  const [chartWidth, setChartWidth] = useState(0);
   // A key moment he has answered, kept on screen with its clip until he goes back to the game.
   const [resolved, setResolved] = useState<{
     readonly i: Extract<Interrupt, { kind: 'keyMoment' }>;
@@ -119,14 +124,14 @@ export function LiveScreen() {
 
   // The clock runs: one play at a time until the engine's log is caught up.
   useEffect(() => {
-    if (phase !== 'watching' || shown >= plays.length) return;
+    if (phase !== 'watching' || paused || shown >= plays.length) return;
     const id = setTimeout(() => {
       setShown((n) => Math.min(plays.length, n + 1));
     }, MS_PER_PLAY[speed]);
     return () => {
       clearTimeout(id);
     };
-  }, [phase, shown, plays.length, speed]);
+  }, [phase, paused, shown, plays.length, speed]);
 
   // A buzz when the game stops for him, and when it ends.
   useEffect(() => {
@@ -204,26 +209,37 @@ export function LiveScreen() {
   if (!live) return null;
   const side = live.userSide;
   const other = side === 0 ? 1 : 0;
-  const last = plays[shown - 1];
-  const score: readonly [number, number] = last ? last.score : [0, 0];
-  const at = clockAt(live.live, last?.t ?? 0);
   const gameRecord = state.world.games[live.gameId];
-  const us = side === 0 ? gameRecord?.home : gameRecord?.away;
-  const them = side === 0 ? gameRecord?.away : gameRecord?.home;
-  const mine = lineSoFar(live.live, career.playerId, shown);
+  const teams: readonly [TeamId, TeamId] = [
+    gameRecord?.home ?? asTeamId(''),
+    gameRecord?.away ?? asTeamId(''),
+  ];
   const final = view === 'final';
+  const lv = liveView(live.live, final ? plays.length : shown);
+  const colourOf = (id: TeamId, fallback: string) =>
+    state.world.teams[id]?.colours.primary ?? fallback;
+  const colours: readonly [string, string] = [
+    colourOf(teams[0], t.c.accent),
+    colourOf(teams[1], t.c.inkTertiary),
+  ];
+  const jerseys: readonly [number[], number[]] = [
+    live.live.teams[0].players.map((p) => jerseyOf(state, p.id)),
+    live.live.teams[1].players.map((p) => jerseyOf(state, p.id)),
+  ];
+  const userIndex = live.live.teams[side].players.findIndex((p) => p.id === career.playerId);
+  const mine = lv.players[side][userIndex];
 
   return (
     <View style={{ flex: 1, backgroundColor: t.c.canvas, paddingTop: insets.top }} testID="live">
       <View style={{ paddingHorizontal: t.gutter, paddingTop: t.space.s, gap: t.space.s }}>
         {view === 'moment' ? null : (
-          <Board
-            us={us ?? ''}
-            them={them ?? ''}
-            scoreUs={final ? live.live.score[side] : score[side]}
-            scoreThem={final ? live.live.score[other] : score[other]}
-            clock={final ? tt('ui.live.final') : clockText(at.clock)}
-            period={final ? '' : periodText(state, live.gameId, at.period, tt)}
+          <GameBoard
+            teams={teams}
+            view={lv}
+            clock={final ? tt('ui.live.final') : clockText(lv.clock)}
+            period={final ? '' : periodText(state, live.gameId, lv.period, tt)}
+            neutral={!!gameRecord?.neutral}
+            final={final}
           />
         )}
         <Text variant="footnote" color="inkSecondary" testID="live-line">
@@ -231,11 +247,11 @@ export function LiveScreen() {
             ? tt(`ui.live.absent.${live.absent}`)
             : tt('ui.live.line', {
                 name: names.person(career.playerId, 'family'),
-                pts: mine.pts,
-                reb: mine.reb,
-                ast: mine.ast,
-                fgm: mine.fgm,
-                fga: mine.fga,
+                pts: mine?.pts ?? 0,
+                reb: mine?.reb ?? 0,
+                ast: mine?.ast ?? 0,
+                fgm: mine?.fgm ?? 0,
+                fga: mine?.fga ?? 0,
               })}
         </Text>
       </View>
@@ -246,9 +262,13 @@ export function LiveScreen() {
             i={openMoment}
             result={resolved?.result}
             entry={resolved?.entry}
-            onChoose={(c) => {
+            onChoose={(c, timing) => {
               const mark = career.feed.length;
-              const outcome = choose(openMoment.id, c) as MomentResult;
+              const outcome = choose(
+                openMoment.id,
+                c,
+                timing === undefined ? {} : { timing },
+              ) as MomentResult;
               haptic(outcome.success ? 'success' : 'warning');
               const entry = useGame
                 .getState()
@@ -275,161 +295,76 @@ export function LiveScreen() {
           points={career.skillPointsEarned - pointsAtStart}
         />
       ) : (
-        <FlatList
-          testID="play-by-play"
-          data={plays.slice(0, shown).reverse()}
-          keyExtractor={(_, i) => String(shown - i)}
-          contentContainerStyle={{ padding: t.gutter, gap: 2 }}
-          renderItem={({ item }) => <PlayRow p={item} side={side} live={live.live} />}
-        />
-      )}
-
-      {view === 'watching' ? (
-        <View
-          style={[
-            styles.dock,
-            {
-              paddingHorizontal: t.gutter,
-              paddingBottom: insets.bottom + 10,
-              borderTopColor: t.c.hairline,
-            },
-          ]}
+        <ScrollView
+          contentContainerStyle={{
+            paddingHorizontal: t.gutter,
+            paddingTop: t.space.s,
+            paddingBottom: insets.bottom + t.space.xl,
+            gap: t.space.m,
+          }}
         >
-          <View style={{ flex: 1 }}>
-            <SegmentedControl
-              testID="live-speed"
-              options={[
-                { id: '1', label: '1×' },
-                { id: '2', label: '2×' },
-                { id: '4', label: '4×' },
-              ]}
-              value={speed}
-              onChange={setSpeed}
+          <View style={{ height: 236 }}>
+            <PlayList live={live.live} shown={shown} colours={colours} userId={career.playerId} />
+          </View>
+          <View
+            onLayout={(e) => {
+              setChartWidth(e.nativeEvent.layout.width);
+            }}
+          >
+            {chartWidth > 0 ? (
+              <ShotChart
+                width={chartWidth}
+                shots={lv.shots}
+                jerseys={jerseys}
+                colours={colours}
+                rightSide={side}
+                userSide={side}
+                userPlayer={userIndex}
+              />
+            ) : null}
+          </View>
+          <View style={styles.controls}>
+            <Button
+              testID="live-pause"
+              size="compact"
+              variant="secondary"
+              label={paused ? tt('ui.live.play') : tt('ui.live.pause')}
+              onPress={() => {
+                setPaused((p) => !p);
+              }}
+            />
+            <View style={{ flex: 1 }}>
+              <SegmentedControl
+                testID="live-speed"
+                options={[
+                  { id: '1', label: '1×' },
+                  { id: '2', label: '2×' },
+                  { id: '4', label: '4×' },
+                ]}
+                value={speed}
+                onChange={setSpeed}
+              />
+            </View>
+            <Button
+              testID="live-skip"
+              size="compact"
+              variant="secondary"
+              label={tt('ui.live.skip')}
+              onPress={() => {
+                setShown(plays.length);
+              }}
             />
           </View>
-          <Button
-            testID="live-skip"
-            size="compact"
-            variant="secondary"
-            label={tt('ui.live.skip')}
-            onPress={() => {
-              setShown(plays.length);
-            }}
-          />
-        </View>
-      ) : null}
+          <Lineups live={live.live} view={lv} teams={teams} userId={career.playerId} />
+        </ScrollView>
+      )}
     </View>
   );
 }
 
-function Board({
-  us,
-  them,
-  scoreUs,
-  scoreThem,
-  clock,
-  period,
-}: {
-  readonly us: string;
-  readonly them: string;
-  readonly scoreUs: number;
-  readonly scoreThem: number;
-  readonly clock: string;
-  readonly period: string;
-}) {
-  const t = useTheme();
-  const { names } = useT();
-  const state = useGame((g) => g.state);
-  const usTeam = state?.world.teams[us];
-  const themTeam = state?.world.teams[them];
-  return (
-    <View
-      testID="live-board"
-      style={[
-        styles.board,
-        {
-          backgroundColor: t.scheme === 'light' ? '#141414' : t.c.surface,
-          borderRadius: t.radii.md,
-        },
-      ]}
-      accessible
-      accessibilityLabel={`${names.team(us)} ${scoreUs}, ${names.team(them)} ${scoreThem}. ${clock} ${period}`}
-    >
-      <View style={styles.boardSide}>
-        <View style={[styles.tick, { backgroundColor: usTeam?.colours.primary ?? t.c.accent }]} />
-        <Text variant="displayS" style={{ color: '#F1EFEA' }}>
-          {names.team(us, 'abbr')}
-        </Text>
-        <Text variant="scoreboard" style={{ color: '#F1EFEA', fontSize: 34, lineHeight: 38 }}>
-          {scoreUs}
-        </Text>
-      </View>
-      <View style={{ alignItems: 'center' }}>
-        <Text variant="stat" style={{ color: '#FF5A1F' }}>
-          {clock}
-        </Text>
-        <Text variant="label" style={{ color: '#A8A49C' }}>
-          {period}
-        </Text>
-      </View>
-      <View style={[styles.boardSide, { justifyContent: 'flex-end' }]}>
-        <Text variant="scoreboard" style={{ color: '#F1EFEA', fontSize: 34, lineHeight: 38 }}>
-          {scoreThem}
-        </Text>
-        <Text variant="displayS" style={{ color: '#F1EFEA' }}>
-          {names.team(them, 'abbr')}
-        </Text>
-        <View
-          style={[styles.tick, { backgroundColor: themTeam?.colours.primary ?? t.c.inkTertiary }]}
-        />
-      </View>
-    </View>
-  );
-}
-
-function PlayRow({
-  p,
-  side,
-  live,
-}: {
-  readonly p: PlayEvent;
-  readonly side: 0 | 1;
-  readonly live: Parameters<typeof playerOf>[0];
-}) {
-  const t = useTheme();
-  const { t: tt, names } = useT();
-  const career = useGame((g) => g.state?.career);
-  const who = playerOf(live, p);
-  const me = who === career?.playerId;
-  const ours = p.side === side;
-  const at = clockAt(live, p.t);
-  const pts = pointsOf(p);
-  return (
-    <View
-      style={[
-        styles.play,
-        {
-          borderLeftColor: ours ? t.c.accent : t.c.hairline,
-          backgroundColor: me ? t.c.accentTint : 'transparent',
-          borderRadius: t.radii.xs,
-        },
-      ]}
-    >
-      <Text variant="caption" color="inkTertiary" style={{ width: 44 }}>
-        {clockText(at.clock)}
-      </Text>
-      <Text
-        variant={me ? 'subhead' : 'callout'}
-        color={me ? 'accentText' : 'ink'}
-        style={{ flex: 1 }}
-      >
-        {tt(`ui.live.play.${p.kind}`, { name: who ? names.person(who, 'family') : '' })}
-      </Text>
-      <Text variant="caption" color={pts ? 'ink' : 'inkTertiary'}>
-        {`${p.score[side]}–${p.score[side === 0 ? 1 : 0]}`}
-      </Text>
-    </View>
-  );
+function jerseyOf(state: GameState, id: string): number {
+  const p = state.world.people[id];
+  return isPlayer(p) ? p.jersey : 0;
 }
 
 function FinalView({
@@ -634,6 +569,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     borderLeftWidth: 3,
   },
+  controls: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   dock: {
     flexDirection: 'row',
     alignItems: 'center',

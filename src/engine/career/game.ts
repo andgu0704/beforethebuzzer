@@ -292,11 +292,21 @@ export interface MomentResult {
   readonly clip: ClipSpec;
 }
 
+/**
+ * What his timing on the skill check is worth, in log-odds: a perfect release adds about as
+ * much as a hot streak, a bad one costs the same. No timing (bots, simulate ahead) is neutral.
+ */
+export function timingEdge(timing: number | undefined): number {
+  if (timing === undefined || !Number.isFinite(timing)) return 0;
+  return (clamp(timing, 0, 1) - 0.5) * 1.2;
+}
+
 export function resolveKeyMoment(
   state: GameState,
   index: ContentIndex,
   interrupt: Extract<Interrupt, { kind: 'keyMoment' }>,
   optionId: string,
+  timing?: number,
 ): MomentResult {
   const current = state.career.cursor.live;
   const def = index.moment.get(interrupt.momentId);
@@ -310,7 +320,8 @@ export function resolveKeyMoment(
   const edge =
     (traits.momentEdge[option.action.kind] ?? 0) +
     (late ? traits.clutchMod : 0) +
-    (state.career.form === 'hot' ? 0.06 : state.career.form === 'slump' ? -0.08 : 0);
+    (state.career.form === 'hot' ? 0.06 : state.career.form === 'slump' ? -0.08 : 0) +
+    (option.action.kind === 'pain' ? 0 : timingEdge(timing));
   const forced = state.career.godMode.forceNextMoment;
   const offense = current.pendingMoment.offense;
   const scoreBefore = margin(live.score, userSide);

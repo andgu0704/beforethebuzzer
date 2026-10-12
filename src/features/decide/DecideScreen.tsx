@@ -364,7 +364,7 @@ function InterruptView({
   onChoose,
 }: {
   readonly i: Interrupt;
-  readonly onChoose: (c: string | readonly string[]) => void;
+  readonly onChoose: (c: string | readonly string[], timing?: number) => void;
 }) {
   const { t: tt, names } = useT();
   const state = useGame((g) => g.state);
@@ -574,10 +574,10 @@ export function DecideScreen() {
 
   if (!state) return null;
 
-  const onChoose = (c: string | readonly string[]) => {
+  const onChoose = (c: string | readonly string[], timing?: number) => {
     if (!pending) return;
     const mark = state.career.feed.length;
-    const outcome = choose(pending.id, c);
+    const outcome = choose(pending.id, c, timing === undefined ? {} : { timing });
     if (pending.kind === 'draftNight') {
       close();
       router.push('/draft/night');

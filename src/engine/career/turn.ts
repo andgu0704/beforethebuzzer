@@ -230,6 +230,7 @@ export function resolve(
   index: ContentIndex,
   interruptId: string,
   choice: Choice,
+  extra: { readonly timing?: number } = {},
 ): unknown {
   const career = state.career;
   const interrupt = career.pending.find((p) => p.id === interruptId);
@@ -238,7 +239,7 @@ export function resolve(
   const done = () => (career.pending = career.pending.filter((p) => p.id !== interruptId));
   switch (interrupt.kind) {
     case 'keyMoment':
-      return resolveKeyMoment(state, index, interrupt, one);
+      return resolveKeyMoment(state, index, interrupt, one, extra.timing);
     case 'event': {
       const outcome = resolveEvent(state, index, interrupt, one);
       done();

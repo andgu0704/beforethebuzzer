@@ -65,6 +65,14 @@ appId: app.beforethebuzzer
             - tapOn:
                 id: 'moment-(?!continue).*'
                 index: 0
+            - runFlow:
+                when:
+                  visible:
+                    id: skill-check
+                commands:
+                  - takeScreenshot: skill-check
+                  - tapOn:
+                      id: skill-release
             - waitForAnimationToEnd:
                 timeout: 4000
             - tapOn:

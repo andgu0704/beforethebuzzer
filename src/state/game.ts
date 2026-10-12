@@ -393,9 +393,13 @@ export function upgrade(skill: Skill): boolean {
 }
 
 /** Answers a pending interrupt. Returns the engine's outcome (moment result, event changes). */
-export function choose(interruptId: string, choice: Choice): unknown {
+export function choose(
+  interruptId: string,
+  choice: Choice,
+  extra: { readonly timing?: number } = {},
+): unknown {
   const state = requireState();
-  const outcome = resolve(state, contentIndex(), interruptId, choice);
+  const outcome = resolve(state, contentIndex(), interruptId, choice, extra);
   bump({ outcomes: { ...get().outcomes, [interruptId]: outcome } });
   void save();
   return outcome;

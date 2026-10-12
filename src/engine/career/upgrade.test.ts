@@ -8,6 +8,7 @@ import { testPlayer } from '../testing/creation';
 import { createCareer, STARTING_SKILL_POINTS } from './create';
 import { userOf, type GameState } from './state';
 import { advanceSlice, resolve } from './turn';
+import { timingEdge } from './game';
 import { autoSpend, gamePoints, upgradeCost, upgradeSkill } from './upgrade';
 
 const index = indexContent(content);
@@ -137,4 +138,14 @@ describe('watching a game', () => {
     };
     expect(shots('score')).toBeGreaterThan(shots('defend'));
   }, 120_000);
+});
+
+describe('the skill check', () => {
+  it('turns timing into odds: perfect helps, bad hurts, none is neutral', () => {
+    expect(timingEdge(undefined)).toBe(0);
+    expect(timingEdge(0.5)).toBe(0);
+    expect(timingEdge(1)).toBeGreaterThan(0.5);
+    expect(timingEdge(0)).toBeLessThan(-0.5);
+    expect(timingEdge(7)).toBe(timingEdge(1));
+  });
 });

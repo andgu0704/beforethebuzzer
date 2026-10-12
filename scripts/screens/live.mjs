@@ -53,9 +53,16 @@ for (let game = 0; game < 4 && moments < 1; game++) {
   await shot(`02-pregame-${game}`);
   await id('approach-score').click();
   await id('tip-off').click();
-  await id('live-board').waitFor({ timeout: 60000 });
-  await page.waitForTimeout(4000);
+  await page
+    .locator('[data-testid="live-board"], [data-testid^="moment-"]')
+    .first()
+    .waitFor({ timeout: 60000 });
+  await page.waitForTimeout(9000);
   await shot(`03-watching-${game}`);
+  await page.mouse.wheel(0, 700);
+  await page.waitForTimeout(500);
+  await shot(`03b-watching-lineups-${game}`);
+  await page.mouse.wheel(0, -700);
   for (let guard = 0; guard < 400; guard++) {
     if (await visible(id('live-final'))) break;
     const option = page.locator('[data-testid^="moment-"]').first();
@@ -63,6 +70,11 @@ for (let game = 0; game < 4 && moments < 1; game++) {
       moments++;
       await shot(`04-moment-${game}`);
       await option.click();
+      if (await visible(id('skill-check'))) {
+        await page.waitForTimeout(300);
+        await shot(`04b-skill-${game}`);
+        await id('skill-release').click();
+      }
       await page.waitForTimeout(1500);
       await shot(`05-moment-result-${game}`);
       await id('moment-continue').click();
