@@ -1,9 +1,16 @@
 import { Redirect, Stack, usePathname } from 'expo-router';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 
 import { openDecide } from '@/state/decide';
 import { useGame } from '@/state/game';
 import { useTheme } from '@/ui/theme/theme';
+
+/**
+ * On iOS a form sheet drew its content blank in release builds (found on the Simulator), so the
+ * sheets use the system page sheet there, which looks the same at full height.
+ */
+const SHEET = Platform.OS === 'ios' ? 'modal' : 'formSheet';
 
 /**
  * The game stack: tabs, pushed screens and sheets. When the engine stops for a decision, the
@@ -44,7 +51,7 @@ export default function GameLayout() {
       <Stack.Screen
         name="decide"
         options={{
-          presentation: 'formSheet',
+          presentation: SHEET,
           gestureEnabled: false,
           sheetAllowedDetents: [1],
           sheetCornerRadius: 20,
@@ -54,7 +61,7 @@ export default function GameLayout() {
       <Stack.Screen
         name="clip/[feedId]"
         options={{
-          presentation: 'formSheet',
+          presentation: SHEET,
           sheetAllowedDetents: [0.75, 1],
           sheetGrabberVisible: true,
           contentStyle: { backgroundColor: t.c.canvas },
