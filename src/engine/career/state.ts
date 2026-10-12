@@ -13,7 +13,7 @@ import type {
 import { isPlayer, type Player } from '../model/person';
 import type { World } from '../model/world';
 
-export const SAVE_FORMAT = 1;
+export const SAVE_FORMAT = 2;
 
 export interface SaveMeta {
   readonly saveId: string;

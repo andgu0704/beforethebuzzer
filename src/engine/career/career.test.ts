@@ -18,9 +18,11 @@ describe('a whole career', () => {
     expect(run.ending).not.toBeNull();
     expect(['draft', 'undrafted']).toContain(run.ending?.reason);
     expect(run.interrupts['offers']).toBe(1);
-    // Undrafted underclassmen can go back to school, so a career can reach more than one draft night.
+    // Undrafted underclassmen can go back to school, so a career can reach more than one draft
+    // night; every night that ends undrafted asks what next.
     expect(run.interrupts['draftNight']).toBeGreaterThanOrEqual(1);
-    expect(run.interrupts['afterDraft'] ?? 0).toBe((run.interrupts['draftNight'] ?? 0) - 1);
+    const drafted = run.ending?.reason === 'draft' ? 1 : 0;
+    expect(run.interrupts['afterDraft'] ?? 0).toBe((run.interrupts['draftNight'] ?? 0) - drafted);
     expect(run.moments.taken).toBeGreaterThan(10);
     expect(run.state.career.timeline.length).toBeGreaterThan(5);
   }, 120_000);

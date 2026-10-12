@@ -76,7 +76,7 @@ const feat = z.enum(FEATS);
 
 export const conditionsSchema = z
   .object({
-    stages: z.array(z.enum(['highSchool', 'college', 'prospect'])),
+    stages: z.array(z.enum(['highSchool', 'college', 'prospect', 'pro'])),
     phases: z.array(
       z.enum([
         'summer',
@@ -357,6 +357,8 @@ export const socialSchema = z
       'declare',
       'drafted',
       'undrafted',
+      'award',
+      'signed',
     ]),
     author: z.enum([
       'fan',

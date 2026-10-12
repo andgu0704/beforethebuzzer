@@ -925,4 +925,18 @@ export const social: readonly SocialTemplateDef[] = [
     weight: 1,
     replies: ['gracious', 'funny'],
   },
+  { id: 'award_fan', trigger: 'award', author: 'fan', weight: 2, replies: ['gracious', 'funny'] },
+  { id: 'award_analyst', trigger: 'award', author: 'analyst', weight: 2, replies: ['gracious'] },
+  { id: 'award_hater', trigger: 'award', author: 'hater', weight: 1, replies: all },
+  { id: 'award_hometown', trigger: 'award', author: 'hometown', weight: 1, replies: ['gracious'] },
+  { id: 'signed_fan', trigger: 'signed', author: 'fan', weight: 2, replies: ['gracious', 'funny'] },
+  { id: 'signed_journalist', trigger: 'signed', author: 'journalist', weight: 2, replies: [] },
+  { id: 'signed_hater', trigger: 'signed', author: 'hater', weight: 1, replies: all },
+  {
+    id: 'signed_brand',
+    trigger: 'signed',
+    author: 'brand',
+    weight: 1,
+    replies: ['gracious', 'funny'],
+  },
 ];

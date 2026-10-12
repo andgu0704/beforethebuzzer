@@ -9,7 +9,7 @@ import type { TeamId } from '../core/ids';
 import { createRng, type Rng } from '../core/rng';
 import type { ContentIndex } from '../content/registry';
 import { estimateOdds } from '../game/moments';
-import type { Interrupt, Offer, WeekPlan } from '../model/career';
+import type { ContractOffer, Interrupt, Offer, WeekPlan } from '../model/career';
 import { POSITION_WEIGHTS, SKILLS, type Skill } from '../model/skills';
 import type { GameState } from '../career/state';
 import { userOf } from '../career/state';
@@ -104,7 +104,11 @@ export const naive: Bot = {
       case 'draftNight':
         return 'go';
       case 'afterDraft':
-        return 'returnToSchool';
+        return i.options.includes('returnToSchool') ? 'returnToSchool' : 'tryout';
+      case 'contract':
+        return bestOffer(i.offers);
+      case 'retire':
+        return 'continue';
     }
   },
 };
@@ -163,7 +167,11 @@ export const casual: Bot = {
       case 'draftNight':
         return 'go';
       case 'afterDraft':
-        return 'returnToSchool';
+        return i.options.includes('returnToSchool') ? 'returnToSchool' : 'tryout';
+      case 'contract':
+        return bestOffer(i.offers);
+      case 'retire':
+        return 'continue';
     }
   },
 };
@@ -356,7 +364,11 @@ export const expert: Bot = {
       case 'draftNight':
         return 'go';
       case 'afterDraft':
-        return 'returnToSchool';
+        return i.options.includes('returnToSchool') ? 'returnToSchool' : 'tryout';
+      case 'contract':
+        return bestOffer(i.offers);
+      case 'retire':
+        return 'continue';
     }
   },
 };
@@ -373,4 +385,11 @@ export function planSize(plan: WeekPlan): number {
     plan.study +
     plan.media
   );
+}
+
+/** The offer with the biggest role, then the most money. */
+function bestOffer(offers: readonly ContractOffer[]): string {
+  const rank = { bench: 0, rotation: 1, starter: 2, star: 3 } as const;
+  const best = [...offers].sort((a, b) => rank[b.role] - rank[a.role] || b.salary - a.salary)[0];
+  return best?.teamId ?? 'retire';
 }

@@ -1,6 +1,6 @@
 import type { ContentIndex } from '../content/registry';
 import { createCareer, type CreationInput } from '../career/create';
-import type { GameState } from '../career/state';
+import { userOf, userTeamId, type GameState } from '../career/state';
 import { advance, resolve } from '../career/turn';
 import type { Ending, Interrupt } from '../model/career';
 import type { Bot } from './bots';
@@ -15,6 +15,11 @@ export interface CareerRun {
 
 export interface RunOptions {
   readonly maxWeeks?: number;
+  /**
+   * Where the run stops: at the draft outcome (the default, which the balance studies measure),
+   * or at the real end of the career, retirement included.
+   */
+  readonly stopAt?: 'draft' | 'end';
   /** Called at every interrupt boundary, e.g. to save and reload mid-turn. */
   readonly onInterrupt?: (state: GameState, interrupt: Interrupt) => GameState;
 }
@@ -31,8 +36,9 @@ export function playCareer(
   let weeks = 0;
   let taken = 0;
   let succeeded = 0;
-  const maxWeeks = options.maxWeeks ?? 400;
-  while (weeks < maxWeeks) {
+  const maxWeeks = options.maxWeeks ?? (options.stopAt === 'end' ? 1400 : 400);
+  const atDraftOutcome = () => options.stopAt !== 'end' && state.career.stage === 'pro';
+  while (weeks < maxWeeks && !atDraftOutcome()) {
     if (state.career.cursor.stage === 'idle') state.career.plan = bot.plan(state, index);
     const step = advance(state, index);
     if (step.kind === 'ended') break;
@@ -56,5 +62,18 @@ export function playCareer(
       if ((result as { success: boolean }).success) succeeded++;
     }
   }
-  return { state, ending: state.career.ending, weeks, interrupts, moments: { taken, succeeded } };
+  const ending = state.career.ending ?? (atDraftOutcome() ? draftOutcome(state) : null);
+  return { state, ending, weeks, interrupts, moments: { taken, succeeded } };
+}
+
+/** How the draft went for a player who is now a pro: picked, or signed after a camp tryout. */
+function draftOutcome(state: GameState): Ending {
+  const user = userOf(state);
+  const pick = user.draft?.pick ?? null;
+  return {
+    reason: pick ? 'draft' : 'undrafted',
+    date: state.world.date,
+    pick,
+    teamId: pick ? (user.draft?.teamId ?? null) : userTeamId(state),
+  };
 }

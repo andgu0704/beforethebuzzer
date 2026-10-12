@@ -7,6 +7,7 @@ import { makePick, signDraftee, updateBoard } from '../draft/draft';
 import { isPlayer, type Agent } from '../model/person';
 import { generateAgent } from '../world/staff';
 import { applyEffects } from './effects';
+import { joinPros, tryout } from './pro';
 import { socialReactions } from './social';
 import { cause, msg, pushFeed, pushTimeline, teamRef, userOf, type GameState } from './state';
 import { foldName } from '../content/registry';
@@ -219,16 +220,22 @@ function endUndrafted(state: GameState): void {
 }
 
 /**
- * After going undrafted with eligibility left: back to campus for another season (his agent
- * agreement ends and the draft profile starts again), or the career ends here.
+ * After going undrafted: back to campus for another season if he has one (his agent agreement
+ * ends and the draft profile starts again), a pro camp tryout, or the career ends here.
  */
 export function resolveAfterDraft(
   state: GameState,
   index: ContentIndex,
-  choice: 'returnToSchool' | 'endCareer',
+  choice: 'returnToSchool' | 'tryout' | 'endCareer',
 ): void {
   const career = state.career;
   const why = cause(state, 'event', 'afterDraft', choice);
+  if (choice === 'tryout') {
+    const draft = state.world.draft;
+    if (draft) draft.pool = draft.pool.filter((id) => id !== career.playerId);
+    tryout(state, index);
+    return;
+  }
   if (choice === 'endCareer') {
     endUndrafted(state);
     pushTimeline(state, msg('timeline.endedAfterDraft'), why, true);
@@ -263,7 +270,7 @@ export function resolveAfterDraft(
   pushFeed(state, 'milestone', msg('feed.returnedToSchool'));
 }
 
-/** Runs the whole draft with the user's interest and God Mode applied; ends the v1 career if he is picked. */
+/** Runs the whole draft with the user's interest and God Mode applied; if he is picked, he turns pro. */
 export function runDraftNight(
   state: GameState,
   index: ContentIndex,
@@ -288,13 +295,6 @@ export function runDraftNight(
   const mine = draft.picks.find((p) => p.playerId === user.id);
   const why = cause(state, 'event', 'draftNight');
   if (mine) {
-    career.stage = 'drafted';
-    career.ending = {
-      reason: 'draft',
-      date: state.world.date,
-      pick: mine.pick,
-      teamId: mine.teamId,
-    };
     pushTimeline(
       state,
       msg('timeline.drafted', { pick: mine.pick, team: teamRef(mine.teamId) }),
@@ -303,19 +303,18 @@ export function runDraftNight(
     );
     pushFeed(state, 'draft', msg('feed.drafted', { pick: mine.pick, team: teamRef(mine.teamId) }));
     socialReactions(state, index, ['drafted'], 'drafted', 3);
+    joinPros(state, index, mine.teamId, 'drafted');
   } else {
     pushTimeline(state, msg('timeline.undrafted'), why, true);
     pushFeed(state, 'draft', msg('feed.undrafted'));
     socialReactions(state, index, ['undrafted'], 'undrafted', 2);
     const left = seasonsLeft(state);
-    if (left > 0)
-      career.pending.push({
-        id: newInterruptId(state),
-        kind: 'afterDraft',
-        options: ['returnToSchool', 'endCareer'],
-        seasonsLeft: left,
-      });
-    else endUndrafted(state);
+    career.pending.push({
+      id: newInterruptId(state),
+      kind: 'afterDraft',
+      options: left > 0 ? ['returnToSchool', 'tryout', 'endCareer'] : ['tryout', 'endCareer'],
+      seasonsLeft: left,
+    });
   }
   const rival = career.rivalId ? state.world.people[career.rivalId] : undefined;
   if (isPlayer(rival)) {

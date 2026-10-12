@@ -5,8 +5,43 @@
 
 export type Migration = (document: unknown) => unknown;
 
+interface DocV1 {
+  format: number;
+  state: {
+    format: number;
+    career: Record<string, unknown> & {
+      stage: string;
+      ending: { reason: string } | null;
+    };
+  };
+}
+
+/**
+ * 1 → 2: skill points, the pre-game approach and award tracking arrive; a career that ended on
+ * draft night carries on into the pros.
+ */
+function toV2(document: unknown): unknown {
+  const doc = structuredCloneish(document) as DocV1;
+  const career = doc.state.career;
+  career['skillPoints'] ??= 3;
+  career['skillPointsEarned'] ??= 3;
+  career['approach'] ??= 'team';
+  career['awardsSeen'] ??= {};
+  if (career.stage === 'drafted' && career.ending?.reason === 'draft') {
+    career.stage = 'pro';
+    career.ending = null;
+  }
+  doc.format = 2;
+  doc.state.format = 2;
+  return doc;
+}
+
+function structuredCloneish(value: unknown): unknown {
+  return JSON.parse(JSON.stringify(value)) as unknown;
+}
+
 /** Keyed by the format being upgraded from. */
-export const MIGRATIONS: Readonly<Record<number, Migration>> = {};
+export const MIGRATIONS: Readonly<Record<number, Migration>> = { 1: toV2 };
 
 export class SaveTooNewError extends Error {
   constructor(

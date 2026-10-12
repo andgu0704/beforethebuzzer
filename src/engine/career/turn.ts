@@ -36,6 +36,7 @@ import {
   updateProjection,
   updateRole,
 } from './progress';
+import { announceAwards, proSummer, proWeek, resolveContract, resolveRetire } from './pro';
 import { clearShowcase, commitTo, raiseOffers } from './recruiting';
 import { socialReactions } from './social';
 import { msg, pushFeed, userTeamId, type GameState } from './state';
@@ -163,7 +164,8 @@ function beginWeek(state: GameState, index: ContentIndex): void {
     ) as TournamentId[];
     raiseCallUps(state, created);
   }
-  if (career.stage === 'college') updateRole(state);
+  proSummer(state);
+  if (career.stage === 'college' || career.stage === 'pro') updateRole(state);
 }
 
 function endWeek(state: GameState, index: ContentIndex): void {
@@ -174,7 +176,10 @@ function endWeek(state: GameState, index: ContentIndex): void {
     updateProjection(state, index);
   rivalNews(state, index);
   quietWeekReaction(state, index);
+  proWeek(state, index);
+  const season = seasonOf(state.world.date);
   endLeagueWeek(state.world, leagueContext(state, index));
+  announceAwards(state, index, season);
 }
 
 /** Now and then the rival's big night reaches the user's phone. */
@@ -253,9 +258,20 @@ export function resolve(
       done();
       runDraftNight(state, index, career.godMode.draftTeam);
       return null;
-    case 'afterDraft':
-      resolveAfterDraft(state, index, one === 'endCareer' ? 'endCareer' : 'returnToSchool');
+    case 'afterDraft': {
+      if (!interrupt.options.includes(one as 'tryout'))
+        throw new Error('invalid after-draft choice');
       done();
+      resolveAfterDraft(state, index, one as 'returnToSchool' | 'tryout' | 'endCareer');
+      return null;
+    }
+    case 'contract':
+      done();
+      resolveContract(state, index, interrupt, one);
+      return null;
+    case 'retire':
+      done();
+      resolveRetire(state, one);
       return null;
   }
 }

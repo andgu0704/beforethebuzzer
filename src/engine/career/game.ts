@@ -97,7 +97,7 @@ export function startUserGame(state: GameState, index: ContentIndex, game: GameR
   const rules = rulesForGame(game);
   const userCtx = {
     ...(reason ? { exclude: new Set([state.career.playerId]) } : {}),
-    ...(game.league === 'college'
+    ...(game.league === 'college' || game.league === 'pro'
       ? { userRole: state.career.role }
       : game.kind === 'showcase'
         ? { userRole: 'starter' as const }
