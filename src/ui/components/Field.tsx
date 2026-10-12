@@ -1,5 +1,5 @@
 import { CheckIcon as Check } from 'phosphor-react-native';
-import type { ReactNode } from 'react';
+import type { ReactNode, Ref } from 'react';
 import { Pressable, StyleSheet, TextInput, View, type TextInputProps } from 'react-native';
 
 import { haptic } from '@/platform/haptics';
@@ -13,8 +13,10 @@ export function TextField({
   label,
   error,
   testID,
+  ref,
   ...input
 }: TextInputProps & {
+  readonly ref?: Ref<TextInput> | undefined;
   readonly label: string;
   readonly error?: string | undefined;
   readonly testID?: string | undefined;
@@ -26,6 +28,7 @@ export function TextField({
         {label}
       </Text>
       <TextInput
+        ref={ref}
         testID={testID}
         accessibilityLabel={label}
         placeholderTextColor={t.c.inkTertiary}

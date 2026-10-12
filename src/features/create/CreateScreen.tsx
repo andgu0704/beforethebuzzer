@@ -1,7 +1,14 @@
 import { router } from 'expo-router';
 import { ArrowLeftIcon as ArrowLeft, ShuffleIcon as Shuffle } from 'phosphor-react-native';
-import { useMemo, useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { useMemo, useRef, useState } from 'react';
+import {
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  View,
+  type TextInput,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { content } from '@/content';
@@ -78,6 +85,7 @@ export function CreateScreen() {
   const [step, setStep] = useState<Step>('who');
   const [touched, setTouched] = useState(false);
   const [nationOpen, setNationOpen] = useState(false);
+  const familyField = useRef<TextInput>(null);
   const busy = useGame((g) => g.busy);
   const engineError = useGame((g) => g.error);
   const errors = validate(d);
@@ -198,18 +206,23 @@ export function CreateScreen() {
               autoCapitalize="words"
               autoCorrect={false}
               textContentType="givenName"
+              returnKeyType="next"
+              submitBehavior="submit"
+              onSubmitEditing={() => familyField.current?.focus()}
               onChangeText={(given) => {
                 patch({ given });
               }}
               error={touched && errors.given ? tt(errors.given) : undefined}
             />
             <TextField
+              ref={familyField}
               testID="family"
               label={tt('ui.create.family')}
               value={d.family}
               autoCapitalize="words"
               autoCorrect={false}
               textContentType="familyName"
+              returnKeyType="done"
               onChangeText={(family) => {
                 patch({ family });
               }}

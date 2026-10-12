@@ -13,8 +13,8 @@ appId: app.beforethebuzzer
 - tapOn:
     id: given
 - inputText: Nika
-- tapOn:
-    id: family
+# Return moves on to the family name, which is under the keyboard at the largest text sizes.
+- pressKey: Enter
 - inputText: Beridze
 - hideKeyboard
 - takeScreenshot: create-who
