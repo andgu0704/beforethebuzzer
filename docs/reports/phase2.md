@@ -76,7 +76,11 @@ approval**.
   simulates ahead, answers every decision, goes through draft night and the ending, visits
   every tab and screen, and takes screenshots. `scripts/screens/all.sh` runs it in light and
   dark at 375 × 667 (iPhone SE) and 440 × 956 (iPhone 17 Pro Max). The contact sheets are in
-  `docs/screens/`.
+  `docs/screens/` (`screens-light-375.jpg`, `screens-dark-440.jpg` and so on). All four runs
+  played a full career to the ending with no page errors.
+- `scripts/screens/godmode.mjs` checks the God Mode prompt, panel, style guide and portrait lab
+  in a God Mode build.
+- CI also builds the iOS Hermes bundle, so native module resolution is checked on every push.
 
 ## Bugs the screenshot runs found and fixed
 
@@ -87,6 +91,12 @@ approval**.
 - A four-way segmented control was truncated at 375 pt.
 - The decision sheet could be pushed twice, which left a duplicate sheet open.
 - Web portraits exhausted WebGL contexts.
+- Dates ran past month ends ("Nov 32").
+- Reloading on a game screen landed on the welcome screen. It now reopens the career, and a
+  pending key moment comes back unchanged (`scripts/screens/resume.mjs`).
+- Pro teams had no standings or emblem on the Team tab.
+- Conference tournaments showed the raw conference id.
+- The same social post could appear twice in a row.
 
 ## A change from the plan
 
