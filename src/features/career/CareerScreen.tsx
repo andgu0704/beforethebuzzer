@@ -6,6 +6,7 @@ import { userOf } from '@/engine/career/state';
 import { scout } from '@/engine/draft/scouting';
 import { SKILLS } from '@/engine/model/skills';
 import { useGame } from '@/state/game';
+import { tournamentName } from '@/state/views';
 import { Avatar } from '@/ui/components/Avatar';
 import { EmptyState, ListRow, Screen, SectionHeader } from '@/ui/components/Layout';
 import { Flag } from '@/ui/components/Marks';
@@ -222,7 +223,7 @@ export function CareerScreen() {
             return (
               <ListRow
                 key={tid}
-                title={tour ? tt(tour.nameKey, tour.nameParams) : tid}
+                title={tour ? tournamentName(tour, tt) : tid}
                 subtitle={
                   tour
                     ? `${tour.season} · ${answer === 'accepted' ? tt('ui.career.accepted') : tt('ui.career.declined')}`

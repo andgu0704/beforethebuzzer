@@ -10,6 +10,7 @@ import type { FeedEntry, Interrupt } from '@/engine/model/career';
 import { haptic } from '@/platform/haptics';
 import { decideMounted } from '@/state/decide';
 import { choose, contentIndex, playOn, useGame } from '@/state/game';
+import { tournamentName } from '@/state/views';
 import { Avatar } from '@/ui/components/Avatar';
 import { Button } from '@/ui/components/Button';
 import { TeamMark } from '@/ui/components/Marks';
@@ -301,7 +302,7 @@ function InterruptView({
           title={tt('ui.decide.callUp.title', { nation: tt(`nations.${userOf(state).nation}`) })}
           body={tt('ui.decide.callUp.body', {
             level: i.level,
-            tournament: tournament ? tt(tournament.nameKey, tournament.nameParams) : '',
+            tournament: tournament ? tournamentName(tournament, tt) : '',
           })}
           options={[
             { id: 'accept', label: tt('ui.decide.callUp.accept') },

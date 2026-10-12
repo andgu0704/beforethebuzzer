@@ -208,3 +208,17 @@ export function tournamentsFor(state: GameState, teamIds: readonly string[]): To
     .filter((t) => t.season === season && t.teams.some((id) => teamIds.includes(id)))
     .sort((a, b) => a.startYear * 52 + a.startWeek - (b.startYear * 52 + b.startWeek));
 }
+
+/** A tournament's display name, with a conference id in its parameters turned into the conference's name. */
+export function tournamentName(
+  tour: Tournament,
+  t: (key: string, params?: Readonly<Record<string, string | number>>) => string,
+): string {
+  const params: Record<string, string | number> = { ...tour.nameParams };
+  const conf = params['conference'];
+  if (typeof conf === 'string') {
+    const def = content.conferences.find((c) => c.id === conf);
+    if (def) params['conference'] = def.shortName;
+  }
+  return t(tour.nameKey, params);
+}

@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, View } from 'react-native';
 
 import type { Series } from '@/engine/model/tournament';
 import { useGame } from '@/state/game';
-import { currentTeam } from '@/state/views';
+import { currentTeam, tournamentName } from '@/state/views';
 import { EmptyState, Screen, SectionHeader } from '@/ui/components/Layout';
 import { Text } from '@/ui/components/Text';
 import { useT } from '@/ui/i18n';
@@ -95,7 +95,7 @@ export function BracketScreen() {
   const rounds = tour.rounds;
   return (
     <Screen testID="bracket">
-      <Text variant="displayM">{tt(tour.nameKey, tour.nameParams)}</Text>
+      <Text variant="displayM">{tournamentName(tour, tt)}</Text>
       <Text variant="footnote" color="inkSecondary">
         {tour.champion
           ? tt('ui.bracket.champion', { team: names.team(tour.champion) })

@@ -19,6 +19,7 @@ import {
   recordText,
   teamSchedule,
   tournamentsFor,
+  tournamentName,
 } from '@/state/views';
 import { Avatar } from '@/ui/components/Avatar';
 import { SegmentedControl } from '@/ui/components/Controls';
@@ -241,7 +242,7 @@ function Standings({ state, team }: { readonly state: GameState; readonly team: 
             <ListRow
               key={tour.id}
               testID={`tournament-${tour.id}`}
-              title={tt(tour.nameKey, tour.nameParams)}
+              title={tournamentName(tour, tt)}
               subtitle={
                 tour.champion
                   ? tt('ui.bracket.champion', { team: names.team(tour.champion) })
