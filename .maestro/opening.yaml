@@ -104,6 +104,10 @@ appId: app.beforethebuzzer
       - waitForAnimationToEnd:
           timeout: 2000
 - takeScreenshot: final
+- scrollUntilVisible:
+    element:
+      id: live-done
+    direction: DOWN
 - tapOn:
     id: live-done
 - extendedWaitUntil:
