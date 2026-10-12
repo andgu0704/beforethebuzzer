@@ -15,6 +15,12 @@ on:
 permissions:
   contents: write
 
+# A newer push supersedes a run still going on the same branch: an older run would only build
+# stale sources and could commit its screenshots over the newer ones.
+concurrency:
+  group: ios-screens-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   simulator:
     runs-on: macos-26

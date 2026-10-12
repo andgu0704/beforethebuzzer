@@ -64,16 +64,27 @@ export function SectionHeader({
   readonly action?: { readonly label: string; readonly onPress: () => void };
 }) {
   const t = useTheme();
+  // At the largest text sizes a title and its detail don't fit side by side: they stack.
+  const large = useLargeText();
   return (
     <View
-      style={[styles.section, { borderBottomColor: t.c.ink, marginTop: t.space.xxl }]}
+      style={[
+        styles.section,
+        { borderBottomColor: t.c.ink, marginTop: t.space.xxl },
+        large && { flexDirection: 'column', alignItems: 'flex-start', gap: 2 },
+      ]}
       accessibilityRole="header"
     >
       <Text variant="displayM" style={{ flexShrink: 1 }}>
         {title}
       </Text>
       {detail ? (
-        <Text variant="footnote" color="inkSecondary" style={{ flexShrink: 1 }} align="right">
+        <Text
+          variant="footnote"
+          color="inkSecondary"
+          style={{ flexShrink: 1 }}
+          align={large ? 'left' : 'right'}
+        >
           {detail}
         </Text>
       ) : null}
