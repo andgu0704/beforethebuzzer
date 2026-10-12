@@ -15,7 +15,8 @@ import { BoxScoreTable } from '@/ui/components/Stats';
 import { Tag } from '@/ui/components/Tag';
 import { Text } from '@/ui/components/Text';
 import { useT } from '@/ui/i18n';
-import { useTheme } from '@/ui/theme/theme';
+import { contrast } from '@/ui/theme/colour';
+import { useLargeText, useTheme } from '@/ui/theme/theme';
 
 import { formatHeight } from '../create/draft';
 
@@ -32,6 +33,7 @@ const SEASON_COLUMNS = [
 
 export function ProfileScreen() {
   const t = useTheme();
+  const large = useLargeText();
   const { t: tt, m, names } = useT();
   const state = useGame((g) => g.state);
   useGame((g) => g.rev);
@@ -66,6 +68,13 @@ export function ProfileScreen() {
     s.awards.filter((a) => a.personId === u.id).map((a) => ({ ...a, year: s.year })),
   );
   const timeline = state.career.timeline.map((e, i) => ({ e, i })).reverse();
+  // The card is in the team colour, or the plain surface before he has a team.
+  const cardBg = team?.colours.primary ?? t.c.surface;
+  const cardInk = team
+    ? contrast('#FFFFFF', cardBg) >= contrast('#141414', cardBg)
+      ? '#FFFFFF'
+      : '#141414'
+    : t.c.ink;
   return (
     <Screen testID="profile">
       <Stack.Screen
@@ -87,7 +96,8 @@ export function ProfileScreen() {
       <View
         style={[
           styles.card,
-          { backgroundColor: team?.colours.primary ?? t.c.surface, borderRadius: t.radii.md },
+          { backgroundColor: cardBg, borderRadius: t.radii.md },
+          large && { flexDirection: 'column', alignItems: 'flex-start' },
         ]}
       >
         <Avatar
@@ -100,14 +110,14 @@ export function ProfileScreen() {
           expression="smile"
           shape="card"
         />
-        <View style={{ flex: 1, gap: 4 }}>
-          <Text variant="displayM" style={{ color: t.c.onAccent }}>
+        <View style={large ? { gap: 4 } : { flex: 1, gap: 4 }}>
+          <Text variant="displayM" style={{ color: cardInk }}>
             {names.person(u.id)}
           </Text>
-          <Text variant="footnote" style={{ color: t.c.onAccent, opacity: 0.85 }}>
+          <Text variant="footnote" style={{ color: cardInk, opacity: 0.85 }}>
             {`#${u.jersey} · ${tt(`ui.positions.${u.position}`)}`}
           </Text>
-          <Text variant="footnote" style={{ color: t.c.onAccent, opacity: 0.85 }}>
+          <Text variant="footnote" style={{ color: cardInk, opacity: 0.85 }}>
             {team ? names.team(team.id) : tt(`ui.stages.${state.career.stage}`)}
           </Text>
         </View>
@@ -115,7 +125,7 @@ export function ProfileScreen() {
       <View style={{ gap: 4, marginTop: t.space.l }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Flag code={u.nation} size={14} />
-          <Text variant="callout">
+          <Text variant="callout" style={{ flexShrink: 1 }}>
             {tt('ui.profile.born', { age: ageOf(state), hometown: u.hometown })}
           </Text>
         </View>

@@ -145,6 +145,8 @@ appId: app.beforethebuzzer
     visible:
       id: profile
     timeout: 15000
+# The card names him, legibly in either scheme.
+- assertVisible: Nika Beridze
 - takeScreenshot: profile
 - scrollUntilVisible:
     element:
