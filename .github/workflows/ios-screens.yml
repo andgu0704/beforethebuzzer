@@ -29,6 +29,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Use the newest Xcode on the runner
+        run: |
+          ls -d /Applications/Xcode*.app
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          xcodebuild -version
       - name: List simulators
         run: xcrun simctl list devices available
       - name: Install Maestro
@@ -51,6 +56,7 @@ jobs:
         if: failure()
         run: |
           grep -nE "error:|❌|fatal|Error:|failed" build.log | grep -v "Explicit dependency" | head -80 || true
+          grep -n -A12 "Could not resolve package dependencies" build.log | head -40 || true
       - name: Run the flows
         run: maestro test .maestro --test-output-dir maestro-output
       - uses: actions/upload-artifact@v4
