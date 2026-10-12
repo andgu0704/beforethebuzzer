@@ -53,7 +53,7 @@ seasons). **Every metric with a target is inside its band**:
 | Expert | 40.0% (20–40%)   | 71.7% (70–100%) | 8           | 8.3%      |
 | Naive  | 0%               | 3.3%            | 61          | 88.3%     |
 
-In Phase 1, casual top five (3.3%), expert top five (11.7%) and expert first round (51.7%) were
+These numbers include the choice to go back to college after going undrafted (below). In Phase 1, casual top five (3.3%), expert top five (11.7%) and expert first round (51.7%) were
 out of band. The college and pro league metrics stay in band.
 
 At 60 careers a share has a standard error of about six points, so the expert sits right at the
@@ -77,3 +77,12 @@ distribution is well inside the targets.
   12–40). This mostly removes the rare elite roll that made a casual freshman a top-five pick.
 - **Tests:** a new `progress.test.ts` covers stock fading, quiet weeks and the final-seconds
   window.
+
+## Going back to college after the draft
+
+An undrafted player who still has college eligibility is asked whether to go back for another
+season or end the career. Going back puts him back on the same team as a year older, resets the
+draft profile for next spring and ends any agent agreement. A senior has no season left, so his
+career ends on draft night as before. All three bots go back. Compared with the run before this
+change, casual undrafted careers fell from 43.3% to 23.3% and the casual median pick rose from
+53 to 43, while the expert results did not change. Every banded metric stays in band.
