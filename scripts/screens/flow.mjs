@@ -61,7 +61,10 @@ async function decide() {
       await page.waitForTimeout(1500);
       await shot('21-draft-night-reveal');
       await id('draft-continue').click();
-      return 'ended';
+      await page.waitForTimeout(800);
+      // Undrafted with eligibility left, the career goes on and the after-draft choice opens.
+      if (await visible(id('ending'))) return 'ended';
+      continue;
     }
     const sheets = await page.locator('[data-testid="decide"]').count();
     if (sheets > 1) console.log(`warning: ${sheets} decision sheets mounted`);
@@ -82,6 +85,10 @@ async function decide() {
       .getAttribute('data-testid')
       .catch(() => null);
     const prefix = kind ? kind.split('-')[0] : 'x';
+    if (kind === 'choice-returnToSchool' && !seen.has('afterDraft')) {
+      seen.add('afterDraft');
+      await shot('12-after-draft');
+    }
     if (!seen.has(prefix)) {
       seen.add(prefix);
       await shot(`10-decide-${prefix}`);
