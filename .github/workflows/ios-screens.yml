@@ -91,6 +91,9 @@ jobs:
           sleep 5
       - name: Run the flows
         run: maestro --device "$UDID" test .maestro --test-output-dir maestro-output
+        env:
+          # The XCTest driver can take minutes to come up on a freshly booted runner.
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: '300000'
       - name: Show what was on screen
         if: failure()
         run: |
@@ -117,6 +120,8 @@ jobs:
           OUT="docs/screens/ios/${{ matrix.name }}"
           # Set this run's shots aside, then lay them on the branch tip: a newer run simply
           # replaces older shots, so concurrent runs can never conflict.
+          # A run that took no screenshots (say, the driver never started) leaves the last ones be.
+          if [ -z "$(ls -A "$OUT" 2>/dev/null)" ]; then exit 0; fi
           KEEP="$RUNNER_TEMP/shots"
           rm -rf "$KEEP" && cp -R "$OUT" "$KEEP"
           git config user.name "github-actions[bot]"
