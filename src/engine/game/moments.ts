@@ -60,6 +60,24 @@ export function triggerMatches(def: MomentDef, c: MomentCandidate): boolean {
   return true;
 }
 
+/** Seconds left in the last period from which a close game may add one moment past its budget. */
+export const FINAL_MOMENT_CLOCK = 35;
+/** Largest margin (either way) that still counts as a one- or two-possession game. */
+export const FINAL_MOMENT_MARGIN = 6;
+
+/**
+ * True in the closing seconds of a one- or two-possession game. A game's moment budget is often
+ * spent before then, so this window may go one moment past it: the last shot is the moment.
+ */
+export function finalMomentWindow(live: LiveGame, userSide: Side): boolean {
+  const rules = rulesFor(live.rulesId);
+  return (
+    live.period >= rules.periods &&
+    live.clock <= FINAL_MOMENT_CLOCK &&
+    Math.abs(marginFor(live, userSide)) <= FINAL_MOMENT_MARGIN
+  );
+}
+
 /**
  * Decides whether this possession becomes a key moment and which one. Late, close moments
  * almost always fire; others are spread through the game. A game the player is in gets at

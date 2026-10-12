@@ -3,6 +3,7 @@
 ## What was built
 
 **Motion**
+
 - Feed entries fade up as they arrive.
 - Meters and decision outcomes count to their new values over 600 ms.
 - Buttons press with a slight scale.
@@ -13,15 +14,16 @@
 
 **Haptics** (§10.4), all switched off by the setting:
 
-| Haptic | When |
-| --- | --- |
-| Selection | Tabs, segmented controls, steppers, chips |
-| Light impact | Primary buttons and choices |
-| Success | A key moment that works, a milestone, draft news, being drafted |
-| Warning | A failed moment, an injury, becoming ineligible, going undrafted |
-| Heavy impact | The buzzer in a close game |
+| Haptic       | When                                                             |
+| ------------ | ---------------------------------------------------------------- |
+| Selection    | Tabs, segmented controls, steppers, chips                        |
+| Light impact | Primary buttons and choices                                      |
+| Success      | A key moment that works, a milestone, draft news, being drafted  |
+| Warning      | A failed moment, an injury, becoming ineligible, going undrafted |
+| Heavy impact | The buzzer in a close game                                       |
 
 **Accessibility**
+
 - Every text style caps Dynamic Type at the plan's multiplier.
 - At accessibility sizes the header meters wrap, and stepper and list rows put their label on
   its own line.
@@ -34,11 +36,13 @@
 splash and favicon from one SVG. **Waiting for your approval.**
 
 **Development build**
+
 - `expo-dev-client` is installed.
 - `eas.json` has `development` and `simulator` profiles, both with God Mode, and a
   `production` profile without it.
 
 **Performance**
+
 - **Overlay:** God Mode can switch on an overlay showing JS frames per second and the last
   engine and save timings.
 - **Sliced weeks:** the engine week now runs in slices (`advanceSlice`): the app paints after
@@ -47,6 +51,7 @@ splash and favicon from one SVG. **Waiting for your approval.**
 - **Saves:** the save is written off the interaction path, in a queue.
 
 **Web bundle**
+
 - Only the five font files the app uses are bundled.
 - Portraits are SVG on the web, so a full roster does not run the browser out of WebGL contexts.
 
