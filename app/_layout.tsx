@@ -1,9 +1,3 @@
-import { Antonio_600SemiBold, Antonio_700Bold } from '@expo-google-fonts/antonio';
-import {
-  SchibstedGrotesk_400Regular,
-  SchibstedGrotesk_500Medium,
-  SchibstedGrotesk_600SemiBold,
-} from '@expo-google-fonts/schibsted-grotesk';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -15,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { PerfOverlay } from '@/features/godmode';
 import { loadSkia } from '@/platform/skia';
 import { boot, useGame } from '@/state/game';
+import { FONT_FILES } from '@/ui/theme/fonts';
 import { ThemeProvider, useTheme } from '@/ui/theme/theme';
 
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
@@ -48,13 +43,7 @@ function Root() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded, fontError] = useFonts({
-    Antonio_600SemiBold,
-    Antonio_700Bold,
-    SchibstedGrotesk_400Regular,
-    SchibstedGrotesk_500Medium,
-    SchibstedGrotesk_600SemiBold,
-  });
+  const [fontsLoaded, fontError] = useFonts(FONT_FILES);
   const booted = useGame((g) => g.booted);
   const [skia, setSkia] = useState(false);
   useEffect(() => {

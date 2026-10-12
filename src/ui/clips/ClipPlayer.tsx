@@ -5,7 +5,8 @@
  * clip opens on its final frame with the result line and a play button.
  */
 
-import { Antonio_600SemiBold, Antonio_700Bold } from '@expo-google-fonts/antonio';
+import { Antonio_600SemiBold } from '@expo-google-fonts/antonio/600SemiBold';
+import { Antonio_700Bold } from '@expo-google-fonts/antonio/700Bold';
 import { Canvas, Picture, Skia, useFont } from '@shopify/react-native-skia';
 import { ArrowCounterClockwiseIcon, PlayIcon } from 'phosphor-react-native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
