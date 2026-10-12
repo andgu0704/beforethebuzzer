@@ -23,6 +23,7 @@ export function StatLine({
     <View
       style={styles.statLine}
       accessible
+      role="group"
       accessibilityLabel={items.map((i) => i.spoken ?? `${i.value} ${i.label}`).join(', ')}
     >
       {items.map((i) => (
@@ -93,6 +94,7 @@ export function Scorebug({
   return (
     <View
       accessible
+      role="group"
       accessibilityLabel={`${kicker}. ${home.name} ${home.score}, ${away.name} ${away.score}. ${home.won ? home.name : away.name} won.`}
       style={{ gap: big ? t.space.xs : 0 }}
     >

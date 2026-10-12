@@ -46,7 +46,7 @@ export const ShotChart = memo(function ShotChart({
       : { x: HOOP + d.x, y: W / 2 - d.y };
   const last = shots[shots.length - 1];
   return (
-    <View testID="shot-chart" accessibilityLabel="Shot chart">
+    <View testID="shot-chart" accessible accessibilityRole="image" accessibilityLabel="Shot chart">
       <Svg width={width} height={height} viewBox={`0 0 ${L} ${W}`}>
         <Rect x={0} y={0} width={L} height={W} fill={FLOOR} rx={1.5} />
         {/* Paint, half-court line and centre circle. */}

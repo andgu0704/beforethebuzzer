@@ -145,12 +145,12 @@ export const PlayList = memo(function PlayList({
             },
           ]}
         >
-          <Text variant="caption" color="inkTertiary" style={{ width: 40 }} tabular>
+          <Text variant="caption" color="inkSecondary" style={{ width: 40 }} tabular>
             {r.clock}
           </Text>
           <Text
             variant={r.big || r.mine ? 'subhead' : 'footnote'}
-            color={r.mine ? 'accentText' : 'ink'}
+            color="ink"
             style={{ flex: 1 }}
             numberOfLines={2}
           >

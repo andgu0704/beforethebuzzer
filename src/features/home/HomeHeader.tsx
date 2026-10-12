@@ -49,7 +49,7 @@ export function HomeHeader() {
         <Pressable
           testID="open-profile"
           accessibilityRole="button"
-          accessibilityLabel={tt('ui.home.profile')}
+          accessibilityHint={tt('ui.home.profile')}
           onPress={() => {
             router.push('/profile');
           }}
@@ -62,6 +62,7 @@ export function HomeHeader() {
             primary={team?.colours.primary}
             secondary={team?.colours.secondary}
             jersey={u.jersey}
+            decorative
           />
           <View style={{ flexShrink: 1 }}>
             <Text variant="bodyStrong" numberOfLines={1}>

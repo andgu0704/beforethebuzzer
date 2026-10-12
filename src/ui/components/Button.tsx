@@ -61,7 +61,8 @@ export function Button({
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityHint={hint}
-      accessibilityState={{ disabled: !!disabled, busy: !!loading }}
+      aria-disabled={!!disabled}
+      aria-busy={!!loading}
       disabled={disabled || loading}
       onPress={() => {
         haptic(variant === 'primary' ? 'light' : 'selection');
@@ -141,7 +142,9 @@ export function IconButton({
       testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
-      accessibilityState={{ disabled: !!disabled, selected: !!selected }}
+      aria-disabled={!!disabled}
+      // Selected is a native state only: the web has no selected button.
+      accessibilityState={{ selected: !!selected }}
       disabled={disabled}
       hitSlop={size < TOUCH ? (TOUCH - size) / 2 : 0}
       onPress={() => {

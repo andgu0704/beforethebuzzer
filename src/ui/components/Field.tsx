@@ -78,7 +78,8 @@ export function OptionRow({
     <Pressable
       testID={testID}
       accessibilityRole="radio"
-      accessibilityState={{ checked: selected, disabled: !!disabled }}
+      aria-checked={selected}
+      aria-disabled={!!disabled}
       accessibilityLabel={body ? `${title}. ${body}` : title}
       disabled={disabled}
       onPress={() => {
@@ -132,7 +133,7 @@ export function ChipRow<T extends string | number>({
             key={String(o.id)}
             testID={testID ? `${testID}-${String(o.id)}` : undefined}
             accessibilityRole="radio"
-            accessibilityState={{ checked: on }}
+            aria-checked={on}
             accessibilityLabel={o.a11y ?? o.label}
             onPress={() => {
               haptic('selection');

@@ -4,7 +4,7 @@ import {
   WarningCircleIcon as WarningCircle,
 } from 'phosphor-react-native';
 import type { ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useLargeText, useTheme } from '../theme/theme';
@@ -46,6 +46,8 @@ export function Screen({
       style={{ flex: 1, backgroundColor: t.c.canvas }}
       contentContainerStyle={[pad, contentStyle]}
       contentInsetAdjustmentBehavior="automatic"
+      // Keyboard users on the web can scroll a screen with nothing to tab to.
+      {...(Platform.OS === 'web' ? { tabIndex: 0 as const } : {})}
     >
       {children}
     </ScrollView>

@@ -20,6 +20,8 @@ export interface AvatarProps {
   readonly expression?: Expression | undefined;
   readonly staff?: boolean | undefined;
   readonly shape?: 'circle' | 'card' | undefined;
+  /** Next to the name already: hidden from assistive tech. */
+  readonly decorative?: boolean | undefined;
 }
 
 /** A person's face. Falls back to initials in the team colour. */
@@ -33,7 +35,9 @@ export function Avatar({
   expression = 'neutral',
   staff = false,
   shape = 'circle',
+  decorative = false,
 }: AvatarProps) {
+  const spoken = decorative ? '' : name;
   const t = useTheme();
   if (portrait)
     return (
@@ -46,7 +50,7 @@ export function Avatar({
         staff={staff}
         background={t.c.sunken}
         shape={shape}
-        accessibilityLabel={name}
+        accessibilityLabel={spoken}
         {...(jersey !== undefined ? { jersey } : {})}
       />
     );
@@ -60,9 +64,9 @@ export function Avatar({
     .toUpperCase();
   return (
     <View
-      accessible
-      accessibilityRole="image"
-      accessibilityLabel={name}
+      {...(spoken === ''
+        ? { 'aria-hidden': true }
+        : { accessible: true, accessibilityRole: 'image' as const, accessibilityLabel: spoken })}
       style={{
         width: size,
         height: size,

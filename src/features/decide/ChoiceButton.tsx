@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { haptic } from '@/platform/haptics';
 import { Text } from '@/ui/components/Text';
@@ -27,8 +27,14 @@ export function ChoiceButton({
     <Pressable
       testID={testID}
       accessibilityRole="button"
-      accessibilityLabel={[label, read, because].filter(Boolean).join('. ')}
-      accessibilityState={{ selected: !!selected, disabled: !!disabled }}
+      // In the order they're shown, so the spoken name matches what's on screen. The web reads
+      // the content itself.
+      accessibilityLabel={
+        Platform.OS === 'web' ? undefined : [because, label, read].filter(Boolean).join('. ')
+      }
+      aria-disabled={!!disabled}
+      // Selected is a native state only: the web has no selected button.
+      accessibilityState={{ selected: !!selected }}
       disabled={disabled}
       onPress={() => {
         haptic('light');

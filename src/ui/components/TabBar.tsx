@@ -8,7 +8,7 @@ import {
   UsersThreeIcon as UsersThree,
   type Icon,
 } from 'phosphor-react-native';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { haptic } from '@/platform/haptics';
@@ -57,9 +57,14 @@ export function TabBar({
             key={route.key}
             testID={`tab-${route.name}`}
             accessibilityRole="tab"
-            accessibilityState={{ selected: focused }}
+            aria-selected={focused}
+            // The web names the tab from its content, badge included.
             accessibilityLabel={
-              badges[route.name] ? `${label}, ${String(badges[route.name])}` : label
+              Platform.OS === 'web'
+                ? undefined
+                : badges[route.name]
+                  ? `${label}, ${String(badges[route.name])}`
+                  : label
             }
             onPress={() => {
               const event = navigation.emit({

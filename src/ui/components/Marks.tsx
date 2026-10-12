@@ -23,7 +23,12 @@ export function Flag({
   const t = useTheme();
   const xml = FLAGS[code];
   return (
-    <View style={styles.flagRow} accessible accessibilityLabel={label ?? code}>
+    <View
+      style={styles.flagRow}
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel={label ?? code}
+    >
       <View
         style={{
           width: size * 1.5,
@@ -122,6 +127,7 @@ export function TeamMark({
     return (
       <View
         accessible
+        accessibilityRole="image"
         accessibilityLabel={label ?? abbr}
         style={{
           width: size,
@@ -150,7 +156,7 @@ export function TeamMark({
   }
   const shape = shapeOf(teamId);
   return (
-    <View accessible accessibilityLabel={label ?? abbr}>
+    <View accessible accessibilityRole="image" accessibilityLabel={label ?? abbr}>
       <Svg width={size} height={size} viewBox="0 0 32 32">
         {shape === 'circle' ? <Circle cx={16} cy={16} r={15} fill={primary} /> : null}
         {shape === 'square' ? (

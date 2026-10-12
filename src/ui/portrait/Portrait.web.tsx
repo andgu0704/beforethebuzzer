@@ -103,9 +103,14 @@ function PortraitView({
   );
   return (
     <View
-      accessible
-      accessibilityRole="image"
-      accessibilityLabel={accessibilityLabel ?? 'Portrait'}
+      {...(accessibilityLabel === ''
+        ? // An empty label marks a decorative face: hidden from assistive tech.
+          { 'aria-hidden': true }
+        : {
+            accessible: true,
+            accessibilityRole: 'image' as const,
+            accessibilityLabel: accessibilityLabel ?? 'Portrait',
+          })}
       style={[{ width: size, height: size }, style]}
     >
       <Face layers={layers} size={size} shape={shape} background={background} />

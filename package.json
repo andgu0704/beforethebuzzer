@@ -22,6 +22,7 @@
     "web:canvaskit": "node -e \"require('node:fs').mkdirSync('public',{recursive:true});require('node:fs').copyFileSync('node_modules/canvaskit-wasm/bin/full/canvaskit.wasm','public/canvaskit.wasm')\"",
     "web:export": "npm run web:canvaskit && expo export --platform web --output-dir dist",
     "screens": "node scripts/screens/flow.mjs",
+    "a11y": "node scripts/screens/a11y.mjs",
     "clips:frames": "tsx scripts/clips/frames.ts"
   },
   "dependencies": {
@@ -63,6 +64,7 @@
     "@playwright/test": "^1.64.0",
     "@types/node": "^22.20.5",
     "@types/react": "~19.2.2",
+    "axe-core": "4.14.0",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~57.0.2",
     "eslint-config-prettier": "^10.1.8",

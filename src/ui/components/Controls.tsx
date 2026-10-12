@@ -1,5 +1,5 @@
 import { MinusIcon as Minus, PlusIcon as Plus } from 'phosphor-react-native';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { type AccessibilityActionEvent, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { haptic } from '@/platform/haptics';
 
@@ -33,7 +33,7 @@ export function SegmentedControl<T extends string>({
             key={o.id}
             testID={testID ? `${testID}-${o.id}` : undefined}
             accessibilityRole="tab"
-            accessibilityState={{ selected: on }}
+            aria-selected={on}
             accessibilityLabel={o.label}
             onPress={() => {
               if (!on) {
@@ -95,15 +95,23 @@ export function Stepper({
   return (
     <View
       style={[styles.stepper, { borderBottomColor: t.c.hairline }, large && { flexWrap: 'wrap' }]}
-      accessible
-      accessibilityRole="adjustable"
-      accessibilityLabel={`${label}, ${detail ?? String(value)}`}
-      accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
-      onAccessibilityAction={(e) => {
-        if (e.nativeEvent.actionName === 'increment' && value < max && canIncrease)
-          onChange(value + 1);
-        if (e.nativeEvent.actionName === 'decrement' && value > min) onChange(value - 1);
-      }}
+      // On the web a slider can't hold the two buttons, so there they stand on their own.
+      {...(Platform.OS === 'web'
+        ? {}
+        : {
+            accessible: true,
+            accessibilityRole: 'adjustable' as const,
+            accessibilityLabel: `${label}, ${detail ?? String(value)}`,
+            'aria-valuemin': min,
+            'aria-valuemax': max,
+            'aria-valuenow': value,
+            accessibilityActions: [{ name: 'increment' }, { name: 'decrement' }],
+            onAccessibilityAction: (e: AccessibilityActionEvent) => {
+              if (e.nativeEvent.actionName === 'increment' && value < max && canIncrease)
+                onChange(value + 1);
+              if (e.nativeEvent.actionName === 'decrement' && value > min) onChange(value - 1);
+            },
+          })}
     >
       <View style={large ? { width: '100%' } : { flex: 1 }}>
         <Text variant="subhead">{label}</Text>
