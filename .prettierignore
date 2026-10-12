@@ -3,3 +3,6 @@ node_modules
 dist
 docs/balance
 package-lock.json
+.claude
+public
+dist-gm
