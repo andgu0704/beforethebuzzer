@@ -467,6 +467,14 @@ export const ui = {
     team: 'Team',
     noStats: 'No games yet',
   },
+  spoken: {
+    pts: { by: 'n', one: '{n} point', other: '{n} points' },
+    reb: { by: 'n', one: '{n} rebound', other: '{n} rebounds' },
+    ast: { by: 'n', one: '{n} assist', other: '{n} assists' },
+    fg: '{made} of {tried} shooting',
+    min: { by: 'n', one: '{n} minute', other: '{n} minutes' },
+    pm: 'plus-minus {n}',
+  },
   game: {
     title: 'Game report',
     yourLine: 'Your line',

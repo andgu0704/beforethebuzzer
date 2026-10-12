@@ -13,6 +13,8 @@ import { Text } from '@/ui/components/Text';
 import { useT } from '@/ui/i18n';
 import { useTheme } from '@/ui/theme/theme';
 
+import { statItems } from './statItems';
+
 const num = (v: number | string | undefined) => (typeof v === 'number' ? v : Number(v ?? 0));
 
 function Kicker({
@@ -82,21 +84,14 @@ function GameItem({ f }: { readonly f: FeedEntry }) {
       </Text>
       {min > 0 ? (
         <StatLine
-          items={[
-            { value: num(d['pts']), label: 'PTS', spoken: `${num(d['pts'])} points` },
-            { value: num(d['reb']), label: 'REB', spoken: `${num(d['reb'])} rebounds` },
-            { value: num(d['ast']), label: 'AST', spoken: `${num(d['ast'])} assists` },
-            {
-              value: `${num(d['fgm'])}-${num(d['fga'])}`,
-              label: 'FG',
-              spoken: `${num(d['fgm'])} of ${num(d['fga'])} shooting`,
-            },
-            {
-              value: `${num(d['pm']) > 0 ? '+' : ''}${num(d['pm'])}`,
-              label: '',
-              spoken: `plus-minus ${num(d['pm'])}`,
-            },
-          ]}
+          items={statItems(tt, {
+            pts: num(d['pts']),
+            reb: num(d['reb']),
+            ast: num(d['ast']),
+            fgm: num(d['fgm']),
+            fga: num(d['fga']),
+            pm: num(d['pm']),
+          })}
         />
       ) : (
         <Text variant="footnote" color="inkSecondary">

@@ -91,9 +91,9 @@ export const CareerCard = forwardRef<View, { readonly state: GameState }>(functi
         <View style={styles.statRow}>
           {[
             { v: tt('ui.ending.seasons', { n: seasons }), l: tt('ui.ending.collegeLine') },
-            { v: one(pg.pts), l: 'PTS' },
-            { v: one(pg.reb), l: 'REB' },
-            { v: one(pg.ast), l: 'AST' },
+            { v: one(pg.pts), l: tt('ui.game.pts') },
+            { v: one(pg.reb), l: tt('ui.game.reb') },
+            { v: one(pg.ast), l: tt('ui.game.ast') },
           ].map((s) => (
             <View key={s.l} style={{ gap: 2 }}>
               <Text variant="label" color="inkSecondary">
