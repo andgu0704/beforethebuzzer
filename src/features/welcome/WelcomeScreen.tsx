@@ -4,7 +4,10 @@ import { useState } from 'react';
 import { Alert, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { content } from '@/content';
+import { createRng } from '@/engine/core/rng';
 import type { SaveSummary } from '@/engine/save/store';
+import { generatePortrait } from '@/engine/world/portrait';
 import { deleteCareer, openCareer, useGame } from '@/state/game';
 import { Avatar } from '@/ui/components/Avatar';
 import { Button, IconButton } from '@/ui/components/Button';
@@ -13,6 +16,21 @@ import { Tag } from '@/ui/components/Tag';
 import { Text } from '@/ui/components/Text';
 import { useT } from '@/ui/i18n';
 import { useTheme } from '@/ui/theme/theme';
+
+/** Four faces from a fixed seed, in four teams' colours: the cast of a career. */
+const CAST = (() => {
+  const rng = createRng('welcome', 'cast');
+  const looks = [
+    { nation: 'USA', primary: '#FF5A1F', secondary: '#FFFFFF', jersey: 7 },
+    { nation: 'SEN', primary: '#14634A', secondary: '#F1EFEA', jersey: 23 },
+    { nation: 'LTU', primary: '#1F3A68', secondary: '#C9A227', jersey: 11 },
+    { nation: 'BRA', primary: '#8A2432', secondary: '#F2B544', jersey: 4 },
+  ];
+  return looks.map((l) => {
+    const nation = content.nations.find((n) => n.code === l.nation) ?? content.nations[0];
+    return { ...l, portrait: nation ? generatePortrait(rng, nation) : undefined };
+  });
+})();
 
 function SaveRow({
   save,
@@ -131,6 +149,28 @@ export function WelcomeScreen() {
           {saves.length ? tt('ui.welcome.tagline') : tt('ui.welcome.invite')}
         </Text>
 
+        {saves.length ? null : (
+          <View
+            style={styles.cast}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          >
+            {CAST.map((c, i) => (
+              <Avatar
+                key={i}
+                name=""
+                portrait={c.portrait}
+                size={72}
+                primary={c.primary}
+                secondary={c.secondary}
+                jersey={c.jersey}
+                expression={i === 0 ? 'smile' : 'focused'}
+                shape="card"
+              />
+            ))}
+          </View>
+        )}
+
         {failed ? (
           <View style={{ marginTop: t.space.xl }}>
             <Banner
@@ -197,6 +237,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   mark: { width: 28, height: 6, borderRadius: 1 },
+  cast: { flexDirection: 'row', gap: 10, marginTop: 28 },
   save: {
     flexDirection: 'row',
     alignItems: 'center',
