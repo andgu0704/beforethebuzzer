@@ -5,7 +5,7 @@
 
 import { content } from '@/content';
 import { userOf, userTeamId, type GameState } from '@/engine/career/state';
-import { collegePhase, seasonOf, weekIndex, type GameDate } from '@/engine/core/calendar';
+import { collegePhase, seasonOf, WEEK, weekIndex, type GameDate } from '@/engine/core/calendar';
 import type { TeamId } from '@/engine/core/ids';
 import type { FeedEntry } from '@/engine/model/career';
 import type { GameRecord, TeamRecord } from '@/engine/model/game';
@@ -68,12 +68,25 @@ export type PhaseKey =
   | 'nationalTournament'
   | 'spring'
   | 'draftProcess'
+  | 'proOffseason'
+  | 'proPreseason'
+  | 'proRegular'
+  | 'proPlayoffs'
   | 'done';
 
 export function phaseOf(state: GameState, date: GameDate = state.world.date): PhaseKey {
   if (state.career.ending) return 'done';
   if (state.career.stage === 'highSchool') return 'highSchool';
+  if (state.career.stage === 'pro') return proPhase(date.week);
   return collegePhase(date.week);
+}
+
+/** The pro calendar: camp in the autumn, 82 games to mid-April, playoffs into June. */
+export function proPhase(week: number): PhaseKey {
+  if (week >= WEEK.proSeasonStart || week <= WEEK.proSeasonEnd) return 'proRegular';
+  if (week >= WEEK.proPlayoffsStart && week < WEEK.draft) return 'proPlayoffs';
+  if (week >= WEEK.preseasonStart) return 'proPreseason';
+  return 'proOffseason';
 }
 
 export function currentTeam(state: GameState): Team | null {

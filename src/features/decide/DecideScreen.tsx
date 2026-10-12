@@ -185,6 +185,88 @@ function OffersCard({
   );
 }
 
+function ContractCard({
+  i,
+  onChoose,
+}: {
+  readonly i: Extract<Interrupt, { kind: 'contract' }>;
+  readonly onChoose: (c: string) => void;
+}) {
+  const t = useTheme();
+  const { t: tt, names } = useT();
+  const state = useGame((g) => g.state);
+  if (!state) return null;
+  return (
+    <View style={{ gap: t.space.l }}>
+      <Header
+        kicker={tt('ui.decide.contract.kicker')}
+        title={tt('ui.decide.contract.title')}
+        body={tt('ui.decide.contract.body')}
+      />
+      {i.offers.map((o) => {
+        const team = state.world.teams[o.teamId];
+        return (
+          <View
+            key={o.teamId}
+            style={[
+              styles.offer,
+              { backgroundColor: t.c.surface, borderRadius: t.radii.md, borderColor: t.c.hairline },
+            ]}
+          >
+            <View style={styles.castRow}>
+              {team ? (
+                <TeamMark
+                  teamId={team.id}
+                  abbr={team.abbr}
+                  primary={team.colours.primary}
+                  secondary={team.colours.secondary}
+                  size={44}
+                />
+              ) : null}
+              <View style={{ flex: 1 }}>
+                <Text variant="displayS">{`${names.team(o.teamId)} ${names.team(o.teamId, 'nickname')}`}</Text>
+                {o.current ? (
+                  <Text variant="footnote" color="accentText">
+                    {tt('ui.decide.contract.stay')}
+                  </Text>
+                ) : null}
+              </View>
+            </View>
+            <Text variant="subhead">
+              {tt('ui.decide.contract.terms', {
+                years: o.years,
+                salary: (o.salary / 1_000_000).toFixed(1),
+              })}
+            </Text>
+            <Text variant="callout" color="inkSecondary">
+              {tt('ui.decide.contract.role', { role: o.role })}
+            </Text>
+            <Button
+              testID={`offer-${o.teamId}`}
+              variant={o.current ? 'primary' : 'secondary'}
+              size="compact"
+              label={tt('ui.decide.contract.sign', { team: names.team(o.teamId) })}
+              onPress={() => {
+                onChoose(o.teamId);
+              }}
+            />
+          </View>
+        );
+      })}
+      {i.canRetire ? (
+        <ChoiceButton
+          testID="choice-retire"
+          label={tt('ui.decide.contract.retire')}
+          read={tt('ui.decide.contract.retireBody')}
+          onPress={() => {
+            onChoose('retire');
+          }}
+        />
+      ) : null}
+    </View>
+  );
+}
+
 function SimpleCard({
   kicker,
   title,
@@ -382,6 +464,22 @@ function InterruptView({
             id: o,
             label: tt(`ui.decide.afterDraft.${o}`),
             read: tt(`ui.decide.afterDraft.${o}Body`),
+          }))}
+          onChoose={onChoose}
+        />
+      );
+    case 'contract':
+      return <ContractCard i={i} onChoose={onChoose} />;
+    case 'retire':
+      return (
+        <SimpleCard
+          kicker={tt('ui.decide.retire.kicker')}
+          title={tt('ui.decide.retire.title')}
+          body={tt('ui.decide.retire.body', { age: i.age })}
+          options={(['continue', 'retire'] as const).map((o) => ({
+            id: o,
+            label: tt(`ui.decide.retire.${o}`),
+            read: tt(`ui.decide.retire.${o}Body`),
           }))}
           onChoose={onChoose}
         />
