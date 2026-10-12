@@ -84,6 +84,12 @@ export interface ScoutView {
 /** Extra draft-stock points from career effects (tournaments, events), keyed by player id. */
 export type StockAdjustments = Readonly<Record<string, number>>;
 
+/**
+ * How the consensus score blends what he is, what he might become and what he has done.
+ * Production carries real weight so that a big role played well moves a prospect up the board.
+ */
+const WEIGHT = { current: 0.4, ceiling: 0.15, production: 0.45 } as const;
+
 export function scout(world: World, p: Player, adjustments: StockAdjustments = {}): ScoutView {
   const season = seasonOf(world.date);
   const age = ageAt(p.birthYear, world.date);
@@ -110,11 +116,12 @@ export function scout(world: World, p: Player, adjustments: StockAdjustments = {
   const injury =
     p.injury && p.injury.severity !== 'minor' ? (p.injury.severity === 'severe' ? -4 : -1.5) : 0;
   const chronic = p.chronic.length * -1.5;
+  // Production counts in full once scouts have seen enough minutes; before that it is assumed average.
+  const seenMinutes = Math.min(1, prod.minutes / 400);
   const score =
-    (current + currentNoise) * 0.44 +
-    estCeiling * 0.36 +
-    prodAdjusted * 0.2 * Math.min(1, prod.minutes / 400) +
-    45 * 0.2 * (1 - Math.min(1, prod.minutes / 400)) +
+    (current + currentNoise) * WEIGHT.current +
+    estCeiling * WEIGHT.ceiling +
+    (prodAdjusted * seenMinutes + 45 * (1 - seenMinutes)) * WEIGHT.production +
     youth +
     length +
     injury +

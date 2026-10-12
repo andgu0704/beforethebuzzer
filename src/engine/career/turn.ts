@@ -29,6 +29,7 @@ import { raiseCallUps, resolveCallUp } from './national';
 import {
   applyPlan,
   checkTraitUnlocks,
+  fadeStock,
   gradeCheck,
   quietWeekReaction,
   updateProjection,
@@ -115,6 +116,7 @@ function beginWeek(state: GameState, index: ContentIndex): void {
   const wasHighSchool = career.stage === 'highSchool';
   beginLeagueWeek(state.world, ctx);
 
+  if (week === WEEK.summerStart) fadeStock(state);
   if (week === WEEK.summerStart && wasHighSchool && career.committedTo) {
     career.stage = 'college';
     career.coachTrust = 45;

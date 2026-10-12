@@ -373,7 +373,7 @@ export function resolveKeyMoment(
       current.context === 'rivalry' ||
       current.context === 'showcase')
   ) {
-    state.career.stock += outcome.success ? 0.25 : -0.12;
+    state.career.stock += outcome.success ? 0.15 : -0.1;
   }
   current.momentBudget -= 1;
   current.pendingMoment = null;
@@ -458,7 +458,7 @@ function finishUserGame(
         game.kind === 'tournament' || game.league === 'national' ? 3 : 2,
       );
     if (game.league === 'national' || game.kind === 'tournament')
-      career.stock += clamp(vsExpected * 0.06, -0.6, 0.8);
+      career.stock += clamp(vsExpected * 0.04, -0.5, 0.5);
     // Chasing his own numbers in a loss hurts the room.
     const teamFga = own.reduce((s, l) => s + l.fga, 0);
     if (!won && line.fga >= 12 && line.fga / Math.max(1, teamFga) > 0.36 && line.ast <= 1) {

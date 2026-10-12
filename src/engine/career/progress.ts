@@ -246,6 +246,17 @@ export function checkTraitUnlocks(state: GameState, index: ContentIndex): void {
   }
 }
 
+/** Share of draft stock that carries over into a new season. */
+export const STOCK_CARRY = 0.5;
+
+/**
+ * A new season starts: scouts weigh this year's form most, so last year's buzz (good or bad)
+ * fades. Staying in school is a fresh audition, not a pile of old credit.
+ */
+export function fadeStock(state: GameState): void {
+  state.career.stock = Math.round(state.career.stock * STOCK_CARRY * 100) / 100;
+}
+
 /** Where scouts have him: rank among all draft-eligible players and a projected pick range. */
 export function updateProjection(state: GameState, index: ContentIndex): void {
   const user = userOf(state);

@@ -65,11 +65,12 @@ export function createCareer(index: ContentIndex, input: CreationInput): GameSta
   const start = (gift.effects.startSkills ?? 0) + (flaw.effects.startSkills ?? 0);
   const level = 45 + start + rng.normal(0, 1);
   const skills = rollSkills(rng, level, input.style, 4);
-  // Hidden potential: wide on purpose, so some careers can reach the top of a draft and some cannot.
+  // Hidden potential: wide enough that some careers can reach the top of a draft and some
+  // cannot, but not so wide that the roll decides more than the way he is played.
   const gap = clamp(
-    rng.normal(21, 6) + (gift.effects.ceiling ?? 0) + (flaw.effects.ceiling ?? 0),
-    12,
-    40,
+    rng.normal(23, 5) + (gift.effects.ceiling ?? 0) + (flaw.effects.ceiling ?? 0),
+    15,
+    38,
   );
   const user: Player = {
     id: asPersonId(nextId(world.counters, 'person', 'p')),
