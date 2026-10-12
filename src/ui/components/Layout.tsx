@@ -7,7 +7,7 @@ import type { ReactNode } from 'react';
 import { Pressable, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useTheme } from '../theme/theme';
+import { useLargeText, useTheme } from '../theme/theme';
 import { TOUCH } from '../theme/tokens';
 import { Button } from './Button';
 import { Text } from './Text';
@@ -112,15 +112,16 @@ export function ListRow({
   readonly subtitle?: string | undefined;
   readonly value?: string | undefined;
   readonly leading?: ReactNode | undefined;
-  readonly onPress?: () => void | undefined;
+  readonly onPress?: (() => void) | undefined;
   readonly icon?: Icon | undefined;
   readonly chevron?: boolean | undefined;
   readonly testID?: string | undefined;
   readonly accessibilityLabel?: string | undefined;
 }) {
   const t = useTheme();
+  const large = useLargeText();
   const body = (
-    <View style={[styles.row, { borderBottomColor: t.c.hairline }]}>
+    <View style={[styles.row, { borderBottomColor: t.c.hairline }, large && { flexWrap: 'wrap' }]}>
       {leading}
       {IconCmp ? <IconCmp size={22} color={t.c.inkSecondary} /> : null}
       <View style={{ flex: 1, gap: 2 }}>

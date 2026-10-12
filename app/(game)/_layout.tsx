@@ -1,6 +1,7 @@
-import { Redirect, Stack, router, usePathname } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { Redirect, Stack, usePathname } from 'expo-router';
+import { useEffect } from 'react';
 
+import { openDecide } from '@/state/decide';
 import { useGame } from '@/state/game';
 import { useTheme } from '@/ui/theme/theme';
 
@@ -14,13 +15,15 @@ export default function GameLayout() {
   const busy = useGame((g) => g.busy);
   const pendingId = useGame((g) => g.state?.career.pending[0]?.id ?? null);
   const pathname = usePathname();
-  const opened = useRef<string | null>(null);
-
   useEffect(() => {
     if (!pendingId || busy || pathname === '/decide') return;
-    if (opened.current === pendingId) return;
-    opened.current = pendingId;
-    router.push('/decide');
+    openDecide();
+    // A push made while the previous sheet is still animating away can be swallowed, so a
+    // decision still pending a moment later is opened again.
+    const id = setInterval(openDecide, 1200);
+    return () => {
+      clearInterval(id);
+    };
   }, [pendingId, busy, pathname]);
 
   if (!state) return <Redirect href="/welcome" />;

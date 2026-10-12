@@ -56,7 +56,12 @@ export const CareerCard = forwardRef<View, { readonly state: GameState }>(functi
           <Text variant="label" style={{ color: '#FFFFFF', opacity: 0.8 }}>
             {end?.pick ? tt(`ui.ending.round.${end.pick <= 30 ? 1 : 2}`) : tt('ui.ending.kicker')}
           </Text>
-          <Text variant="scoreboard" style={{ color: '#FFFFFF' }}>
+          <Text
+            variant={end?.pick ? 'scoreboard' : 'displayL'}
+            style={{ color: '#FFFFFF' }}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+          >
             {end?.pick ? `#${end.pick}` : tt('ui.ending.undrafted').toUpperCase()}
           </Text>
           {draftTeam ? (
@@ -86,9 +91,9 @@ export const CareerCard = forwardRef<View, { readonly state: GameState }>(functi
         <View style={styles.statRow}>
           {[
             { v: tt('ui.ending.seasons', { n: seasons }), l: tt('ui.ending.collegeLine') },
-            { v: one(pg.pts), l: 'PTS' },
-            { v: one(pg.reb), l: 'REB' },
-            { v: one(pg.ast), l: 'AST' },
+            { v: one(pg.pts), l: tt('ui.game.pts') },
+            { v: one(pg.reb), l: tt('ui.game.reb') },
+            { v: one(pg.ast), l: tt('ui.game.ast') },
           ].map((s) => (
             <View key={s.l} style={{ gap: 2 }}>
               <Text variant="label" color="inkSecondary">

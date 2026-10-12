@@ -68,7 +68,23 @@ function watchedTeams(state: GameState): Set<TeamId> {
 }
 
 export function advance(state: GameState, index: ContentIndex): StepResult {
+  const step = advanceSlice(state, index, Infinity);
+  if (step.kind === 'yield') throw new Error('an unbounded advance cannot yield');
+  return step;
+}
+
+/**
+ * Like `advance`, but hands control back after `slots` game slots (and after the week's
+ * opening), so an app can paint between slices of a heavy week. Call it again to carry on; the
+ * result is the same as one `advance`.
+ */
+export function advanceSlice(
+  state: GameState,
+  index: ContentIndex,
+  slots: number,
+): StepResult | { readonly kind: 'yield' } {
   const career = state.career;
+  let budget = slots;
   for (let guard = 0; guard < 500; guard++) {
     if (career.ending) return { kind: 'ended' };
     const pending = career.pending[0];
@@ -78,6 +94,7 @@ export function advance(state: GameState, index: ContentIndex): StepResult {
       case 'idle':
         beginWeek(state, index);
         cursor.stage = 'games';
+        if (Number.isFinite(budget)) return { kind: 'yield' };
         break;
       case 'games': {
         if (cursor.live) {
@@ -92,6 +109,8 @@ export function advance(state: GameState, index: ContentIndex): StepResult {
         }
         const mine = step.held[0];
         if (mine) startUserGame(state, index, mine);
+        budget -= 1;
+        if (budget <= 0) return { kind: 'yield' };
         break;
       }
       case 'events':

@@ -1,5 +1,3 @@
-import { Text } from '@/ui/components/Text';
+import { GodModeScreen } from '@/features/godmode';
 
-export default function Placeholder() {
-  return <Text>Coming next</Text>;
-}
+export default GodModeScreen;

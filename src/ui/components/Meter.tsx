@@ -1,7 +1,7 @@
 import { ArrowDownIcon as ArrowDown, ArrowUpIcon as ArrowUp } from 'phosphor-react-native';
 import { StyleSheet, View } from 'react-native';
 
-import { useTheme } from '../theme/theme';
+import { useLargeText, useTheme } from '../theme/theme';
 import { AnimatedNumber } from './AnimatedNumber';
 import { Text } from './Text';
 
@@ -25,11 +25,12 @@ export function Meter({
   readonly format?: (n: number) => string | undefined;
 }) {
   const t = useTheme();
+  const large = useLargeText();
   const pct = Math.max(0, Math.min(1, value / max));
   const colour = tone === 'ink' ? t.c.ink : t.c[tone];
   return (
     <View
-      style={styles.wrap}
+      style={[styles.wrap, large && { minWidth: '28%' }]}
       accessible
       accessibilityLabel={accessibilityLabel ?? `${label} ${Math.round(value)}`}
     >

@@ -5,12 +5,14 @@ import {
   FastForwardIcon as FastForward,
 } from 'phosphor-react-native';
 import { useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { FeedEntry } from '@/engine/model/career';
-import { dismissError, playAhead, playOn, useGame } from '@/state/game';
+import { dismissError, playAhead, playOn, save, useGame } from '@/state/game';
+import { openDecide } from '@/state/decide';
+import { useSettings } from '@/state/settings';
 import { feedByWeek, phaseOf, weekRange } from '@/state/views';
 import { Button, IconButton } from '@/ui/components/Button';
 import { Banner, EmptyState } from '@/ui/components/Layout';
@@ -59,8 +61,13 @@ export function ActionDock() {
   const state = useGame((g) => g.state);
   const busy = useGame((g) => g.busy);
   useGame((g) => g.rev);
+  const tips = useSettings((s) => s.tipsSeen);
   if (!state) return null;
   const pending = state.career.pending.length;
+  // Onboarding by doing: one line next to the control it describes, once each.
+  const firstWeek = state.career.stage === 'highSchool' && state.career.feed.length <= 2;
+  const tip =
+    !firstWeek || pending || busy ? null : !tips['plan'] ? 'plan' : !tips['next'] ? 'next' : null;
   const ended = state.career.ending !== null;
   const label = ended
     ? tt('ui.home.ended')
@@ -72,31 +79,59 @@ export function ActionDock() {
           ? tt('ui.home.simulating')
           : tt('ui.home.nextWeek');
   return (
-    <View
-      style={[
-        styles.dock,
-        { paddingHorizontal: t.gutter, backgroundColor: t.c.canvas, borderTopColor: t.c.hairline },
-      ]}
-    >
-      <IconButton
-        testID="simulate-ahead"
-        icon={FastForward}
-        label={tt('ui.home.simulateAhead')}
-        disabled={!!busy || pending > 0 || ended}
-        onPress={() => void playAhead()}
-      />
-      <Button
-        testID="next-week"
-        style={{ flex: 1 }}
-        label={label}
-        disabled={!!busy}
-        onPress={() => {
-          if (ended) router.push('/ending');
-          else if (pending) router.push('/decide');
-          else void playOn();
-        }}
-        trailing={busy ? <Basketball size={18} color={t.c.onAccent} weight="fill" /> : undefined}
-      />
+    <View style={{ backgroundColor: t.c.canvas }}>
+      {tip ? (
+        <Pressable
+          testID={`tip-${tip}`}
+          onPress={() => {
+            if (tip === 'plan') router.push('/train');
+            else useSettings.getState().markTip('next');
+          }}
+          style={[
+            styles.tip,
+            {
+              marginHorizontal: t.gutter,
+              backgroundColor: t.c.accentTint,
+              borderRadius: t.radii.sm,
+            },
+          ]}
+        >
+          <Text variant="footnote" color="accentText">
+            {tip === 'plan' ? tt('ui.home.tipPlan') : tt('ui.home.tipNext')}
+          </Text>
+        </Pressable>
+      ) : null}
+      <View
+        style={[
+          styles.dock,
+          {
+            paddingHorizontal: t.gutter,
+            backgroundColor: t.c.canvas,
+            borderTopColor: t.c.hairline,
+          },
+        ]}
+      >
+        <IconButton
+          testID="simulate-ahead"
+          icon={FastForward}
+          label={tt('ui.home.simulateAhead')}
+          disabled={!!busy || pending > 0 || ended}
+          onPress={() => void playAhead()}
+        />
+        <Button
+          testID="next-week"
+          style={{ flex: 1 }}
+          label={label}
+          disabled={!!busy}
+          onPress={() => {
+            if (tip === 'next') useSettings.getState().markTip('next');
+            if (ended) router.push('/ending');
+            else if (pending) openDecide();
+            else void playOn();
+          }}
+          trailing={busy ? <Basketball size={18} color={t.c.onAccent} weight="fill" /> : undefined}
+        />
+      </View>
     </View>
   );
 }
@@ -152,7 +187,25 @@ export function HomeScreen() {
                 tone="negative"
                 title={error.kind === 'save' ? tt('ui.home.saveError') : tt('ui.home.errorTitle')}
                 body={error.message}
-                action={{ label: tt('ui.common.close'), onPress: dismissError }}
+                action={
+                  error.kind === 'engine'
+                    ? {
+                        label: tt('ui.common.retry'),
+                        onPress: () => {
+                          dismissError();
+                          void playOn();
+                        },
+                      }
+                    : error.kind === 'save'
+                      ? {
+                          label: tt('ui.common.retry'),
+                          onPress: () => {
+                            dismissError();
+                            void save();
+                          },
+                        }
+                      : { label: tt('ui.common.close'), onPress: dismissError }
+                }
               />
             ) : null}
           </View>
@@ -187,6 +240,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   entry: { paddingVertical: 16, borderBottomWidth: StyleSheet.hairlineWidth },
+  tip: { paddingHorizontal: 12, paddingVertical: 8, marginTop: 8 },
   dock: {
     flexDirection: 'row',
     gap: 10,

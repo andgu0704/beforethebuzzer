@@ -16,7 +16,20 @@ export interface AheadResult {
 }
 
 const ROUTINE_CONTEXTS = new Set(['regular', 'conference', 'exhibition']);
-const NOTABLE: ReadonlySet<FeedKind> = new Set(['injury', 'milestone', 'draft']);
+export const NOTABLE: ReadonlySet<FeedKind> = new Set(['injury', 'milestone', 'draft']);
+
+/** A key moment simulate ahead may answer by itself: one in a routine game. */
+export function isRoutineMoment(
+  state: GameState,
+  interrupt: Interrupt,
+  stopAtEveryMoment = false,
+): interrupt is Extract<Interrupt, { kind: 'keyMoment' }> {
+  return (
+    interrupt.kind === 'keyMoment' &&
+    !stopAtEveryMoment &&
+    ROUTINE_CONTEXTS.has(state.career.cursor.live?.context ?? '')
+  );
+}
 
 /** The option he has picked most often in this kind of moment; the first one if he never has. */
 export function tendencyChoice(
@@ -57,11 +70,7 @@ export function simulateAhead(
     if (step.kind === 'ended') return { weeks, stop: 'ended' };
     if (step.kind === 'interrupt') {
       const i = step.interrupt;
-      const routine =
-        i.kind === 'keyMoment' &&
-        !options.stopAtEveryMoment &&
-        ROUTINE_CONTEXTS.has(state.career.cursor.live?.context ?? '');
-      if (i.kind === 'keyMoment' && routine) {
+      if (isRoutineMoment(state, i, options.stopAtEveryMoment)) {
         resolve(state, index, i.id, tendencyChoice(state, index, i));
         continue;
       }

@@ -52,12 +52,11 @@ export function becauseOf(
       });
   }
   const trait = requires.traitsAny?.[0];
-  if (trait && index.trait.get(trait))
-    return t('ui.decide.becauseTrait', { trait: t(`traits.${trait}.name`) });
+  if (trait && index.trait.get(trait)) return t('ui.decide.becauseTrait', { trait });
   const skill = requires.skillsMin ? Object.entries(requires.skillsMin)[0] : undefined;
   if (skill)
     return t('ui.decide.becauseSkill', {
-      skill: t(`skills.${skill[0]}`).toLowerCase(),
+      skillName: t(`skills.${skill[0]}`).toLowerCase(),
       n: skill[1],
     });
   return null;

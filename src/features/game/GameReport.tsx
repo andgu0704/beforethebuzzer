@@ -13,20 +13,21 @@ import { useT } from '@/ui/i18n';
 import { useTheme } from '@/ui/theme/theme';
 
 import { FeedItem } from '../feed/FeedItem';
+import { statItems } from '../feed/statItems';
 
-const COLUMNS = [
-  { key: 'min', label: 'MIN' },
-  { key: 'pts', label: 'PTS' },
-  { key: 'reb', label: 'REB' },
-  { key: 'ast', label: 'AST' },
-  { key: 'stl', label: 'STL' },
-  { key: 'blk', label: 'BLK' },
-  { key: 'tov', label: 'TO' },
-  { key: 'fg', label: 'FG', width: 52 },
-  { key: 'tp', label: '3PT', width: 52 },
-  { key: 'ft', label: 'FT', width: 52 },
-  { key: 'pf', label: 'PF' },
-  { key: 'pm', label: '+/−' },
+const COLUMN_KEYS = [
+  { key: 'min' },
+  { key: 'pts' },
+  { key: 'reb' },
+  { key: 'ast' },
+  { key: 'stl' },
+  { key: 'blk' },
+  { key: 'tov' },
+  { key: 'fg', width: 52 },
+  { key: 'tp', width: 52 },
+  { key: 'ft', width: 52 },
+  { key: 'pf' },
+  { key: 'pm' },
 ] as const;
 
 function cells(l: PlayerLine): Record<string, string | number> {
@@ -72,7 +73,7 @@ export function GameReport() {
         {names.team(b.teamId)}
       </Text>
       <BoxScoreTable
-        columns={COLUMNS}
+        columns={COLUMN_KEYS.map((c) => ({ ...c, label: tt(`ui.game.${c.key}`) }))}
         highlight={state.career.playerId}
         rows={[...b.players]
           .sort((x, y) => Number(y.starter) - Number(x.starter) || y.sec - x.sec)
@@ -99,25 +100,14 @@ export function GameReport() {
           <View style={{ marginTop: t.space.s }}>
             <StatLine
               size="large"
-              items={[
-                { value: line.pts, label: 'PTS', spoken: `${line.pts} points` },
-                {
-                  value: line.orb + line.drb,
-                  label: 'REB',
-                  spoken: `${line.orb + line.drb} rebounds`,
-                },
-                { value: line.ast, label: 'AST', spoken: `${line.ast} assists` },
-                {
-                  value: `${line.fgm}-${line.fga}`,
-                  label: 'FG',
-                  spoken: `${line.fgm} of ${line.fga} shooting`,
-                },
-                {
-                  value: Math.round(line.sec / 60),
-                  label: 'MIN',
-                  spoken: `${Math.round(line.sec / 60)} minutes`,
-                },
-              ]}
+              items={statItems(tt, {
+                pts: line.pts,
+                reb: line.orb + line.drb,
+                ast: line.ast,
+                fgm: line.fgm,
+                fga: line.fga,
+                min: Math.round(line.sec / 60),
+              })}
             />
           </View>
         </>

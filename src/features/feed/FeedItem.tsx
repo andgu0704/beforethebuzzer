@@ -6,11 +6,14 @@ import { replySocial } from '@/engine/career/social';
 import type { FeedEntry, SocialPost } from '@/engine/model/career';
 import { mutate, useGame } from '@/state/game';
 import { Avatar } from '@/ui/components/Avatar';
+import { AnimatedNumber } from '@/ui/components/AnimatedNumber';
 import { Button } from '@/ui/components/Button';
 import { StatLine, Scorebug } from '@/ui/components/Stats';
 import { Text } from '@/ui/components/Text';
 import { useT } from '@/ui/i18n';
 import { useTheme } from '@/ui/theme/theme';
+
+import { statItems } from './statItems';
 
 const num = (v: number | string | undefined) => (typeof v === 'number' ? v : Number(v ?? 0));
 
@@ -81,21 +84,14 @@ function GameItem({ f }: { readonly f: FeedEntry }) {
       </Text>
       {min > 0 ? (
         <StatLine
-          items={[
-            { value: num(d['pts']), label: 'PTS', spoken: `${num(d['pts'])} points` },
-            { value: num(d['reb']), label: 'REB', spoken: `${num(d['reb'])} rebounds` },
-            { value: num(d['ast']), label: 'AST', spoken: `${num(d['ast'])} assists` },
-            {
-              value: `${num(d['fgm'])}-${num(d['fga'])}`,
-              label: 'FG',
-              spoken: `${num(d['fgm'])} of ${num(d['fga'])} shooting`,
-            },
-            {
-              value: `${num(d['pm']) > 0 ? '+' : ''}${num(d['pm'])}`,
-              label: '',
-              spoken: `plus-minus ${num(d['pm'])}`,
-            },
-          ]}
+          items={statItems(tt, {
+            pts: num(d['pts']),
+            reb: num(d['reb']),
+            ast: num(d['ast']),
+            fgm: num(d['fgm']),
+            fga: num(d['fga']),
+            pm: num(d['pm']),
+          })}
         />
       ) : (
         <Text variant="footnote" color="inkSecondary">
@@ -178,18 +174,18 @@ function Changes({ data }: { readonly data: Readonly<Record<string, number | str
       const [kind, key] = k.split(':') as [string, string];
       const label = kind === 'skill' ? tt(`skills.${key}`) : tt(`ui.feed.changes.${key}`);
       const n = v as number;
-      const shown =
-        key === 'gpa'
-          ? n.toFixed(2)
-          : key === 'money'
-            ? `$${Math.abs(Math.round(n))}`
-            : String(Math.round(n * 10) / 10);
-      const sign = n > 0 ? '+' : key === 'money' ? '−' : '';
-      return {
-        label,
-        value: `${sign}${shown}`,
-        good: key === 'energy' || key === 'money' ? n > 0 : n > 0,
+      const format = (x: number) => {
+        const sign = x > 0 ? '+' : x < 0 ? '−' : '';
+        const abs = Math.abs(x);
+        const body =
+          key === 'gpa'
+            ? abs.toFixed(2)
+            : key === 'money'
+              ? `$${Math.round(abs)}`
+              : String(Math.round(abs * 10) / 10);
+        return `${sign}${body}`;
       };
+      return { label, n, format, good: n > 0 };
     });
   if (!items.length) return null;
   return (
@@ -202,9 +198,14 @@ function Changes({ data }: { readonly data: Readonly<Record<string, number | str
           <Text variant="footnote" color="inkSecondary">
             {i.label}
           </Text>
-          <Text variant="subhead" color={i.good ? 'positive' : 'negative'} tabular>
-            {i.value}
-          </Text>
+          <AnimatedNumber
+            value={i.n}
+            from={0}
+            format={i.format}
+            variant="subhead"
+            tabular={false}
+            style={{ color: i.good ? t.c.positive : t.c.negative }}
+          />
         </View>
       ))}
     </View>

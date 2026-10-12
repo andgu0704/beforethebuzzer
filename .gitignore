@@ -44,3 +44,5 @@ yarn-error.*
 # screenshot scratch
 scripts/screens/_*.mjs
 public/canvaskit.wasm
+dist-gm/
+dist-ios/

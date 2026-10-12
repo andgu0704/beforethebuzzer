@@ -5,13 +5,7 @@
 
 import { content } from '@/content';
 import { userOf, userTeamId, type GameState } from '@/engine/career/state';
-import {
-  collegePhase,
-  seasonOf,
-  weekIndex,
-  weekStartDay,
-  type GameDate,
-} from '@/engine/core/calendar';
+import { collegePhase, seasonOf, weekIndex, type GameDate } from '@/engine/core/calendar';
 import type { TeamId } from '@/engine/core/ids';
 import type { FeedEntry } from '@/engine/model/career';
 import type { GameRecord, TeamRecord } from '@/engine/model/game';
@@ -34,16 +28,34 @@ export const MONTHS = [
   'Dec',
 ];
 
-export function dayLabel(week: number, offset = 0): string {
-  const { month, day } = weekStartDay(week);
-  const d = day + offset;
-  return `${MONTHS[month - 1] ?? ''} ${d}`;
+const MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+/** Month (1–12) and day for a day of the year counted from 1 (the game's 364-day year wraps). */
+function fromDayOfYear(dayOfYear: number): { month: number; day: number } {
+  let d = ((dayOfYear - 1) % 365) + 1;
+  let month = 0;
+  while (month < 11 && d > (MONTH_DAYS[month] ?? 31)) {
+    d -= MONTH_DAYS[month] ?? 31;
+    month++;
+  }
+  return { month: month + 1, day: d };
 }
 
-/** "Jan 12–18" */
+function label(dayOfYear: number): string {
+  const { month, day } = fromDayOfYear(dayOfYear);
+  return `${MONTHS[month - 1] ?? ''} ${day}`;
+}
+
+export function dayLabel(week: number, offset = 0): string {
+  return label((week - 1) * 7 + 1 + offset);
+}
+
+/** "Jan 12–18", or "Jun 25–Jul 1" across a month end. */
 export function weekRange(week: number): string {
-  const { month, day } = weekStartDay(week);
-  return `${MONTHS[month - 1] ?? ''} ${day}–${day + 6}`;
+  const first = (week - 1) * 7 + 1;
+  const a = fromDayOfYear(first);
+  const b = fromDayOfYear(first + 6);
+  return a.month === b.month ? `${label(first)}–${b.day}` : `${label(first)}–${label(first + 6)}`;
 }
 
 export type PhaseKey =

@@ -1,5 +1,3 @@
-import { Text } from '@/ui/components/Text';
+import { SettingsScreen } from '@/features/settings/SettingsScreen';
 
-export default function Placeholder() {
-  return <Text>Coming next</Text>;
-}
+export default SettingsScreen;

@@ -24,7 +24,9 @@ export function EndingScreen() {
   const [note, setNote] = useState<string | null>(null);
   if (!state) return null;
   const end = state.career.ending;
-  const last = state.career.feed.filter((f) => f.kind === 'draft').pop();
+  const last = state.career.feed
+    .filter((f) => f.message.key === 'feed.drafted' || f.message.key === 'feed.undrafted')
+    .pop();
   return (
     <View
       style={{ flex: 1, backgroundColor: t.c.canvas, paddingTop: end ? insets.top : 0 }}

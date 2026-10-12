@@ -35,14 +35,17 @@
           "image": "./assets/splash.png",
           "imageWidth": 160,
           "backgroundColor": "#F3F1EC",
-          "dark": { "image": "./assets/splash.png", "backgroundColor": "#0F0F10" }
+          "dark": {
+            "image": "./assets/splash.png",
+            "backgroundColor": "#0F0F10"
+          }
         }
       ],
       "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     }
   }
 }

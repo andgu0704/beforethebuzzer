@@ -8,15 +8,17 @@
 import { create } from 'zustand';
 
 import { content } from '@/content';
-import { simulateAhead } from '@/engine/career/ahead';
+import { isRoutineMoment, NOTABLE, tendencyChoice } from '@/engine/career/ahead';
 import { createCareer, type CreationInput } from '@/engine/career/create';
 import { userOf, userTeamId, type GameState } from '@/engine/career/state';
-import { advance, resolve, type Choice } from '@/engine/career/turn';
+import { advanceSlice, resolve, type Choice } from '@/engine/career/turn';
 import { indexContent, type ContentIndex } from '@/engine/content/registry';
 import type { Interrupt } from '@/engine/model/career';
 import { deserialise, SaveError, serialise, type SaveSummary } from '@/engine/save/store';
+import { haptic } from '@/platform/haptics';
 import { saveStore } from '@/platform/storage';
 
+import { timed, usePerf } from './perf';
 import { useSettings } from './settings';
 
 let indexCache: ContentIndex | null = null;
@@ -61,6 +63,42 @@ const get = useGame.getState;
 
 function bump(extra: Partial<GameStore> = {}): void {
   set({ ...extra, rev: get().rev + 1 });
+}
+
+/** Game slots played between frames; a slot is one round of league games. */
+const SLOTS_PER_FRAME = 2;
+
+/**
+ * Plays until something needs the user, the week ends or the career ends, painting between
+ * slices so a heavy week never freezes the screen. Routine key moments can be answered on the
+ * way (simulate ahead).
+ */
+async function runWeek(
+  state: GameState,
+  auto: { readonly stopAtEveryMoment: boolean } | null,
+): Promise<'interrupt' | 'weekDone' | 'ended'> {
+  for (let guard = 0; guard < 5000; guard++) {
+    const step = timed('lastEngineMs', () => advanceSlice(state, contentIndex(), SLOTS_PER_FRAME));
+    if (step.kind === 'yield') {
+      await frame();
+      continue;
+    }
+    if (
+      step.kind === 'interrupt' &&
+      auto &&
+      isRoutineMoment(state, step.interrupt, auto.stopAtEveryMoment)
+    ) {
+      resolve(
+        state,
+        contentIndex(),
+        step.interrupt.id,
+        tendencyChoice(state, contentIndex(), step.interrupt),
+      );
+      continue;
+    }
+    return step.kind;
+  }
+  return 'weekDone';
 }
 
 /** Lets the UI paint (the "Simulating" state) before a long synchronous engine call. */
@@ -110,7 +148,10 @@ export function save(): Promise<void> {
     try {
       await frame();
       const summary = summaryOf(state);
-      await saveStore.write(summary, serialise(state));
+      const start = performance.now();
+      const text = serialise(state);
+      await saveStore.write(summary, text);
+      usePerf.setState({ lastSaveMs: performance.now() - start });
       const saves = get().saves.filter((s) => s.id !== summary.id);
       set({ saves: [summary, ...saves] });
     } catch (e) {
@@ -182,6 +223,14 @@ export async function newCareer(input: CreationInput): Promise<void> {
 
 // ------------------------------------------------------------------ the turn
 
+/** Warning for injuries and eligibility, success for milestones and draft news (§10.4). */
+function feelNews(state: GameState, from: number): void {
+  const fresh = state.career.feed.slice(from);
+  if (fresh.some((f) => f.kind === 'injury' || f.message.key === 'feed.ineligible'))
+    haptic('warning');
+  else if (fresh.some((f) => f.kind === 'milestone' || f.kind === 'draft')) haptic('success');
+}
+
 export function pendingInterrupt(state: GameState | null): Interrupt | null {
   return state?.career.pending[0] ?? null;
 }
@@ -202,7 +251,9 @@ export async function playOn(): Promise<void> {
   });
   await frame();
   try {
-    advance(state, contentIndex());
+    const mark = state.career.feed.length;
+    await runWeek(state, null);
+    feelNews(state, mark);
     bump({ busy: null });
     await save();
   } catch (e) {
@@ -227,10 +278,13 @@ export async function playAhead(maxWeeks = 12): Promise<void> {
   try {
     for (let weeks = 0; weeks < maxWeeks;) {
       await frame();
-      const r = simulateAhead(state, contentIndex(), { maxWeeks: 1, stopAtEveryMoment });
-      weeks += r.weeks;
+      const mark = state.career.feed.length;
+      const r = await runWeek(state, { stopAtEveryMoment });
+      feelNews(state, mark);
+      if (r !== 'weekDone') break;
+      weeks += 1;
       bump({ busy: { kind: 'ahead', weeks, of: maxWeeks } });
-      if (r.stop !== 'limit') break;
+      if (state.career.feed.slice(mark).some((f) => NOTABLE.has(f.kind))) break;
     }
     bump({ busy: null });
     await save();

@@ -66,7 +66,14 @@ export function CombineScreen() {
           {KEYS.map(({ key, unit, lowerBetter, digits = 0 }) => {
             const a = avg(key);
             const v = mine[key];
-            const better = lowerBetter ? v < a : v > a;
+            const tolerance = digits ? 0.02 : 0.5;
+            const diff = lowerBetter ? a - v : v - a;
+            const tone =
+              !peers.length || Math.abs(diff) < tolerance
+                ? 'ink'
+                : diff > 0
+                  ? 'positive'
+                  : 'negative';
             return (
               <View key={key} style={[styles.row, { borderBottomColor: t.c.hairline }]}>
                 <View style={{ flex: 1 }}>
@@ -75,11 +82,8 @@ export function CombineScreen() {
                     {tt('ui.combine.vsAvg', { avg: `${a.toFixed(digits)} ${unit}` })}
                   </Text>
                 </View>
-                <Text
-                  variant="stat"
-                  color={peers.length ? (better ? 'positive' : 'negative') : 'ink'}
-                >
-                  {`${v.toFixed(digits)}`}
+                <Text variant="stat" color={tone}>
+                  {v.toFixed(digits)}
                 </Text>
                 <Text variant="footnote" color="inkSecondary" style={{ width: 28 }}>
                   {unit}

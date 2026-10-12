@@ -83,7 +83,7 @@ export function MomentView({
         </View>
       </View>
 
-      <ClipSlot situation={s} result={result} />
+      <ClipSlot situation={s} result={result} resultLine={entry ? m(entry.message) : undefined} />
 
       <View style={{ gap: t.space.s }}>
         <Text variant="label" color="brandText">

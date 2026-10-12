@@ -224,6 +224,7 @@ function Schedule({ state, team }: { readonly state: GameState; readonly team: T
 function Standings({ state, team }: { readonly state: GameState; readonly team: Team }) {
   const t = useTheme();
   const { t: tt, names } = useT();
+  if (team.kind === 'pro') return <ProStandings state={state} team={team} />;
   if (team.kind !== 'college') return null;
   const season = seasonOf(state.world.date);
   const s = state.world.seasons[String(season)];
@@ -333,6 +334,57 @@ function Standings({ state, team }: { readonly state: GameState; readonly team: 
   );
 }
 
+function ProStandings({
+  state,
+  team,
+}: {
+  readonly state: GameState;
+  readonly team: Extract<Team, { kind: 'pro' }>;
+}) {
+  const t = useTheme();
+  const { t: tt, names } = useT();
+  const table = Object.values(state.world.teams)
+    .filter(
+      (x): x is Extract<Team, { kind: 'pro' }> =>
+        x.kind === 'pro' && x.conference === team.conference,
+    )
+    .map((x) => ({ id: x.id, r: recordOf(state, x.id) }))
+    .sort((a, b) => (b.r ? b.r.w - b.r.l : 0) - (a.r ? a.r.w - a.r.l : 0));
+  return (
+    <View>
+      <SectionHeader
+        title={tt(`ui.team.proConference.${team.conference}`)}
+        detail={tt('ui.team.overall')}
+      />
+      {table.map(({ id, r }, i) => (
+        <View
+          key={id}
+          style={[
+            styles.row,
+            { borderBottomColor: t.c.hairline },
+            id === team.id && {
+              backgroundColor: t.c.accentTint,
+              marginHorizontal: -8,
+              paddingHorizontal: 8,
+              borderRadius: t.radii.sm,
+            },
+          ]}
+        >
+          <Text variant="footnote" color="inkSecondary" style={{ width: 20 }} tabular>
+            {i + 1}
+          </Text>
+          <Text variant="subhead" style={{ flex: 1 }} numberOfLines={1}>
+            {names.team(id)}
+          </Text>
+          <Text variant="footnote" tabular>
+            {recordText(r)}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export function TeamScreen() {
   const t = useTheme();
   const insets = useSafeAreaInsets();
@@ -355,6 +407,7 @@ export function TeamScreen() {
               abbr={team.abbr}
               primary={team.colours.primary}
               secondary={team.colours.secondary}
+              emblem={team.kind === 'pro' ? team.emblem : undefined}
               size={40}
             />
           ) : null}

@@ -14,7 +14,20 @@ const engineForbiddenImports = [
 ];
 
 export default tseslint.config(
-  { ignores: ['node_modules', '.expo', 'dist', 'docs', 'eslint.config.mjs'] },
+  {
+    ignores: [
+      'node_modules',
+      '.expo',
+      '.claude',
+      'dist',
+      'docs',
+      'public',
+      'eslint.config.mjs',
+      'metro.config.js',
+      'scripts/**/*.mjs',
+      'expo-env.d.ts',
+    ],
+  },
   ...expoConfig,
   ...tseslint.configs.strictTypeChecked,
   {

@@ -29,7 +29,7 @@ export function perGame(lines: readonly SeasonLine[]): PerGame {
     ast: sum('ast') / d,
     stl: sum('stl') / d,
     blk: sum('blk') / d,
-    min: sum('min') / d / 60,
+    min: sum('min') / d,
     fgPct: fga ? sum('fgm') / fga : 0,
     tpPct: tpa ? sum('tpm') / tpa : 0,
     ftPct: fta ? sum('ftm') / fta : 0,
@@ -43,4 +43,4 @@ export function seasonLines(world: World, p: Player): SeasonLine[] {
 }
 
 export const one = (n: number) => n.toFixed(1);
-export const pct = (n: number) => `${(n * 100).toFixed(1)}`;
+export const pct = (n: number) => (n * 100).toFixed(1);
