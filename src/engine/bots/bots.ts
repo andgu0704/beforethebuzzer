@@ -103,6 +103,8 @@ export const naive: Bot = {
         return rng.pick(i.agents);
       case 'draftNight':
         return 'go';
+      case 'afterDraft':
+        return 'returnToSchool';
     }
   },
 };
@@ -160,6 +162,8 @@ export const casual: Bot = {
         return i.agents[0] ?? 'none';
       case 'draftNight':
         return 'go';
+      case 'afterDraft':
+        return 'returnToSchool';
     }
   },
 };
@@ -351,6 +355,8 @@ export const expert: Bot = {
       }
       case 'draftNight':
         return 'go';
+      case 'afterDraft':
+        return 'returnToSchool';
     }
   },
 };

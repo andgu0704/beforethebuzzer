@@ -204,6 +204,15 @@ function describe(
         body: 'The green room smells like new suits.',
         options: [{ id: 'go', label: 'Let it happen' }],
       };
+    case 'afterDraft':
+      return {
+        title: 'UNDRAFTED',
+        body: `You have ${i.seasonsLeft} season${i.seasonsLeft === 1 ? '' : 's'} of college eligibility left.`,
+        options: [
+          { id: 'returnToSchool', label: 'Go back to college for another season' },
+          { id: 'endCareer', label: 'End the career here' },
+        ],
+      };
   }
 }
 

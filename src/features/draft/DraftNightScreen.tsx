@@ -174,7 +174,9 @@ export function DraftNightScreen() {
             </>
           ) : (
             <Text variant="body" style={{ color: '#141414' }}>
-              {tt('ui.draftNight.undraftedReveal')}
+              {state.career.ending
+                ? tt('ui.draftNight.undraftedReveal')
+                : tt('ui.draftNight.undraftedReturn')}
             </Text>
           )}
         </Animated.View>
@@ -185,7 +187,8 @@ export function DraftNightScreen() {
             testID="draft-continue"
             label={tt('ui.draftNight.continue')}
             onPress={() => {
-              router.replace('/ending');
+              // Undrafted with eligibility left, the career goes on: the choice opens on Home.
+              router.replace(useGame.getState().state?.career.ending ? '/ending' : '/home');
             }}
           />
         ) : (

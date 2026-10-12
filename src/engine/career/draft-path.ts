@@ -202,7 +202,68 @@ export function raiseDraftNight(state: GameState): void {
     state.career.pending.push({ id: newInterruptId(state), kind: 'draftNight' });
 }
 
-/** Runs the whole draft with the user's interest and God Mode applied; ends the v1 career. */
+/** College seasons he could still play: none for a senior or anyone no longer on a college roster. */
+export function seasonsLeft(state: GameState): number {
+  const a = userOf(state).affiliation;
+  return a.kind === 'college' ? 4 - a.classYear : 0;
+}
+
+function endUndrafted(state: GameState): void {
+  state.career.stage = 'undrafted';
+  state.career.ending = {
+    reason: 'undrafted',
+    date: state.world.date,
+    pick: null,
+    teamId: null,
+  };
+}
+
+/**
+ * After going undrafted with eligibility left: back to campus for another season (his agent
+ * agreement ends and the draft profile starts again), or the career ends here.
+ */
+export function resolveAfterDraft(
+  state: GameState,
+  index: ContentIndex,
+  choice: 'returnToSchool' | 'endCareer',
+): void {
+  const career = state.career;
+  const why = cause(state, 'event', 'afterDraft', choice);
+  if (choice === 'endCareer') {
+    endUndrafted(state);
+    pushTimeline(state, msg('timeline.endedAfterDraft'), why, true);
+    return;
+  }
+  career.stage = 'college';
+  career.draft.declared = false;
+  career.draft.testingWaters = false;
+  career.draft.workouts = [];
+  career.draft.interest = {};
+  const hadAgent = career.agentId !== null;
+  career.agentId = null;
+  career.agentOffers = [];
+  const draft = state.world.draft;
+  if (draft) draft.pool = draft.pool.filter((id) => id !== career.playerId);
+  applyEffects(
+    state,
+    index,
+    [
+      { kind: 'status', key: 'confidence', delta: -3 },
+      { kind: 'status', key: 'coachTrust', delta: 3 },
+    ],
+    why,
+    createRng(state.world.seed, 'afterDraft', career.playerId),
+  );
+  pushTimeline(
+    state,
+    msg(hadAgent ? 'timeline.returnedLeftAgent' : 'timeline.returnedToSchool'),
+    why,
+    true,
+  );
+  pushFeed(state, 'milestone', msg('feed.returnedToSchool'));
+}
+
+/** Runs the whole draft with the user's interest and God Mode applied; ends the v1 career if he is picked. */
 export function runDraftNight(
   state: GameState,
   index: ContentIndex,
@@ -243,11 +304,18 @@ export function runDraftNight(
     pushFeed(state, 'draft', msg('feed.drafted', { pick: mine.pick, team: teamRef(mine.teamId) }));
     socialReactions(state, index, ['drafted'], 'drafted', 3);
   } else {
-    career.stage = 'undrafted';
-    career.ending = { reason: 'undrafted', date: state.world.date, pick: null, teamId: null };
     pushTimeline(state, msg('timeline.undrafted'), why, true);
     pushFeed(state, 'draft', msg('feed.undrafted'));
     socialReactions(state, index, ['undrafted'], 'undrafted', 2);
+    const left = seasonsLeft(state);
+    if (left > 0)
+      career.pending.push({
+        id: newInterruptId(state),
+        kind: 'afterDraft',
+        options: ['returnToSchool', 'endCareer'],
+        seasonsLeft: left,
+      });
+    else endUndrafted(state);
   }
   const rival = career.rivalId ? state.world.people[career.rivalId] : undefined;
   if (isPlayer(rival)) {

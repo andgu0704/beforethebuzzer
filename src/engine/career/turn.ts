@@ -17,6 +17,7 @@ import {
   raiseDraftNight,
   raiseWithdraw,
   raiseWorkouts,
+  resolveAfterDraft,
   resolveAgent,
   resolveDraftDecision,
   resolveWithdraw,
@@ -251,6 +252,10 @@ export function resolve(
     case 'draftNight':
       done();
       runDraftNight(state, index, career.godMode.draftTeam);
+      return null;
+    case 'afterDraft':
+      resolveAfterDraft(state, index, one === 'endCareer' ? 'endCareer' : 'returnToSchool');
+      done();
       return null;
   }
 }

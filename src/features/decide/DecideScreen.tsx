@@ -372,6 +372,20 @@ function InterruptView({
           onChoose={onChoose}
         />
       );
+    case 'afterDraft':
+      return (
+        <SimpleCard
+          kicker={tt('ui.decide.afterDraft.kicker')}
+          title={tt('ui.decide.afterDraft.title')}
+          body={tt('ui.decide.afterDraft.body', { n: i.seasonsLeft })}
+          options={i.options.map((o) => ({
+            id: o,
+            label: tt(`ui.decide.afterDraft.${o}`),
+            read: tt(`ui.decide.afterDraft.${o}Body`),
+          }))}
+          onChoose={onChoose}
+        />
+      );
     case 'draftNight':
       return (
         <SimpleCard

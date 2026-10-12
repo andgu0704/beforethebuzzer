@@ -290,6 +290,20 @@ export const ui = {
       none: 'No agent',
       noneBody: 'Keep your amateur options and do it yourself.',
     },
+    afterDraft: {
+      kicker: 'After the draft',
+      title: 'Back to school?',
+      body: {
+        by: 'n',
+        one: 'You have one season of college eligibility left. Coach has called twice already.',
+        other: 'You have {n} seasons of college eligibility left. Coach has called twice already.',
+      },
+      returnToSchool: 'Go back for another season',
+      returnToSchoolBody:
+        'Another year to grow and another draft next spring. Any agent agreement ends.',
+      endCareer: 'End the career here',
+      endCareerBody: 'Take your chances somewhere else. The story ends tonight.',
+    },
     draftNight: {
       kicker: 'Draft night',
       title: 'The green room',
@@ -571,6 +585,8 @@ export const ui = {
     continue: 'Continue',
     round: 'Round {n}',
     undraftedReveal: 'The last name is called. The room empties slowly.',
+    undraftedReturn:
+      'The last name is called. The room empties slowly. Your phone has one message: Coach.',
   },
   combine: {
     title: 'Combine',

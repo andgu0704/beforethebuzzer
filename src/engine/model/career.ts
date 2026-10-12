@@ -191,7 +191,15 @@ export type Interrupt =
       readonly max: number;
     }
   | { readonly id: InterruptId; readonly kind: 'agent'; readonly agents: readonly PersonId[] }
-  | { readonly id: InterruptId; readonly kind: 'draftNight' };
+  | { readonly id: InterruptId; readonly kind: 'draftNight' }
+  | {
+      readonly id: InterruptId;
+      /** Undrafted with college eligibility left: go back for another season, or stop here. */
+      readonly kind: 'afterDraft';
+      readonly options: readonly ('returnToSchool' | 'endCareer')[];
+      /** College seasons he still has. */
+      readonly seasonsLeft: number;
+    };
 
 export type InterruptKind = Interrupt['kind'];
 
