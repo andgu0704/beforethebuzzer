@@ -25,3 +25,5 @@ jobs:
         run: |
           npm run web:export
           node scripts/ci/check-godmode.mjs dist
+      - name: Native bundle builds (iOS, Hermes)
+        run: npx expo export --platform ios --output-dir ${{ runner.temp }}/ios

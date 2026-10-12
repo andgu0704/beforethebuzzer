@@ -6,3 +6,4 @@ package-lock.json
 .claude
 public
 dist-gm
+dist-ios
