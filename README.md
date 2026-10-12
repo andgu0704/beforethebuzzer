@@ -10,7 +10,8 @@ phase reports.
 - **Phase 2 (interface):** every screen in the plan is built, with the design system,
   illustrated portraits, God Mode and saves (SQLite on devices, IndexedDB on the web).
 - **Phase 3 (2D clips):** 18 play templates with success and failure variants, drawn with Skia.
-- **Phase 4 (content and balance):** 72 events, 46 key moments, 32 traits, 164 social posts.
+- **Phase 4 (content and balance):** 72 events, 46 key moments, 32 traits, 164 social posts;
+  every balance target in band (`docs/balance/phase4.md`).
 - **Phase 5 (polish):** icon and splash, haptics, reduced motion, Dynamic Type stacking,
   performance overlay. The real-device check is still to do with you.
 
