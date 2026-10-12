@@ -544,8 +544,7 @@ export const ui = {
     draftedBy: '{team}',
     round: { '1': 'First round', '2': 'Second round' },
     undrafted: 'Undrafted',
-    undraftedBody:
-      'Sixty names were called. Yours was not one of them. There are other doors, and you know where most of them are.',
+    undraftedBody: 'There are other doors, and you know where most of them are.',
     collegeLine: 'College',
     seasons: { by: 'n', one: '{n} season', other: '{n} seasons' },
     medals: 'Medals',
