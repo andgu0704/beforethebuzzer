@@ -1,0 +1,134 @@
+name: iOS screenshots
+
+# Builds a release app for the iOS Simulator and runs the Maestro flows. The screenshots are
+# committed to docs/screens/ios on the branch that ran it (and uploaded as an artifact). Runs from
+# the Actions tab, or when this workflow or the flows change. The built app is cached on the
+# sources, so a change to the flows alone skips the half-hour build.
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/**']
+    paths:
+      - '.github/workflows/ios-screens.yml'
+      - '.maestro/**'
+
+permissions:
+  contents: write
+
+jobs:
+  simulator:
+    runs-on: macos-26
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - device: 'iPhone 17 Pro Max'
+            appearance: light
+            textSize: large
+            name: pro-max-light
+          - device: 'iPhone 17e'
+            appearance: dark
+            textSize: accessibility-extra-extra-extra-large
+            name: 17e-dark-a11y-xxxl
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Use the newest Xcode on the runner
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)"
+          xcodebuild -version
+      - name: Install Maestro
+        run: |
+          curl -fsSL "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+      - name: Boot the simulator
+        run: |
+          # The same name exists under several runtimes; take the newest one.
+          UDID=$(xcrun simctl list devices available -j | jq -r --arg name "${{ matrix.device }}" \
+            '[.devices | to_entries | sort_by(.key)[] | select(.key | test("iOS")) | .value[] | select(.name == $name)] | last | .udid')
+          echo "Simulator $UDID"
+          echo "UDID=$UDID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl ui "$UDID" appearance ${{ matrix.appearance }}
+          xcrun simctl ui "$UDID" content_size ${{ matrix.textSize }}
+      - name: Restore the built app
+        id: app
+        uses: actions/cache/restore@v4
+        with:
+          path: app-build
+          key: ios-app-${{ hashFiles('package-lock.json', 'app.json', 'metro.config.js', 'app/**', 'src/**', 'assets/**') }}
+      - name: Build a release build
+        if: steps.app.outputs.cache-hit != 'true'
+        run: |
+          set -o pipefail
+          npx expo run:ios --configuration Release --device "$UDID" --no-bundler 2>&1 | tee build.log
+          mkdir -p app-build
+          APP=$(find ~/Library/Developer/Xcode/DerivedData -type d -path '*Release-iphonesimulator/BeforetheBuzzer.app' | head -1)
+          cp -R "$APP" app-build/
+        env:
+          CI: '1'
+      - name: Show build errors
+        if: failure()
+        run: |
+          grep -nE "error:|❌|fatal|Error:|failed" build.log | grep -v "Explicit dependency" | head -80 || true
+          grep -n -B6 -A4 "❌" build.log | head -60 || true
+      - name: Save the built app
+        if: steps.app.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: app-build
+          key: ${{ steps.app.outputs.cache-primary-key }}
+      - name: Install the app
+        run: |
+          xcrun simctl install "$UDID" app-build/BeforetheBuzzer.app
+          xcrun simctl launch "$UDID" app.beforethebuzzer
+          sleep 5
+      - name: Run the flows
+        run: maestro --device "$UDID" test .maestro --test-output-dir maestro-output
+      - name: Show what was on screen
+        if: failure()
+        run: |
+          maestro --device "$UDID" hierarchy > hierarchy.json 2>/dev/null || true
+          grep -oE '"(accessibilityText|text|resource-id|title)" *: *"[^"]+"' hierarchy.json | sort -u | head -120 || true
+          xcrun simctl spawn "$UDID" log show --last 10m --style compact \
+            --predicate 'process == "BeforetheBuzzer" AND (messageType == error OR messageType == fault OR eventMessage CONTAINS "JS")' \
+            | tail -80 || true
+      - name: Collect the screenshots
+        if: always()
+        run: |
+          OUT="docs/screens/ios/${{ matrix.name }}"
+          rm -rf "$OUT" && mkdir -p "$OUT"
+          find . .maestro maestro-output -maxdepth 4 -name '*.png' \
+            -not -path './node_modules/*' -not -path './ios/*' -not -path './assets/*' -not -path './docs/*' \
+            -not -path './public/*' -not -path './app-build/*' 2>/dev/null | sort -u | while read -r f; do
+            base=$(basename "$f" .png | tr -c 'A-Za-z0-9_-' '-' | sed 's/-*$//')
+            sips -Z 1400 -s format jpeg -s formatOptions 70 "$f" --out "$OUT/$base.jpg" > /dev/null
+          done
+          ls -la "$OUT"
+      - name: Commit the screenshots to the branch
+        if: always() && github.ref_type == 'branch'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "docs/screens/ios/${{ matrix.name }}"
+          git diff --cached --quiet && exit 0
+          git commit -m "iOS screenshots: ${{ matrix.name }} (run ${{ github.run_number }})"
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin "${{ github.ref_name }}" && git push origin "HEAD:${{ github.ref_name }}" && exit 0
+            sleep $((i * 3))
+          done
+          exit 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screens-${{ matrix.name }}
+          path: |
+            build.log
+            maestro-output
+            docs/screens/ios/${{ matrix.name }}

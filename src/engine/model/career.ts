@@ -191,7 +191,15 @@ export type Interrupt =
       readonly max: number;
     }
   | { readonly id: InterruptId; readonly kind: 'agent'; readonly agents: readonly PersonId[] }
-  | { readonly id: InterruptId; readonly kind: 'draftNight' };
+  | { readonly id: InterruptId; readonly kind: 'draftNight' }
+  | {
+      readonly id: InterruptId;
+      /** Undrafted with college eligibility left: go back for another season, or stop here. */
+      readonly kind: 'afterDraft';
+      readonly options: readonly ('returnToSchool' | 'endCareer')[];
+      /** College seasons he still has. */
+      readonly seasonsLeft: number;
+    };
 
 export type InterruptKind = Interrupt['kind'];
 
@@ -201,7 +209,7 @@ export interface LiveUserGame {
   readonly gameId: GameId;
   readonly live: LiveGame;
   readonly userSide: Side;
-  /** Seconds the player's moments may still use. */
+  /** Key moments the player may still get this game (it can reach -1 after a final-seconds extra). */
   momentBudget: number;
   /** Set while waiting for the user to choose. */
   pendingMoment: { readonly momentId: string; readonly offense: Side } | null;

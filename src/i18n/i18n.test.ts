@@ -37,6 +37,26 @@ describe('localisation', () => {
     ).toBe('Hi Beridze');
   });
 
+  it('works without Intl.PluralRules or Intl.NumberFormat, as on Hermes for iOS', () => {
+    const intl = Intl as unknown as Record<string, unknown>;
+    const saved = { PluralRules: intl['PluralRules'], NumberFormat: intl['NumberFormat'] };
+    intl['PluralRules'] = undefined;
+    intl['NumberFormat'] = undefined;
+    try {
+      const tr = createTranslator('en', {
+        b: { by: 'n', one: '{n} week', other: '{n} weeks' },
+      });
+      expect(tr.t('b', { n: 1 })).toBe('1 week');
+      expect(tr.t('b', { n: 0 })).toBe('0 weeks');
+      expect(tr.t('b', { n: 12500 })).toBe('12,500 weeks');
+      expect(tr.number(1234567)).toBe('1,234,567');
+      expect(tr.number(2.5, { maximumFractionDigits: 1 })).toBe('2.5');
+    } finally {
+      intl['PluralRules'] = saved.PluralRules;
+      intl['NumberFormat'] = saved.NumberFormat;
+    }
+  });
+
   it('has text for every literal key the engine emits', () => {
     const files = sourceFiles(join(__dirname, '..', 'engine'));
     const missing: string[] = [];

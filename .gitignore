@@ -39,3 +39,10 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+.claude/worktrees/
+
+# screenshot scratch
+scripts/screens/_*.mjs
+public/canvaskit.wasm
+dist-gm/
+dist-ios/

@@ -11,6 +11,7 @@ import { prospectScore } from '../college/recruiting';
 import { eligibleProspects, rankProspects } from '../draft/scouting';
 import { grow } from '../player/growth';
 import { changeStatus } from './effects';
+import { socialReactions } from './social';
 import { cause, msg, pushFeed, pushTimeline, userOf, userTeamId, type GameState } from './state';
 import { mergeTraits } from './traits';
 
@@ -245,8 +246,19 @@ export function checkTraitUnlocks(state: GameState, index: ContentIndex): void {
   }
 }
 
+/** Share of draft stock that carries over into a new season. */
+export const STOCK_CARRY = 0.65;
+
+/**
+ * A new season starts: scouts weigh this year's form most, so last year's buzz (good or bad)
+ * fades. Staying in school is a fresh audition, not a pile of old credit.
+ */
+export function fadeStock(state: GameState): void {
+  state.career.stock = Math.round(state.career.stock * STOCK_CARRY * 100) / 100;
+}
+
 /** Where scouts have him: rank among all draft-eligible players and a projected pick range. */
-export function updateProjection(state: GameState): void {
+export function updateProjection(state: GameState, index: ContentIndex): void {
   const user = userOf(state);
   const career = state.career;
   if (career.stage !== 'college' && career.stage !== 'prospect') return;
@@ -269,6 +281,43 @@ export function updateProjection(state: GameState): void {
   const draftRank = Math.round(position * 0.55) + 1;
   const spread = Math.round(2 + view.uncertainty * 1.2 + draftRank * 0.18);
   career.draft.projected = [clamp(draftRank - spread, 1, 61), clamp(draftRank + spread, 1, 61)];
+  const previous = career.draft.history[career.draft.history.length - 1];
   career.draft.history.push({ date: state.world.date, rank: draftRank });
   if (career.draft.history.length > 160) career.draft.history.shift();
+  if (previous)
+    boardMoveReaction(state, index, Math.min(previous.rank, 61), Math.min(draftRank, 61));
+}
+
+/** Weeks between posts about his place on the board, so a volatile spell does not flood the feed. */
+const BOARD_POST_GAP = 4;
+
+/** A real jump or slide on the board gets people talking. */
+function boardMoveReaction(state: GameState, index: ContentIndex, from: number, to: number): void {
+  if (Math.min(from, to) > 60) return;
+  const move = from - to;
+  const meaningful = Math.max(4, Math.round(Math.min(from, to) * 0.2));
+  if (Math.abs(move) < meaningful) return;
+  const now = weekIndex(state.world.date);
+  const recent = state.career.feed.some(
+    (f) =>
+      (f.social?.template.startsWith('draft_rise') ||
+        f.social?.template.startsWith('draft_fall')) &&
+      now - weekIndex(f.date) < BOARD_POST_GAP,
+  );
+  if (recent) return;
+  socialReactions(state, index, [move > 0 ? 'draftRise' : 'draftFall'], `board-${now}`, 1);
+}
+
+/** Chance that a week with nothing in it at all draws a post anyway. */
+const QUIET_POST_CHANCE = 0.5;
+
+/** A week with no game and nothing else in the feed: sometimes someone notices the silence. */
+export function quietWeekReaction(state: GameState, index: ContentIndex): void {
+  const career = state.career;
+  if (career.stage === 'drafted' || career.stage === 'undrafted') return;
+  const now = weekIndex(state.world.date);
+  if (career.recent.some((g) => weekIndex(g.date) === now)) return;
+  if (career.feed.some((f) => weekIndex(f.date) === now)) return;
+  if (!createRng(state.world.seed, 'quiet', now).chance(QUIET_POST_CHANCE)) return;
+  socialReactions(state, index, ['quietWeek'], `quiet-${now}`, 1);
 }

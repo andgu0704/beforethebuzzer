@@ -6,6 +6,7 @@ import { moments } from './moments';
 import { nations } from './nations';
 import { social } from './social';
 import { traits } from './traits';
+import { ui } from './ui';
 
 export const en = {
   ...engine,
@@ -15,4 +16,5 @@ export const en = {
   consequences,
   social,
   nations,
+  ui,
 } satisfies Catalog;

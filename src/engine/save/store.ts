@@ -1,4 +1,5 @@
 import { SAVE_FORMAT, type GameState } from '../career/state';
+import type { Portrait } from '../model/person';
 import { decodeDocument, documentToState, encodeState } from './codec';
 import { migrate } from './migrations';
 import { saveSchema } from './validate';
@@ -9,6 +10,21 @@ export interface SaveSummary {
   readonly name: string;
   readonly updatedWeek: number;
   readonly godMode: boolean;
+  /** What the saves list shows: portrait, team, date. Absent on saves written by scripts. */
+  readonly detail?: SaveDetail;
+}
+
+export interface SaveDetail {
+  readonly year: number;
+  readonly week: number;
+  readonly stage: string;
+  readonly teamId: string;
+  readonly teamName: string;
+  readonly colour: string;
+  readonly jersey: number;
+  readonly portrait: Portrait;
+  readonly ended: boolean;
+  readonly pick: number;
 }
 
 /** Storage for saves. The app uses SQLite on devices and IndexedDB on the web; tests use memory. */

@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "Before the Buzzer",
+    "slug": "before-the-buzzer",
+    "scheme": "beforethebuzzer",
+    "version": "0.2.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "icon": "./assets/icon.png",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.beforethebuzzer"
+    },
+    "android": {
+      "package": "app.beforethebuzzer",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FF5A1F"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-font",
+      "expo-localization",
+      "expo-sharing",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "imageWidth": 160,
+          "backgroundColor": "#F3F1EC",
+          "dark": {
+            "image": "./assets/splash.png",
+            "backgroundColor": "#0F0F10"
+          }
+        }
+      ],
+      "expo-status-bar"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": false
+    }
+  }
+}

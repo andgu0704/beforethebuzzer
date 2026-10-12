@@ -1,0 +1,81 @@
+# Creates a career and plays the opening weeks, taking screenshots on the way.
+appId: app.beforethebuzzer
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible:
+      id: new-career
+    timeout: 30000
+- takeScreenshot: welcome
+- tapOn:
+    id: new-career
+- tapOn:
+    id: given
+- inputText: Nika
+# Return moves on to the family name, which is under the keyboard at the largest text sizes.
+- pressKey: Enter
+- inputText: Beridze
+# Return on the family name closes the keyboard (hideKeyboard is unreliable on iOS).
+- pressKey: Enter
+- takeScreenshot: create-who
+- repeat:
+    times: 5
+    commands:
+      - tapOn:
+          id: create-next
+- tapOn:
+    id: create-next
+- extendedWaitUntil:
+    visible:
+      id: next-week
+    timeout: 60000
+- takeScreenshot: home-first
+- tapOn:
+    id: next-week
+- extendedWaitUntil:
+    visible:
+      id: decide
+    timeout: 30000
+- takeScreenshot: decide
+# Answer every decision the week brings: the first option, then the outcome's Continue.
+- repeat:
+    while:
+      visible:
+        id: decide
+    commands:
+      - runFlow:
+          when:
+            visible:
+              id: '(choice|moment|offer)-.*'
+          commands:
+            - tapOn:
+                id: '(choice|moment|offer)-.*'
+                index: 0
+      - runFlow:
+          when:
+            visible:
+              id: decide-continue
+          commands:
+            - takeScreenshot: decide-outcome
+            - tapOn:
+                id: decide-continue
+      - waitForAnimationToEnd:
+          timeout: 5000
+- extendedWaitUntil:
+    visible:
+      id: next-week
+    timeout: 60000
+- takeScreenshot: home-after-week
+- tapOn:
+    id: tab-train
+- takeScreenshot: train
+- tapOn:
+    id: tab-team
+- takeScreenshot: team
+- tapOn:
+    id: tab-career
+- takeScreenshot: career
+- tapOn:
+    id: tab-social
+- takeScreenshot: social

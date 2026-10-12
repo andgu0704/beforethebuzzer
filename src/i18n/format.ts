@@ -61,9 +61,46 @@ export interface Translator {
   message(m: Message, names: NameResolver): string;
 }
 
+/**
+ * Hermes on iOS ships only part of Intl (no PluralRules there), so each constructor is guarded.
+ * The fallbacks are the English rules, which every catalog has.
+ */
+function pluralRules(locale: string): { select(n: number): string } {
+  if (typeof Intl !== 'undefined' && typeof Intl.PluralRules === 'function') {
+    try {
+      return new Intl.PluralRules(locale);
+    } catch {
+      // unsupported locale: fall through
+    }
+  }
+  return { select: (n) => (n === 1 ? 'one' : 'other') };
+}
+
+function numberFormat(
+  locale: string,
+  options?: Intl.NumberFormatOptions,
+): { format(n: number): string } {
+  if (typeof Intl !== 'undefined' && typeof Intl.NumberFormat === 'function') {
+    try {
+      return new Intl.NumberFormat(locale, options);
+    } catch {
+      // unsupported locale or option: fall through
+    }
+  }
+  return {
+    format: (n) => {
+      const digits = options?.maximumFractionDigits ?? 0;
+      const fixed = n.toFixed(digits).replace(/\.0+$/, '');
+      const [whole = '', fraction] = fixed.split('.');
+      const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      return fraction ? `${grouped}.${fraction}` : grouped;
+    },
+  };
+}
+
 export function createTranslator(locale: string, catalog: Catalog): Translator {
-  const plural = new Intl.PluralRules(locale);
-  const numbers = new Intl.NumberFormat(locale);
+  const plural = pluralRules(locale);
+  const numbers = numberFormat(locale);
   const t = (key: string, params: Params = {}): string => {
     const leaf = lookup(catalog, key);
     if (leaf === undefined) return key;
@@ -86,7 +123,7 @@ export function createTranslator(locale: string, catalog: Catalog): Translator {
     locale,
     t,
     has: (key) => lookup(catalog, key) !== undefined,
-    number: (value, options) => new Intl.NumberFormat(locale, options).format(value),
+    number: (value, options) => numberFormat(locale, options).format(value),
     message(m, names) {
       const params: Record<string, string | number> = {};
       const entries: [string, MessageParam][] = Object.entries(m.params ?? {});
