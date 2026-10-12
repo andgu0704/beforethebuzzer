@@ -4,9 +4,8 @@
  * achieve.
  */
 
-import { WEEK } from '../core/calendar';
+import { WEEK, weekIndex } from '../core/calendar';
 import type { TeamId } from '../core/ids';
-import { dpow } from '../core/math';
 import { createRng, type Rng } from '../core/rng';
 import type { ContentIndex } from '../content/registry';
 import { estimateOdds } from '../game/moments';
@@ -167,7 +166,32 @@ export const casual: Bot = {
 
 // ---------------------------------------------------------------- expert
 
-/** Training blocks go where they add the most to his overall rating. */
+/** Weeks without a visible skill-up after which a trained skill looks like it has stalled. */
+const STALL_WEEKS = 16;
+
+/**
+ * Skills that are not moving any more: no skill-up in the feed for a while. This is what a
+ * player can see of his hidden ceilings, so the expert uses it instead of the ceilings.
+ */
+function stalledSkills(state: GameState): Set<Skill> {
+  const now = weekIndex(state.world.date);
+  const feed = state.career.feed;
+  const first = feed[0];
+  const out = new Set<Skill>();
+  if (!first || now - weekIndex(first.date) < STALL_WEEKS) return out;
+  const lastUp: Partial<Record<Skill, number>> = {};
+  for (const f of feed) {
+    const skill = f.message.key === 'feed.skillUp' ? f.message.params?.['skill'] : undefined;
+    if (typeof skill === 'string') lastUp[skill as Skill] = weekIndex(f.date);
+  }
+  for (const s of SKILLS) if ((lastUp[s] ?? -Infinity) < now - STALL_WEEKS) out.add(s);
+  return out;
+}
+
+/**
+ * Training blocks go where they add the most to his overall rating, with diminishing returns
+ * inside a week. Skills he has been working on that stopped improving give way to others.
+ */
 function expertTraining(
   state: GameState,
   index: ContentIndex,
@@ -176,24 +200,40 @@ function expertTraining(
   const user = userOf(state);
   const traits = mergeTraits(index, user);
   const weights = POSITION_WEIGHTS[user.position];
-  const plan: Partial<Record<Skill, number>> = {};
-  for (let b = 0; b < blocks; b++) {
-    let best: Skill = 'shooting';
-    let bestGain = -1;
-    for (const s of SKILLS) {
-      const gap = Math.max(0, user.ceiling[s] - user.skills[s]);
-      const room = gap <= 0 ? 0 : dpow(gap / 20, 1.4);
-      const current = plan[s] ?? 0;
-      const marginal = trainingEffect(current + 1) - trainingEffect(current);
-      const gain = weights[s] * room * marginal * (traits.growthSkill[s] ?? 1);
-      if (gain > bestGain) {
-        bestGain = gain;
-        best = s;
+  const allocate = (damp: (s: Skill) => number) => {
+    const plan: Partial<Record<Skill, number>> = {};
+    for (let b = 0; b < blocks; b++) {
+      let best: Skill = 'shooting';
+      let bestGain = -1;
+      for (const s of SKILLS) {
+        if (Math.floor(user.skills[s]) >= 99) continue;
+        const current = plan[s] ?? 0;
+        const marginal = trainingEffect(current + 1) - trainingEffect(current);
+        const gain = weights[s] * marginal * (traits.growthSkill[s] ?? 1) * damp(s);
+        if (gain > bestGain) {
+          bestGain = gain;
+          best = s;
+        }
       }
+      plan[best] = (plan[best] ?? 0) + 1;
     }
-    plan[best] = (plan[best] ?? 0) + 1;
-  }
-  return plan;
+    return plan;
+  };
+  const usual = allocate(() => 1);
+  const stalled = stalledSkills(state);
+  return allocate((s) => (stalled.has(s) && (usual[s] ?? 0) > 0 ? 0.2 : 1));
+}
+
+/**
+ * The projected pick worth leaving school for. Early on another year of growth and a fresh
+ * season of form usually beat a mid-first-round slot, so only a top-ten projection is worth
+ * going for; by his third year a first-round projection is, since a senior season adds age
+ * and little room to grow.
+ */
+function leaveThreshold(state: GameState): number {
+  const user = userOf(state);
+  const year = user.affiliation.kind === 'college' ? user.affiliation.classYear : 4;
+  return year <= 1 ? 6 : year === 2 ? 10 : 30;
 }
 
 function expectedPick(state: GameState): number {
@@ -291,17 +331,14 @@ export const expert: Bot = {
       case 'callUp':
         return 'accept';
       case 'draftDecision': {
-        const user = userOf(state);
-        const year = user.affiliation.kind === 'college' ? user.affiliation.classYear : 4;
         const pick = expectedPick(state);
-        // Leave only when the projection justifies it; otherwise grow another year.
-        const threshold = year === 1 ? 11 : year === 2 ? 16 : 26;
+        const threshold = leaveThreshold(state);
         if (pick <= threshold) return 'declare';
-        if (pick <= threshold + 12) return 'testWaters';
+        if (pick <= threshold * 1.6) return 'testWaters';
         return 'stay';
       }
       case 'withdraw':
-        return expectedPick(state) <= 30 ? 'stay' : 'return';
+        return expectedPick(state) <= leaveThreshold(state) ? 'stay' : 'return';
       case 'workouts':
         return i.teams.slice(0, i.max);
       case 'agent': {
