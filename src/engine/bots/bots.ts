@@ -32,8 +32,8 @@ export function spendWeights(bot: Bot, state: GameState): Record<Skill, number> 
   if (bot.name === 'naive') return mapSkills(() => 1);
   const position = POSITION_WEIGHTS[userOf(state).position];
   if (bot.name === 'expert') return { ...position };
-  // A casual player half follows what his position needs and half chases the fun skills.
-  return mapSkills((s) => 0.5 * position[s] + 0.5 * CASUAL_TASTE[s]);
+  // A casual player mostly chases the fun skills, and only partly what his position needs.
+  return mapSkills((s) => 0.35 * position[s] + 0.65 * CASUAL_TASTE[s]);
 }
 
 const CASUAL_TASTE: Record<Skill, number> = {

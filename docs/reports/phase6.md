@@ -102,6 +102,30 @@ The engine now records more in each game's play log, without touching its random
   - a family-name field hidden under the keyboard at the largest text size;
   - a week header that ran off the screen at that size.
 
+## Accessibility audit
+
+`npm run a11y` runs axe-core over every main screen of the web build, in light or dark mode:
+welcome, create, the five tabs, pre-game, live, a key moment, the skill check, the final and
+Settings. The first run found serious or critical problems on most of them. After the
+fixes, neither mode has any. What changed:
+
+- **States on the web.** react-native-web ignores `accessibilityState` and
+  `accessibilityValue`. Checked, disabled, busy and selected now use `aria-*` props, which
+  react-native-web and native both read. The Create screen's radio rows now say which is
+  chosen.
+- **The practice stepper.** On native it is still one adjustable control with its value. On
+  the web it can't be a slider holding two buttons, so the buttons stand on their own.
+- **Names that match the screen.** Choice buttons and tabs are named from what they show on
+  the web, and native reads the parts in the order they're drawn. The profile button is named
+  by the player's name and line, with "Open your profile" as the hint.
+- **Images.** Decorative faces are hidden from assistive tech. Flags, team marks and the shot
+  chart are images with names.
+- **Contrast.** The play-by-play clock and your own plays now reach 4.5:1.
+- **Keyboard.** Screens with nothing to tab to can still be scrolled by keyboard on the web.
+
+One moderate finding remains on every screen: the web page has no landmark regions. It only
+applies to the web build, so it is noted here and not fixed.
+
 ## Balance
 
 Growth now comes from points you spend. Practice earns 0.18 points per block, a full game's
@@ -111,17 +135,21 @@ skill climbs. A young player gains about 30 skill points a year, the old pace.
 | Seed `phase6`, 60 careers each | Top five | First round | Median pick | Target bands                         |
 | ------------------------------ | -------- | ----------- | ----------- | ------------------------------------ |
 | Naive                          | 0%       | 0%          | 61          | none                                 |
-| Casual                         | 3.3%     | 28.3%       | 45          | top five 0–3%, first round 12–35%    |
+| Casual                         | 3.3%     | 26.7%       | 43          | top five 0–3%, first round 12–35%    |
 | Expert                         | 23.3%    | 78.3%       | 16          | top five 20–40%, first round 70–100% |
 
-- **Casual top five:** 2 careers of 60, one above the band.
+- **Casual top five:** 2 careers of 60, one over a band that ends at 1.8 careers. A larger run
+  settles it: 180 casual careers on seed `phase6-casual` give 2.2% top five, 19.4% first round
+  and a median pick of 43, all in band. Pooled, that is 6 top-five picks in 240 careers, or
+  2.5% (`docs/balance/phase6-casual.md`).
 - **Expert on a second seed** (`phase6b`): 43.3% top five and 91.7% first round.
 - **Spending and noise:** points spent with no per-skill diminishing returns grow a focused
   player faster than the old practice did. Income was cut twice for that reason. After the
   cuts, the seed matters more than the economy: across both seeds the expert top-five rate
   averages about 33%, in the middle of its band.
-- **Casual spending:** the casual bot spends half by position and half by taste. Spending
-  purely by position made it as efficient as the expert.
+- **Casual spending:** the casual bot spends about a third by position and two thirds by
+  taste. Spending purely by position made it as efficient as the expert, and an even split
+  still put it above the top-five band.
 - **Full report:** `docs/balance/phase6.md`.
 
 ## Not done here: needs a device and you

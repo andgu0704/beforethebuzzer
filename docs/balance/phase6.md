@@ -1,7 +1,7 @@
 # Balance report
 
-Seed `phase6` · 2 league seasons · 60 careers per policy · 595 s on 4 workers.
-College engine time per in-season week (Node): median 206 ms, p90 345 ms.
+Seed `phase6` · 2 league seasons · 60 careers per policy · 770 s on 4 workers.
+College engine time per in-season week (Node): median 216 ms, p90 352 ms.
 
 
 ## College league
@@ -65,7 +65,7 @@ College engine time per in-season week (Node): median 206 ms, p90 345 ms.
 | International caps (avg) | 5.3 | — |  |
 | Games missed while ineligible (avg) | 36.2 | — |  |
 | Save size MB (avg) | 5.7 | — |  |
-| Seconds per career (avg) | 16.4 | — |  |
+| Seconds per career (avg) | 18.1 | — |  |
 
 ## Careers: casual
 
@@ -74,19 +74,19 @@ College engine time per in-season week (Node): median 206 ms, p90 345 ms.
 | Careers | 60.0 | — |  |
 | Top-five picks | 3.3% | 0.0%–3.0% | **out of band** |
 | Lottery (top 14) | 8.3% | — |  |
-| First round | 28.3% | 12.0%–35.0% | in band |
+| First round | 26.7% | 12.0%–35.0% | in band |
 | Second round | 65.0% | — |  |
-| Undrafted | 6.7% | — |  |
-| Median pick | 45.0 | 31.0–61.0 | in band |
+| Undrafted | 8.3% | — |  |
+| Median pick | 43.0 | 31.0–61.0 | in band |
 | Seasons in college (avg) | 2.2 | — |  |
-| Last season points per game (avg) | 16.6 | — |  |
+| Last season points per game (avg) | 16.4 | — |  |
 | Last season minutes per game (avg) | 27.1 | — |  |
-| Key moments per career (avg) | 123 | — |  |
-| Key-moment success | 53.4% | — |  |
-| International caps (avg) | 6.9 | — |  |
+| Key moments per career (avg) | 124 | — |  |
+| Key-moment success | 53.5% | — |  |
+| International caps (avg) | 6.7 | — |  |
 | Games missed while ineligible (avg) | 0.3 | — |  |
 | Save size MB (avg) | 4.7 | — |  |
-| Seconds per career (avg) | 9.4 | — |  |
+| Seconds per career (avg) | 12.0 | — |  |
 
 ## Careers: expert
 
@@ -107,6 +107,6 @@ College engine time per in-season week (Node): median 206 ms, p90 345 ms.
 | International caps (avg) | 7.7 | — |  |
 | Games missed while ineligible (avg) | 0.0 | — |  |
 | Save size MB (avg) | 5.2 | — |  |
-| Seconds per career (avg) | 12.0 | — |  |
+| Seconds per career (avg) | 19.3 | — |  |
 
 1 metric(s) outside their bands.
