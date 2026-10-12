@@ -14,7 +14,7 @@ import { msg, pushFeed, userOf, userTeamId, type GameState } from './state';
 import { mergeTraits } from './traits';
 
 /** Points per practice block for a young player with an average coach, before tiredness. */
-export const PRACTICE_RATE = 0.25;
+export const PRACTICE_RATE = 0.18;
 /** Practice blocks beyond this earn less each. */
 const FULL_RETURN_BLOCKS = 4;
 export const MAX_SKILL = 99;
@@ -50,7 +50,7 @@ export function practicePoints(state: GameState, index: ContentIndex, blocks: nu
 export function gamePoints(minutes: number, vsExpected: number, won: boolean, age = 20): number {
   if (minutes <= 0) return 0;
   const learning = Math.max(0.3, ageFactor(age));
-  return ((minutes / 40) * 1.2 + clamp(vsExpected * 0.15, 0, 1.8) + (won ? 0.45 : 0)) * learning;
+  return ((minutes / 40) * 0.9 + clamp(vsExpected * 0.15, 0, 1.8) + (won ? 0.45 : 0)) * learning;
 }
 
 export function earnPoints(state: GameState, points: number): void {
