@@ -66,3 +66,11 @@ describe('sliced weeks', () => {
     expect(serialise(b)).toBe(serialise(a));
   });
 });
+
+describe('social posts', () => {
+  it('do not repeat a template among recent posts', () => {
+    const run = playCareer(index, testPlayer('social-repeat'), BOTS.casual);
+    const posts = run.state.career.feed.filter((f) => f.social).map((f) => f.social?.template);
+    for (let i = 1; i < posts.length; i++) expect(posts[i]).not.toBe(posts[i - 1]);
+  });
+});

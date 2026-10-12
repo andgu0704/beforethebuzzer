@@ -100,6 +100,18 @@ export function postSocial(
   });
 }
 
+const RECENT_POSTS = 12;
+
+function recentTemplates(state: GameState): Set<string> {
+  const out = new Set<string>();
+  const feed = state.career.feed;
+  for (let i = feed.length - 1; i >= 0 && out.size < RECENT_POSTS; i--) {
+    const post = feed[i]?.social;
+    if (post) out.add(post.template);
+  }
+  return out;
+}
+
 /** Posts reacting to what just happened. At most `max` per trigger set. */
 export function socialReactions(
   state: GameState,
@@ -112,9 +124,13 @@ export function socialReactions(
   let posted = 0;
   for (const trigger of triggers) {
     if (posted >= max) break;
-    const options = index.content.social.filter(
+    const all = index.content.social.filter(
       (s) => s.trigger === trigger && meets(state, index, s.when),
     );
+    // The same post twice in a few weeks reads as a glitch, so recent templates sit out.
+    const recent = recentTemplates(state);
+    const fresh = all.filter((s) => !recent.has(s.id));
+    const options = fresh.length > 0 ? fresh : all;
     if (options.length === 0) continue;
     const t = rng.weighted(options, (s) => s.weight);
     if (postSocial(state, index, t.id, rng)) posted++;
