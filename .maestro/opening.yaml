@@ -16,7 +16,8 @@ appId: app.beforethebuzzer
 # Return moves on to the family name, which is under the keyboard at the largest text sizes.
 - pressKey: Enter
 - inputText: Beridze
-- hideKeyboard
+# Return on the family name closes the keyboard (hideKeyboard is unreliable on iOS).
+- pressKey: Enter
 - takeScreenshot: create-who
 - repeat:
     times: 5
