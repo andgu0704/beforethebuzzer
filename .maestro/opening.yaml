@@ -1,5 +1,5 @@
-# Creates a career, plays the first game on the live screen, spends a skill point and visits
-# every tab, taking screenshots on the way.
+# Creates a career, plays the first game on the live screen, spends a skill point, visits
+# every tab and opens Settings from the profile, taking screenshots on the way.
 appId: app.beforethebuzzer
 ---
 - launchApp:
@@ -135,3 +135,28 @@ appId: app.beforethebuzzer
 - tapOn:
     id: tab-social
 - takeScreenshot: social
+# The profile, then Settings, where the skill check can be switched off.
+- tapOn:
+    id: tab-home
+- tapOn:
+    id: open-profile
+- extendedWaitUntil:
+    visible:
+      id: profile
+    timeout: 15000
+- takeScreenshot: profile
+- scrollUntilVisible:
+    element:
+      id: profile-settings
+    direction: DOWN
+- tapOn:
+    id: profile-settings
+- extendedWaitUntil:
+    visible:
+      id: settings
+    timeout: 15000
+- scrollUntilVisible:
+    element:
+      id: skill-checks
+    direction: DOWN
+- takeScreenshot: settings
