@@ -42,9 +42,15 @@ jobs:
           xcrun simctl ui "${{ matrix.device }}" appearance ${{ matrix.appearance }}
           xcrun simctl ui "${{ matrix.device }}" content_size ${{ matrix.textSize }}
       - name: Build and install a release build
-        run: npx expo run:ios --configuration Release --device "${{ matrix.device }}" --no-bundler
+        run: |
+          set -o pipefail
+          npx expo run:ios --configuration Release --device "${{ matrix.device }}" --no-bundler 2>&1 | tee build.log
         env:
           CI: '1'
+      - name: Show build errors
+        if: failure()
+        run: |
+          grep -nE "error:|❌|fatal|Error:|failed" build.log | grep -v "Explicit dependency" | head -80 || true
       - name: Run the flows
         run: maestro test .maestro --test-output-dir maestro-output
       - uses: actions/upload-artifact@v4
@@ -52,6 +58,7 @@ jobs:
         with:
           name: screens-${{ matrix.device }}-${{ matrix.appearance }}-${{ matrix.textSize }}
           path: |
+            build.log
             maestro-output
             *.png
             .maestro/*.png
