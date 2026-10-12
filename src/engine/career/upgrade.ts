@@ -64,7 +64,7 @@ export function earnPoints(state: GameState, points: number): void {
 export function upgradeCost(user: Player, skill: Skill): number {
   const value = user.skills[skill];
   if (value >= MAX_SKILL) return Infinity;
-  const base = value < 40 ? 3 : value < 60 ? 6 : value < 75 ? 9 : value < 88 ? 12 : 15;
+  const base = value < 40 ? 3 : value < 60 ? 6 : value < 72 ? 9 : value < 84 ? 12 : 15;
   const ceiling = user.ceiling[skill];
   return value >= ceiling ? base * 3 : value >= ceiling - 4 ? Math.ceil(base * 1.5) : base;
 }
