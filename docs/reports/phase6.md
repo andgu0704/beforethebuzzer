@@ -98,13 +98,25 @@ The engine now records more in each game's play log, without touching its random
 
 ## Balance
 
-Growth now comes from points you spend.
+Growth now comes from points you spend. Practice earns 0.18 points per block, a full game's
+minutes about 0.9 (plus more for a good game or a win), and +1 costs 3 to 15 points as a
+skill climbs. A young player gains about 30 skill points a year, the old pace.
 
-- **Rates:** tuned to about the old pace, roughly 30 skill points a year for a young player.
-  A player earns 45–50 points a season to spend.
-- **Casual bot:** spends half by position and half by taste. Spending purely by position
-  made it as efficient as the expert.
-- **Full results:** in `docs/balance/phase6.md`.
+| Seed `phase6`, 60 careers each | Top five | First round | Median pick | Target bands                         |
+| ------------------------------ | -------- | ----------- | ----------- | ------------------------------------ |
+| Naive                          | 0%       | 0%          | 61          | none                                 |
+| Casual                         | 3.3%     | 28.3%       | 45          | top five 0–3%, first round 12–35%    |
+| Expert                         | 23.3%    | 78.3%       | 16          | top five 20–40%, first round 70–100% |
+
+- **Casual top five:** 2 careers of 60, one above the band.
+- **Expert on a second seed** (`phase6b`): 43.3% top five and 91.7% first round.
+- **Spending and noise:** points spent with no per-skill diminishing returns grow a focused
+  player faster than the old practice did. Income was cut twice for that reason. After the
+  cuts, the seed matters more than the economy: across both seeds the expert top-five rate
+  averages about 33%, in the middle of its band.
+- **Casual spending:** the casual bot spends half by position and half by taste. Spending
+  purely by position made it as efficient as the expert.
+- **Full report:** `docs/balance/phase6.md`.
 
 ## Not done here: needs a device and you
 

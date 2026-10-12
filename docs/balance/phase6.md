@@ -1,7 +1,7 @@
 # Balance report
 
-Seed `phase6` · 2 league seasons · 60 careers per policy · 588 s on 4 workers.
-College engine time per in-season week (Node): median 174 ms, p90 287 ms.
+Seed `phase6` · 2 league seasons · 60 careers per policy · 595 s on 4 workers.
+College engine time per in-season week (Node): median 206 ms, p90 345 ms.
 
 
 ## College league
@@ -58,14 +58,14 @@ College engine time per in-season week (Node): median 174 ms, p90 287 ms.
 | Undrafted | 78.3% | — |  |
 | Median pick | 61.0 | — |  |
 | Seasons in college (avg) | 2.9 | — |  |
-| Last season points per game (avg) | 9.8 | — |  |
-| Last season minutes per game (avg) | 25.0 | — |  |
-| Key moments per career (avg) | 99.1 | — |  |
-| Key-moment success | 47.5% | — |  |
-| International caps (avg) | 5.6 | — |  |
-| Games missed while ineligible (avg) | 34.8 | — |  |
-| Save size MB (avg) | 5.6 | — |  |
-| Seconds per career (avg) | 15.9 | — |  |
+| Last season points per game (avg) | 8.6 | — |  |
+| Last season minutes per game (avg) | 23.8 | — |  |
+| Key moments per career (avg) | 93.7 | — |  |
+| Key-moment success | 46.8% | — |  |
+| International caps (avg) | 5.3 | — |  |
+| Games missed while ineligible (avg) | 36.2 | — |  |
+| Save size MB (avg) | 5.7 | — |  |
+| Seconds per career (avg) | 16.4 | — |  |
 
 ## Careers: casual
 
@@ -73,40 +73,40 @@ College engine time per in-season week (Node): median 174 ms, p90 287 ms.
 |---|---|---|---|
 | Careers | 60.0 | — |  |
 | Top-five picks | 3.3% | 0.0%–3.0% | **out of band** |
-| Lottery (top 14) | 13.3% | — |  |
-| First round | 33.3% | 12.0%–35.0% | in band |
+| Lottery (top 14) | 8.3% | — |  |
+| First round | 28.3% | 12.0%–35.0% | in band |
 | Second round | 65.0% | — |  |
-| Undrafted | 1.7% | — |  |
-| Median pick | 42.0 | 31.0–61.0 | in band |
-| Seasons in college (avg) | 2.0 | — |  |
-| Last season points per game (avg) | 16.2 | — |  |
+| Undrafted | 6.7% | — |  |
+| Median pick | 45.0 | 31.0–61.0 | in band |
+| Seasons in college (avg) | 2.2 | — |  |
+| Last season points per game (avg) | 16.6 | — |  |
 | Last season minutes per game (avg) | 27.1 | — |  |
-| Key moments per career (avg) | 110 | — |  |
-| Key-moment success | 53.5% | — |  |
-| International caps (avg) | 6.1 | — |  |
+| Key moments per career (avg) | 123 | — |  |
+| Key-moment success | 53.4% | — |  |
+| International caps (avg) | 6.9 | — |  |
 | Games missed while ineligible (avg) | 0.3 | — |  |
-| Save size MB (avg) | 4.5 | — |  |
-| Seconds per career (avg) | 8.7 | — |  |
+| Save size MB (avg) | 4.7 | — |  |
+| Seconds per career (avg) | 9.4 | — |  |
 
 ## Careers: expert
 
 | Metric | Value | Target | |
 |---|---|---|---|
 | Careers | 60.0 | — |  |
-| Top-five picks | 41.7% | 20.0%–40.0% | **out of band** |
-| Lottery (top 14) | 65.0% | — |  |
-| First round | 91.7% | 70.0%–100.0% | in band |
-| Second round | 8.3% | — |  |
-| Undrafted | 0.0% | — |  |
-| Median pick | 9.0 | — |  |
-| Seasons in college (avg) | 2.8 | — |  |
-| Last season points per game (avg) | 23.2 | — |  |
-| Last season minutes per game (avg) | 28.5 | — |  |
-| Key moments per career (avg) | 151 | — |  |
+| Top-five picks | 23.3% | 20.0%–40.0% | in band |
+| Lottery (top 14) | 50.0% | — |  |
+| First round | 78.3% | 70.0%–100.0% | in band |
+| Second round | 18.3% | — |  |
+| Undrafted | 3.3% | — |  |
+| Median pick | 16.0 | — |  |
+| Seasons in college (avg) | 2.9 | — |  |
+| Last season points per game (avg) | 22.7 | — |  |
+| Last season minutes per game (avg) | 28.8 | — |  |
+| Key moments per career (avg) | 155 | — |  |
 | Key-moment success | 57.4% | — |  |
-| International caps (avg) | 7.9 | — |  |
+| International caps (avg) | 7.7 | — |  |
 | Games missed while ineligible (avg) | 0.0 | — |  |
 | Save size MB (avg) | 5.2 | — |  |
-| Seconds per career (avg) | 12.2 | — |  |
+| Seconds per career (avg) | 12.0 | — |  |
 
-2 metric(s) outside their bands.
+1 metric(s) outside their bands.
