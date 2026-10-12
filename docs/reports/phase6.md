@@ -89,7 +89,7 @@ The engine now records more in each game's play log, without touching its random
     `scripts/screens/pro-save.ts` writes these saves without playing four college seasons
     first.
 - **On the iOS Simulator**, with release builds, both devices pass the whole Maestro flow (runs
-  17, 19 and 20 of `ios-screens.yml`; screenshots in `docs/screens/ios/`):
+  17 and 19 to 22 of `ios-screens.yml`; screenshots in `docs/screens/ios/`):
   - iPhone 17 Pro Max, light mode;
   - iPhone 17e, dark mode, at the largest accessibility text size.
 
