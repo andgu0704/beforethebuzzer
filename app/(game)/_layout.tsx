@@ -26,7 +26,8 @@ export default function GameLayout() {
     };
   }, [pendingId, busy, pathname]);
 
-  if (!state) return <Redirect href="/welcome" />;
+  // A reload or deep link into the game: the index route reopens the last career (or welcomes).
+  if (!state) return <Redirect href="/" />;
   return (
     <Stack
       screenOptions={{
