@@ -88,6 +88,16 @@ approval**.
 - The decision sheet could be pushed twice, which left a duplicate sheet open.
 - Web portraits exhausted WebGL contexts.
 
+## A change from the plan
+
+**React Compiler is off.** The engine mutates one `GameState` in place for speed, and the store
+signals changes with a revision number. The compiler caches each component's output on the
+identity of the objects it reads. The state object never changes identity, so the cache would
+keep showing stale values; screens only stayed fresh by accident, through the translator hook.
+I checked this by compiling the Home header and finding its meters cached on `state`.
+Re-rendering is cheap here, so the compiler is switched off in `app.json` rather than working
+around it file by file.
+
 ## Known gaps
 
 - **No iOS Simulator here.** `.github/workflows/ios-screens.yml` (run it from the Actions tab)
