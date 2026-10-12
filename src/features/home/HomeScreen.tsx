@@ -10,7 +10,7 @@ import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { FeedEntry } from '@/engine/model/career';
-import { dismissError, playAhead, playOn, useGame } from '@/state/game';
+import { dismissError, playAhead, playOn, save, useGame } from '@/state/game';
 import { openDecide } from '@/state/decide';
 import { useSettings } from '@/state/settings';
 import { feedByWeek, phaseOf, weekRange } from '@/state/views';
@@ -187,7 +187,25 @@ export function HomeScreen() {
                 tone="negative"
                 title={error.kind === 'save' ? tt('ui.home.saveError') : tt('ui.home.errorTitle')}
                 body={error.message}
-                action={{ label: tt('ui.common.close'), onPress: dismissError }}
+                action={
+                  error.kind === 'engine'
+                    ? {
+                        label: tt('ui.common.retry'),
+                        onPress: () => {
+                          dismissError();
+                          void playOn();
+                        },
+                      }
+                    : error.kind === 'save'
+                      ? {
+                          label: tt('ui.common.retry'),
+                          onPress: () => {
+                            dismissError();
+                            void save();
+                          },
+                        }
+                      : { label: tt('ui.common.close'), onPress: dismissError }
+                }
               />
             ) : null}
           </View>
