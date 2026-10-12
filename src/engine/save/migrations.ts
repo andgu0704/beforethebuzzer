@@ -23,8 +23,8 @@ interface DocV1 {
 function toV2(document: unknown): unknown {
   const doc = structuredCloneish(document) as DocV1;
   const career = doc.state.career;
-  career['skillPoints'] ??= 3;
-  career['skillPointsEarned'] ??= 3;
+  career['skillPoints'] ??= 9;
+  career['skillPointsEarned'] ??= 9;
   career['approach'] ??= 'team';
   career['awardsSeen'] ??= {};
   if (career.stage === 'drafted' && career.ending?.reason === 'draft') {

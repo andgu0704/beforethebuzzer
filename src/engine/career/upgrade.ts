@@ -14,7 +14,7 @@ import { msg, pushFeed, userOf, userTeamId, type GameState } from './state';
 import { mergeTraits } from './traits';
 
 /** Points per practice block for a young player with an average coach, before tiredness. */
-export const PRACTICE_RATE = 0.12;
+export const PRACTICE_RATE = 0.27;
 /** Practice blocks beyond this earn less each. */
 const FULL_RETURN_BLOCKS = 4;
 export const MAX_SKILL = 99;
@@ -43,10 +43,14 @@ export function practicePoints(state: GameState, index: ContentIndex, blocks: nu
   );
 }
 
-/** Points from a game: playing time, and more for a game that beat what was expected of him. */
-export function gamePoints(minutes: number, vsExpected: number, won: boolean): number {
+/**
+ * Points from a game: playing time, more for a game that beat what was expected of him, a
+ * little for a win. Young players learn more from each game than veterans do.
+ */
+export function gamePoints(minutes: number, vsExpected: number, won: boolean, age = 20): number {
   if (minutes <= 0) return 0;
-  return (minutes / 40) * 0.2 + clamp(vsExpected * 0.03, 0, 0.35) + (won ? 0.08 : 0);
+  const learning = Math.max(0.3, ageFactor(age));
+  return ((minutes / 40) * 1.2 + clamp(vsExpected * 0.15, 0, 1.8) + (won ? 0.45 : 0)) * learning;
 }
 
 export function earnPoints(state: GameState, points: number): void {
@@ -60,7 +64,7 @@ export function earnPoints(state: GameState, points: number): void {
 export function upgradeCost(user: Player, skill: Skill): number {
   const value = user.skills[skill];
   if (value >= MAX_SKILL) return Infinity;
-  const base = value < 40 ? 1 : value < 60 ? 2 : value < 75 ? 3 : value < 88 ? 4 : 5;
+  const base = value < 40 ? 3 : value < 60 ? 6 : value < 75 ? 9 : value < 88 ? 12 : 15;
   const ceiling = user.ceiling[skill];
   return value >= ceiling ? base * 3 : value >= ceiling - 4 ? Math.ceil(base * 1.5) : base;
 }

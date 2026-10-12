@@ -157,7 +157,7 @@ describe('save migration', () => {
     expect(loaded.format).toBe(2);
     expect(loaded.career.stage).toBe('pro');
     expect(loaded.career.ending).toBeNull();
-    expect(loaded.career.skillPoints).toBe(3);
+    expect(loaded.career.skillPoints).toBe(9);
     expect(loaded.career.approach).toBe('team');
     expect(advance(loaded, index).kind).not.toBe('ended');
   }, 180_000);

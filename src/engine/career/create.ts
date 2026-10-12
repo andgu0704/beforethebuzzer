@@ -50,7 +50,7 @@ const OUTLETS = [
 
 /** A new career: a fresh world, the user's player in this spring's high-school class, his rival and his beat writer. */
 /** Points to spend before the first game, so the upgrade screen means something from day one. */
-export const STARTING_SKILL_POINTS = 3;
+export const STARTING_SKILL_POINTS = 9;
 
 export function createCareer(index: ContentIndex, input: CreationInput): GameState {
   const nation = index.nation.get(input.nation);

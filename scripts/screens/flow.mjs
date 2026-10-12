@@ -66,6 +66,39 @@ async function decide() {
       if (await visible(id('ending'))) return 'ended';
       continue;
     }
+    // The live game screen: tip off, skip through the plays, close the final.
+    if (await visible(id('tip-off'))) {
+      if (!seen.has('pregame')) {
+        seen.add('pregame');
+        await shot('13-pregame');
+      }
+      if (await id('tip-off').isEnabled()) await id('tip-off').click();
+      await page.waitForTimeout(800);
+      continue;
+    }
+    if (await visible(id('moment-continue'))) {
+      await id('moment-continue').click();
+      continue;
+    }
+    if (await visible(id('live-final'))) {
+      if (!seen.has('final')) {
+        seen.add('final');
+        await shot('15-live-final');
+      }
+      await id('live-done').click();
+      await page.waitForTimeout(500);
+      continue;
+    }
+    if (await visible(id('live-skip'))) {
+      if (!seen.has('watching')) {
+        seen.add('watching');
+        await page.waitForTimeout(2500);
+        await shot('14-live');
+      }
+      await id('live-skip').click();
+      await page.waitForTimeout(300);
+      continue;
+    }
     const sheets = await page.locator('[data-testid="decide"]').count();
     if (sheets > 1) console.log(`warning: ${sheets} decision sheets mounted`);
     const actionable = page.locator(
@@ -140,7 +173,7 @@ for (let turn = 0; turn < weeks && !ended; turn++) {
         .catch(() => '')
     ).toLowerCase();
     if (process.env.FLOW_DEBUG) console.log(turn, guard, page.url(), now);
-    if (/next week|see how it ended/.test(now) && r === 'none') break;
+    if (/next week|next game|see how it ended/.test(now) && r === 'none') break;
     if (/decide/.test(now) && r === 'none') {
       const ok = await id('next-week')
         .click({ timeout: 8000 })

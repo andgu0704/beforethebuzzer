@@ -17,3 +17,14 @@ export function decideMounted(on: boolean): void {
   mounted = Math.max(0, mounted + (on ? 1 : -1));
   if (!on) lastPush = 0;
 }
+
+/** The live game screen is open: decisions on the way to tip-off are its to carry on from. */
+let live = 0;
+
+export function liveMounted(on: boolean): void {
+  live = Math.max(0, live + (on ? 1 : -1));
+}
+
+export function liveActive(): boolean {
+  return live > 0;
+}

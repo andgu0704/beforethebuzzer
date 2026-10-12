@@ -8,7 +8,7 @@ import { castParams } from '@/engine/career/events';
 import { userOf } from '@/engine/career/state';
 import type { FeedEntry, Interrupt } from '@/engine/model/career';
 import { haptic } from '@/platform/haptics';
-import { decideMounted } from '@/state/decide';
+import { decideMounted, liveActive } from '@/state/decide';
 import { choose, contentIndex, playOn, useGame } from '@/state/game';
 import { tournamentName } from '@/state/views';
 import { Avatar } from '@/ui/components/Avatar';
@@ -551,7 +551,8 @@ export function DecideScreen() {
     if (s && s.career.pending.length === 0) {
       close();
       if (s.career.ending) router.push('/ending');
-      else if (s.career.cursor.stage !== 'idle') void playOn();
+      // The live game screen carries on to tip-off itself; elsewhere the week plays on.
+      else if (s.career.cursor.stage !== 'idle' && !liveActive()) void playOn();
     }
   };
 

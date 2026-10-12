@@ -235,3 +235,13 @@ export function tournamentName(
   }
   return t(tour.nameKey, params);
 }
+
+/** "Los Angeles Comets": city name and nickname, without saying a select side's name twice. */
+export function fullTeamName(
+  names: { team(id: string, part?: 'name' | 'nickname' | 'abbr'): string },
+  id: string,
+): string {
+  const name = names.team(id);
+  const nickname = names.team(id, 'nickname');
+  return !nickname || name.includes(nickname) ? name : `${name} ${nickname}`;
+}

@@ -1,4 +1,4 @@
-import { weekIndex } from '../core/calendar';
+import { ageAt, weekIndex } from '../core/calendar';
 import { asInterruptId, nextId, type PersonId, type TeamId } from '../core/ids';
 import { clamp } from '../core/math';
 import { createRng } from '../core/rng';
@@ -528,7 +528,10 @@ function finishUserGame(
     }
     recordFeats(state, line);
     approachReaction(state, index, line, won, vsExpected);
-    earnPoints(state, gamePoints(minutes, vsExpected, won));
+    earnPoints(
+      state,
+      gamePoints(minutes, vsExpected, won, ageAt(user.birthYear, state.world.date)),
+    );
     updateForm(state, traits.slumpResist);
     // Injury: tired legs and old knocks raise the odds.
     const risk =

@@ -13,7 +13,9 @@ import type { FeedEntry } from '@/engine/model/career';
 import { dismissError, playAhead, playOn, save, useGame } from '@/state/game';
 import { openDecide } from '@/state/decide';
 import { useSettings } from '@/state/settings';
-import { feedByWeek, phaseOf, weekRange } from '@/state/views';
+import { nextUserGame, opponentOf, ownTeamOf, venueOf, weeksUntil } from '@/state/live';
+import { feedByWeek, fullTeamName, phaseOf, recordOf, recordText, weekRange } from '@/state/views';
+import { TeamMark } from '@/ui/components/Marks';
 import { Button, IconButton } from '@/ui/components/Button';
 import { Banner, EmptyState } from '@/ui/components/Layout';
 import { Text } from '@/ui/components/Text';
@@ -54,10 +56,62 @@ function WeekHeader({ week, phase }: { readonly week: number; readonly phase: st
   );
 }
 
-/** The action dock: simulate ahead and next week, or the pending decision. */
+/** His next game, plainly: who, where, when, and both records. Tapping it opens the game. */
+function UpNext() {
+  const t = useTheme();
+  const { t: tt, names } = useT();
+  const state = useGame((g) => g.state);
+  useGame((g) => g.rev);
+  if (!state || state.career.ending) return null;
+  const next = nextUserGame(state);
+  if (!next) return null;
+  const opp = opponentOf(state, next);
+  const team = state.world.teams[opp];
+  const own = state.world.teams[ownTeamOf(state, next)];
+  const weeks = weeksUntil(state, next);
+  return (
+    <Pressable
+      testID="up-next"
+      accessibilityRole="button"
+      onPress={() => {
+        if (weeks <= 1 && !state.career.pending.length) router.push('/live');
+      }}
+      style={[
+        styles.upNext,
+        { backgroundColor: t.c.surface, borderRadius: t.radii.md, borderColor: t.c.hairline },
+      ]}
+    >
+      {team ? (
+        <TeamMark
+          teamId={team.id}
+          abbr={team.abbr}
+          primary={team.colours.primary}
+          secondary={team.colours.secondary}
+          emblem={team.kind === 'pro' ? team.emblem : undefined}
+          size={40}
+        />
+      ) : null}
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text variant="label" color="brandText">
+          {weeks === 0 ? tt('ui.live.nextGame') : tt('ui.live.inWeeks', { n: weeks })}
+        </Text>
+        <Text variant="subhead" numberOfLines={1}>
+          {tt(`ui.home.upNext.${venueOf(state, next)}`, {
+            team: fullTeamName(names, opp),
+          })}
+        </Text>
+        <Text variant="footnote" color="inkSecondary" numberOfLines={1}>
+          {`${own ? `${names.team(own.id, 'abbr')} ${recordText(recordOf(state, own.id))}` : ''} · ${names.team(opp, 'abbr')} ${recordText(recordOf(state, opp))} · ${weekRange(next.date.week)}`}
+        </Text>
+      </View>
+    </Pressable>
+  );
+}
+
+/** The action dock: simulate ahead and next game (or week), or the pending decision. */
 export function ActionDock() {
   const t = useTheme();
-  const { t: tt } = useT();
+  const { t: tt, names } = useT();
   const state = useGame((g) => g.state);
   const busy = useGame((g) => g.busy);
   useGame((g) => g.rev);
@@ -69,6 +123,10 @@ export function ActionDock() {
   const tip =
     !firstWeek || pending || busy ? null : !tips['plan'] ? 'plan' : !tips['next'] ? 'next' : null;
   const ended = state.career.ending !== null;
+  // A game this week or next: the main action is to play it.
+  const next = nextUserGame(state);
+  const soon = next && weeksUntil(state, next) <= 1 ? next : null;
+  const gameSoon = soon !== null;
   const label = ended
     ? tt('ui.home.ended')
     : pending
@@ -77,7 +135,9 @@ export function ActionDock() {
         ? tt('ui.home.simulatingAhead', { n: Math.min(busy.of, busy.weeks + 1), of: busy.of })
         : busy
           ? tt('ui.home.simulating')
-          : tt('ui.home.nextWeek');
+          : soon
+            ? tt('ui.home.nextGame', { team: names.team(opponentOf(state, soon), 'abbr') })
+            : tt('ui.home.nextWeek');
   return (
     <View style={{ backgroundColor: t.c.canvas }}>
       {tip ? (
@@ -127,6 +187,7 @@ export function ActionDock() {
             if (tip === 'next') useSettings.getState().markTip('next');
             if (ended) router.push('/ending');
             else if (pending) openDecide();
+            else if (gameSoon) router.push('/live');
             else void playOn();
           }}
           trailing={busy ? <Basketball size={18} color={t.c.onAccent} weight="fill" /> : undefined}
@@ -182,6 +243,7 @@ export function HomeScreen() {
         ListHeaderComponent={
           <View style={{ gap: t.space.m }}>
             <HomeHeader />
+            <UpNext />
             {error ? (
               <Banner
                 tone="negative"
@@ -241,6 +303,13 @@ const styles = StyleSheet.create({
   },
   entry: { paddingVertical: 16, borderBottomWidth: StyleSheet.hairlineWidth },
   tip: { paddingHorizontal: 12, paddingVertical: 8, marginTop: 8 },
+  upNext: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
   dock: {
     flexDirection: 'row',
     gap: 10,
