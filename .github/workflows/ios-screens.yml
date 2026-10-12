@@ -19,9 +19,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - device: 'iPhone 16 Pro Max'
+          - device: 'iPhone 17 Pro Max'
             appearance: light
             textSize: large
+          - device: 'iPhone 17e'
+            appearance: dark
+            textSize: accessibility-extra-extra-extra-large
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -42,14 +45,19 @@ jobs:
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
       - name: Boot the simulator
         run: |
-          xcrun simctl boot "${{ matrix.device }}" || true
-          xcrun simctl bootstatus "${{ matrix.device }}" -b
-          xcrun simctl ui "${{ matrix.device }}" appearance ${{ matrix.appearance }}
-          xcrun simctl ui "${{ matrix.device }}" content_size ${{ matrix.textSize }}
+          # The same name exists under several runtimes; take the newest one.
+          UDID=$(xcrun simctl list devices available -j | jq -r --arg name "${{ matrix.device }}" \
+            '[.devices | to_entries | sort_by(.key)[] | select(.key | test("iOS")) | .value[] | select(.name == $name)] | last | .udid')
+          echo "Simulator $UDID"
+          echo "UDID=$UDID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl ui "$UDID" appearance ${{ matrix.appearance }}
+          xcrun simctl ui "$UDID" content_size ${{ matrix.textSize }}
       - name: Build and install a release build
         run: |
           set -o pipefail
-          npx expo run:ios --configuration Release --device "${{ matrix.device }}" --no-bundler 2>&1 | tee build.log
+          npx expo run:ios --configuration Release --device "$UDID" --no-bundler 2>&1 | tee build.log
         env:
           CI: '1'
       - name: Show build errors
@@ -59,7 +67,7 @@ jobs:
           grep -n -A12 "Could not resolve package dependencies" build.log | head -40 || true
           grep -n -B6 -A4 "❌" build.log | head -60 || true
       - name: Run the flows
-        run: maestro test .maestro --test-output-dir maestro-output
+        run: maestro --device "$UDID" test .maestro --test-output-dir maestro-output
       - uses: actions/upload-artifact@v4
         if: always()
         with:
