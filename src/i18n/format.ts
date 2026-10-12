@@ -108,7 +108,10 @@ export function createTranslator(locale: string, catalog: Catalog): Translator {
     if (typeof leaf === 'string') template = leaf;
     else {
       const n = Number(params[leaf.by] ?? 0);
-      const category = plural.select(n) as keyof PluralForm;
+      // An explicit zero form wins: English rules file 0 under 'other'.
+      const category = (
+        n === 0 && leaf.zero !== undefined ? 'zero' : plural.select(n)
+      ) as keyof PluralForm;
       template = leaf[category] ?? leaf.other;
     }
     return template.replace(/\{(\w+)\}/g, (_, name: string) => {

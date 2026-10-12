@@ -9,8 +9,8 @@ import type { TeamId } from '../core/ids';
 import { createRng, type Rng } from '../core/rng';
 import type { ContentIndex } from '../content/registry';
 import { estimateOdds } from '../game/moments';
-import type { Interrupt, Offer, WeekPlan } from '../model/career';
-import { POSITION_WEIGHTS, SKILLS, type Skill } from '../model/skills';
+import type { ContractOffer, Interrupt, Offer, WeekPlan } from '../model/career';
+import { mapSkills, POSITION_WEIGHTS, SKILLS, type Skill } from '../model/skills';
 import type { GameState } from '../career/state';
 import { userOf } from '../career/state';
 import { mergeTraits } from '../career/traits';
@@ -23,6 +23,28 @@ export interface Bot {
   plan(state: GameState, index: ContentIndex): WeekPlan;
   choose(state: GameState, index: ContentIndex, interrupt: Interrupt): Choice;
 }
+
+/**
+ * How a bot spends skill points: the naive one spreads them evenly, the others follow what
+ * matters for his position (which is also where they used to put their practice).
+ */
+export function spendWeights(bot: Bot, state: GameState): Record<Skill, number> {
+  if (bot.name === 'naive') return mapSkills(() => 1);
+  const position = POSITION_WEIGHTS[userOf(state).position];
+  if (bot.name === 'expert') return { ...position };
+  // A casual player half follows what his position needs and half chases the fun skills.
+  return mapSkills((s) => 0.5 * position[s] + 0.5 * CASUAL_TASTE[s]);
+}
+
+const CASUAL_TASTE: Record<Skill, number> = {
+  shooting: 0.35,
+  athleticism: 0.25,
+  handling: 0.15,
+  playmaking: 0.1,
+  defence: 0.05,
+  rebounding: 0.05,
+  gameSense: 0.05,
+};
 
 function rngFor(state: GameState, label: string): Rng {
   return createRng(
@@ -104,7 +126,11 @@ export const naive: Bot = {
       case 'draftNight':
         return 'go';
       case 'afterDraft':
-        return 'returnToSchool';
+        return i.options.includes('returnToSchool') ? 'returnToSchool' : 'tryout';
+      case 'contract':
+        return bestOffer(i.offers);
+      case 'retire':
+        return 'continue';
     }
   },
 };
@@ -163,7 +189,11 @@ export const casual: Bot = {
       case 'draftNight':
         return 'go';
       case 'afterDraft':
-        return 'returnToSchool';
+        return i.options.includes('returnToSchool') ? 'returnToSchool' : 'tryout';
+      case 'contract':
+        return bestOffer(i.offers);
+      case 'retire':
+        return 'continue';
     }
   },
 };
@@ -356,7 +386,11 @@ export const expert: Bot = {
       case 'draftNight':
         return 'go';
       case 'afterDraft':
-        return 'returnToSchool';
+        return i.options.includes('returnToSchool') ? 'returnToSchool' : 'tryout';
+      case 'contract':
+        return bestOffer(i.offers);
+      case 'retire':
+        return 'continue';
     }
   },
 };
@@ -373,4 +407,11 @@ export function planSize(plan: WeekPlan): number {
     plan.study +
     plan.media
   );
+}
+
+/** The offer with the biggest role, then the most money. */
+function bestOffer(offers: readonly ContractOffer[]): string {
+  const rank = { bench: 0, rotation: 1, starter: 2, star: 3 } as const;
+  const best = [...offers].sort((a, b) => rank[b.role] - rank[a.role] || b.salary - a.salary)[0];
+  return best?.teamId ?? 'retire';
 }

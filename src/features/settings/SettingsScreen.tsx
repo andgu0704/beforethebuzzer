@@ -100,6 +100,15 @@ export function SettingsScreen() {
         }}
       />
       <Toggle
+        testID="skill-checks"
+        label={tt('ui.settings.skillChecks')}
+        body={tt('ui.settings.skillChecksBody')}
+        value={s.skillChecks}
+        onChange={(skillChecks) => {
+          s.update({ skillChecks });
+        }}
+      />
+      <Toggle
         testID="autoplay"
         label={tt('ui.settings.autoplay')}
         body={tt('ui.settings.autoplayBody')}

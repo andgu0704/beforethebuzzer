@@ -57,6 +57,12 @@ export interface PlayEvent {
   readonly player: number;
   readonly kind: PlayKind;
   readonly score: readonly [number, number];
+  /** The shot, for made and missed field goals. */
+  readonly shot?: ShotType;
+  /** The player on the other side involved: the one who lost the ball, or whose shot was blocked. */
+  readonly vs?: number;
+  /** Who is on the floor for each side, whenever it has changed since the last play. */
+  readonly on?: readonly [readonly number[], readonly number[]];
 }
 
 /** Everything needed to pause a game mid-way and resume it after a save. */

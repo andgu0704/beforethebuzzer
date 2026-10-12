@@ -1735,4 +1735,612 @@ export const events = {
       },
     },
   },
+  pro_rookie_initiation: {
+    title: 'The rookie list',
+    body: 'First day of camp. {starTeammate} hands you a list: doughnuts every morning, his bags on every flight, and a solo on the team plane. The list is laminated. It has been laminated for years.',
+    choices: {
+      carry_the_bags: {
+        label: 'Do everything on the list',
+        outcome:
+          'Four dozen doughnuts a day and a bag that weighs more than you do. By November the veterans were calling you by your first name.',
+        timeline: 'Did every rookie chore on the list.',
+      },
+      counter_offer: {
+        label: 'Make a counter-offer',
+        outcome:
+          'You proposed bagels on alternate days. How it landed depended on how sure of yourself you sounded.',
+        timeline: 'Negotiated the rookie duties.',
+      },
+      refuse: {
+        label: 'Politely decline',
+        outcome:
+          'You said you were here to play basketball. The room went quiet, then somebody put your shoes in the cold tub.',
+        timeline: 'Refused the rookie duties.',
+      },
+      make_it_a_show: {
+        label: 'Turn the solo into a show',
+        outcome:
+          'You did the solo with costume changes. Someone filmed it. The veterans have lost the high ground and they know it.',
+        timeline: 'Turned the rookie solo into a show.',
+      },
+    },
+  },
+  pro_veteran_mentor: {
+    title: 'The oldest man on the roster',
+    body: 'The oldest man on the roster stretches for forty minutes before he touches a ball. He says you waste your feet on defence and offers to show you why, at seven, before anyone else is in.',
+    choices: {
+      mornings_with_him: {
+        label: 'Meet him at seven',
+        outcome:
+          'He moved you six inches to the left, twice a day, for a month. You now arrive at every screen a half-step early and slightly annoyed.',
+        timeline: 'Took early lessons from a veteran.',
+      },
+      copy_his_routine: {
+        label: 'Steal his recovery routine',
+        outcome:
+          'Cold tub, hot tub, a nine o’clock bedtime and a cryotherapy membership that costs more than your first car. Your legs have stopped complaining.',
+        timeline: 'Copied a veteran’s recovery routine.',
+      },
+      politely_decline: {
+        label: 'Thank him and pass',
+        outcome:
+          'He shrugged and said the league would teach you instead. He said it kindly, which was worse.',
+        timeline: 'Turned down a veteran’s offer to help.',
+      },
+    },
+  },
+  pro_famous_arena: {
+    title: 'The old building',
+    body: 'The road trip ends in the oldest arena in the league. The banners hang so low you could touch them from the top row. Your dad has asked for a photo of the floor. Specifically the floor.',
+    choices: {
+      early_shootaround: {
+        label: 'Go out three hours early',
+        outcome:
+          'The rims are the same height as everywhere else. It took forty shots to believe it.',
+        timeline: 'Shot around early in the league’s oldest arena.',
+      },
+      photo_for_dad: {
+        label: 'Get Dad his photo',
+        outcome:
+          'You lay on the floor for the angle. Your dad has made it his background. An assistant coach had some thoughts about the timing.',
+        timeline: 'Took a photo of a famous floor for his father.',
+      },
+      just_another_game: {
+        label: 'Treat it like any other Tuesday',
+        outcome:
+          'You looked up once, during warm-ups. That was the deal you made with yourself, and you kept it.',
+        timeline: 'Played the famous arena like any other road game.',
+      },
+    },
+  },
+  pro_minutes_cut: {
+    title: 'Fewer minutes',
+    body: 'Your minutes have halved in two weeks and nobody has told you why. {coach} walks past you in the corridor like you are a fire extinguisher.',
+    choices: {
+      ask_why: {
+        label: 'Knock on his door',
+        outcome:
+          'He explained it with a whiteboard. Whether it sounded like a plan or an excuse depended on how much you trusted each other already.',
+        timeline: 'Asked the coach why his minutes were cut.',
+      },
+      outwork_it: {
+        label: 'Say nothing, stay late',
+        outcome:
+          'An hour after every practice, shooting and sliding. The coach did not say anything either, but he started watching.',
+        timeline: 'Answered fewer minutes with extra work.',
+      },
+      vent_to_reporters: {
+        label: 'Tell the reporters what you think',
+        outcome:
+          'You said you "just want to help the team win", in a tone. Every reporter in the room heard the tone.',
+        timeline: 'Complained about his minutes to the press.',
+      },
+      agent_calls_the_front_office: {
+        label: 'Have {agent} call the front office',
+        outcome:
+          '{agent} made a call. The front office made a call. The coach found out about both calls before lunch.',
+        timeline: 'Sent his agent to the front office about minutes.',
+      },
+    },
+  },
+  pro_trade_rumours: {
+    title: 'In conversations',
+    body: '{journalist} reports that your name is "in conversations" before the trade deadline. The word "conversations" is doing a lot of work. Your phone has not stopped buzzing since breakfast.',
+    choices: {
+      ask_the_front_office: {
+        label: 'Ask the front office directly',
+        outcome:
+          'The general manager said you were "a big part of what we are building". How much that was worth depended on how much they trusted you.',
+        timeline: 'Asked the front office about trade rumours.',
+      },
+      phone_in_a_drawer: {
+        label: 'Put the phone in a drawer',
+        outcome: 'Three days without the internet. The deadline passed. You were still here.',
+        timeline: 'Ignored the trade rumours.',
+      },
+      play_like_an_audition: {
+        label: 'Play like it’s an audition',
+        outcome:
+          'Thirty shots a night for a week. Scouts from four teams loved it. Your teammates did the maths on their own shots.',
+        timeline: 'Played the trade deadline like an audition.',
+      },
+      cryptic_post: {
+        label: 'Post a single eye emoji',
+        outcome:
+          'One emoji, eleven thousand theories. The front office asked what it meant. So did your mother.',
+        timeline: 'Posted something cryptic during trade rumours.',
+      },
+    },
+  },
+  pro_contract_year: {
+    title: 'The spreadsheet',
+    body: 'Somewhere in the front office there is a spreadsheet with your name on it, and it has started updating after every game. Everyone keeps telling you not to think about the next contract.',
+    choices: {
+      play_for_the_numbers: {
+        label: 'Play for the numbers',
+        outcome:
+          'Your averages went up. So did your shot attempts. The ball has started arriving a little later than it used to.',
+        timeline: 'Played for his next contract.',
+      },
+      ask_about_an_extension: {
+        label: 'Ask about an extension now',
+        outcome:
+          'The front office said they "love where this is going". What that meant depended on how highly they rated you already.',
+        timeline: 'Asked the team about an early extension.',
+      },
+      ban_contract_talk: {
+        label: 'Ban contract talk until April',
+        outcome:
+          'You told everyone, including the people paid to talk about it. Sleep has improved. Your phone has gone quiet in a slightly hurt way.',
+        timeline: 'Banned contract talk for the season.',
+      },
+      let_the_agent_worry: {
+        label: 'Let {agent} worry about it',
+        outcome:
+          '{agent} said "that’s what I’m here for" and meant it. You went back to worrying about pick-and-rolls.',
+        timeline: 'Left the contract to his agent.',
+      },
+    },
+  },
+  pro_shoe_deal: {
+    title: 'The shoe company',
+    body: 'A shoe company flies you to a campus with its own lake. They show you a mood board of your face. They show you a contract. They show you a shoe and ask what it should be called.',
+    choices: {
+      big_deal: {
+        label: 'Sign the big deal',
+        outcome:
+          'Four shoots a season, a summer tour and a shoe named after your middle name. The money is very real. So is the schedule.',
+        timeline: 'Signed a major shoe deal.',
+      },
+      small_deal: {
+        label: 'Take the smaller, quieter deal',
+        outcome: 'Free shoes, a cheque, and one photo shoot a year. Your face is on a box, small.',
+        timeline: 'Signed a modest shoe deal.',
+      },
+      stay_free: {
+        label: 'Keep wearing whatever fits',
+        outcome:
+          'You played in last year’s shoes. Two companies sent letters. Your feet have never been happier.',
+        timeline: 'Turned down a shoe deal.',
+      },
+      agent_haggles: {
+        label: 'Let {agent} haggle',
+        outcome:
+          '{agent} walked out of the meeting twice. Whether they followed him depended on how big a name you already were.',
+        timeline: 'Had his agent negotiate the shoe deal.',
+      },
+    },
+  },
+  pro_locker_feud: {
+    title: 'Not passing',
+    body: '{teammate} and {starTeammate} have not passed to each other since Tuesday. It started with a seat on the plane. It is now about respect, and possibly a watch.',
+    choices: {
+      get_them_in_a_room: {
+        label: 'Get them in a room',
+        outcome:
+          'You locked the video room door and put a pizza on the table. It went as well as the room already liked each other.',
+        timeline: 'Tried to settle a feud between teammates.',
+      },
+      back_the_star: {
+        label: 'Take {starTeammate}’s side',
+        outcome:
+          '{starTeammate} now saves you a seat on the plane. {teammate} has started sitting somewhere else entirely.',
+        timeline: 'Took the star’s side in a locker-room feud.',
+      },
+      tell_the_coach: {
+        label: 'Tell the coach',
+        outcome:
+          'The coach sorted it in ten minutes. Everyone in the locker room knows how he found out.',
+        timeline: 'Reported a locker-room feud to the coach.',
+      },
+      captain_call: {
+        label: 'Settle it as captain',
+        outcome:
+          'You made them shoot free throws together until one of them laughed. It took forty minutes.',
+        timeline: 'Ended a locker-room feud as captain.',
+      },
+    },
+  },
+  pro_hometown_charity: {
+    title: 'The rec centre',
+    body: 'Your old rec centre wants you for a charity night. The roof leaks over the free-throw line, which is why you still shoot with a slight lean.',
+    choices: {
+      fix_the_roof: {
+        label: 'Pay for a new roof',
+        outcome:
+          'New roof, new rims, your name on a plaque by the door. The old man who ran the place cried and then told you to fix your lean.',
+        timeline: 'Paid to fix his hometown rec centre.',
+      },
+      run_a_camp: {
+        label: 'Run a free camp for a week',
+        outcome:
+          'Two hundred kids, one ball each and a lot of shouting. Your voice is gone. Several of them can now make a layup with the wrong hand.',
+        timeline: 'Ran a free camp in his hometown.',
+      },
+      send_a_video: {
+        label: 'Send a cheque and a video',
+        outcome:
+          'The video played on a projector against a wall. The cheque was generous. Your aunt mentioned twice that you were not there.',
+        timeline: 'Sent money and a video to the hometown charity night.',
+      },
+    },
+  },
+  pro_hit_piece: {
+    title: 'Two thousand words',
+    body: '{journalist} has written two thousand words on why you are "a box-score mirage". There are charts. There is a paragraph about your shoes.',
+    choices: {
+      answer_online: {
+        label: 'Answer him online',
+        outcome:
+          'You posted your own chart. It was either a clever reply or a public meltdown, depending on who was reading.',
+        timeline: 'Answered a critical article online.',
+      },
+      invite_him_to_film: {
+        label: 'Invite him to watch film with you',
+        outcome:
+          'You walked him through six possessions. Whether he left convinced depended on how well you could explain your own game.',
+        timeline: 'Invited a critic to a film session.',
+      },
+      say_nothing: {
+        label: 'Say nothing',
+        outcome:
+          'You did not read it. You read it twice. You said nothing, which he took as an invitation to write a sequel.',
+        timeline: 'Ignored a critical article.',
+      },
+    },
+  },
+  pro_load_management: {
+    title: 'Rest day',
+    body: 'The sports science staff wants you out of tomorrow’s game. Your legs agree. The game is on national television, and a lot of people bought tickets because of a poster with you on it.',
+    choices: {
+      sit_it_out: {
+        label: 'Sit it out',
+        outcome:
+          'You watched from the bench in a nice jumper. Your legs thanked you. A child in the third row held up a sign that did not.',
+        timeline: 'Sat out a game to rest.',
+      },
+      play_through_it: {
+        label: 'Play anyway',
+        outcome:
+          'You played thirty-six minutes on legs made of wet cardboard. The crowd loved it. The sports science staff wrote something down.',
+        timeline: 'Played through fatigue.',
+      },
+      minutes_limit: {
+        label: 'Play, on a minutes limit',
+        outcome:
+          'Twenty-two minutes, then a towel over your head. Everyone was slightly disappointed, which in this job is called a compromise.',
+        timeline: 'Played a game on a minutes limit.',
+      },
+      ice_and_painkillers: {
+        label: 'Ice, painkillers and a big coat',
+        outcome:
+          'You felt nothing for three hours, which was the point. Tomorrow will have its own opinion.',
+        timeline: 'Played on painkillers instead of resting.',
+      },
+    },
+  },
+  pro_all_star_talk: {
+    title: 'The debate shows',
+    body: 'The All-Star reserves are announced on Thursday. The debate shows have a graphic with your face on one side, a question mark in the middle and a guard from a bigger market on the other.',
+    choices: {
+      make_your_case: {
+        label: 'Make your case on a podcast',
+        outcome:
+          'You brought numbers. The internet brought other numbers. It came down to whose numbers people liked more.',
+        timeline: 'Campaigned publicly for an All-Star spot.',
+      },
+      let_the_numbers_talk: {
+        label: 'Let the numbers talk',
+        outcome:
+          'You said "the coaches will decide" and went to practice. The coach approved. The debate shows needed a new graphic.',
+        timeline: 'Stayed quiet about the All-Star selection.',
+      },
+      push_the_teammate: {
+        label: 'Say {starTeammate} deserves it more',
+        outcome:
+          '{starTeammate} heard about it before you got to the car park. He has been passing to you like it is his idea.',
+        timeline: 'Backed a teammate for the All-Star game.',
+      },
+    },
+  },
+  pro_elimination_nerves: {
+    title: 'One more loss',
+    body: 'Lose tomorrow and the season is over. You have checked the door lock four times. Your hand does a small thing when you lift a coffee cup.',
+    choices: {
+      film_all_night: {
+        label: 'Watch film until it’s light',
+        outcome:
+          'You know every set they run and the name of their assistant coach’s dog. You also know what three a.m. looks like.',
+        timeline: 'Watched film all night before an elimination game.',
+      },
+      force_yourself_to_sleep: {
+        label: 'Make yourself sleep',
+        outcome:
+          'Lights off, phone away, counting backwards. Whether it worked depended on how much nerve you had left.',
+        timeline: 'Tried to sleep before an elimination game.',
+      },
+      call_home: {
+        label: 'Call home',
+        outcome:
+          'Your mother talked about the weather for an hour. You did not mention basketball once. It was the best hour of the week.',
+        timeline: 'Called home before an elimination game.',
+      },
+      speak_at_breakfast: {
+        label: 'Say something at breakfast',
+        outcome:
+          'You stood up between the eggs and the coffee. Whether the room stood with you depended on how close it already was.',
+        timeline: 'Spoke to the team before an elimination game.',
+      },
+    },
+  },
+  pro_superteam_pitch: {
+    title: 'Imagine us two',
+    body: 'The best player in the biggest market in the league texts you at one in the morning: "imagine us two". Then a photo of his view. The view is very good.',
+    choices: {
+      keep_talking: {
+        label: 'Text back: "keep talking"',
+        outcome:
+          'You talked until three. By lunchtime somebody had leaked it, and your coach’s handshake has become a nod.',
+        timeline: 'Entertained a star’s pitch to join him.',
+      },
+      shut_it_down_publicly: {
+        label: 'Say you’re happy here, out loud',
+        outcome:
+          'You said it at a press conference, in a home shirt. The fans printed it on a banner. The star sent a thumbs-up and nothing else.',
+        timeline: 'Publicly turned down a star’s recruiting pitch.',
+      },
+      leave_on_read: {
+        label: 'Leave him on read',
+        outcome: 'Read, 1:04 a.m. He has not texted again. He has started following your mother.',
+        timeline: 'Ignored a star’s recruiting pitch.',
+      },
+      forward_to_agent: {
+        label: 'Forward it to {agent}',
+        outcome:
+          '{agent} called it "leverage" with real affection. Your front office has started returning his calls faster.',
+        timeline: 'Used a star’s pitch as leverage.',
+      },
+    },
+  },
+  pro_team_meeting: {
+    title: 'Players only',
+    body: 'After the loss, {coach} calls a players-only meeting and then stays in the room. Nobody points this out.',
+    choices: {
+      speak_first: {
+        label: 'Speak first',
+        outcome:
+          'You said the thing nobody wanted to say first. How it landed depended on how sure of it you sounded.',
+        timeline: 'Spoke first in a team meeting.',
+      },
+      own_your_part: {
+        label: 'Own your part of it',
+        outcome:
+          'You listed your three worst possessions out loud. It is hard to blame anyone else after that, which was the idea.',
+        timeline: 'Took responsibility in a team meeting.',
+      },
+      call_out_the_star: {
+        label: 'Say what everyone thinks about {starTeammate}',
+        outcome:
+          'You said it. {starTeammate} looked at you for a long time. Whether you had the standing to say it was the whole question.',
+        timeline: 'Called out the team’s best player in a meeting.',
+      },
+      say_nothing: {
+        label: 'Say nothing',
+        outcome:
+          'You studied the carpet for forty minutes. It is a nice carpet. The meeting changed nothing.',
+        timeline: 'Stayed quiet in a team meeting.',
+      },
+    },
+  },
+  pro_rival_beef: {
+    title: 'The old clip',
+    body: '{rival} has posted an old clip of himself crossing you over, with a laughing emoji and no caption. Four million people have seen it, including your mother.',
+    choices: {
+      post_the_block: {
+        label: 'Post the clip where you blocked him',
+        outcome:
+          'You found it in eleven minutes. It has more views than his. Somebody at the league office has started circling dates.',
+        timeline: 'Answered a rival’s post with a clip of his own.',
+      },
+      call_him: {
+        label: 'Call him instead',
+        outcome:
+          'He picked up on the second ring and laughed. You talked about the old days for half an hour. Neither of you deleted anything.',
+        timeline: 'Called his rival instead of posting.',
+      },
+      save_it_for_the_game: {
+        label: 'Save it for the next game',
+        outcome:
+          'You screenshotted it and set it as your lock screen. You will look at it every day until you play him.',
+        timeline: 'Saved a rival’s post for motivation.',
+      },
+      bury_it_for_good: {
+        label: 'Reply with a photo of you two at camp',
+        outcome:
+          'Two teenagers in matching camp shirts. The internet lost interest in the feud within the hour, and {rival} laughed first.',
+        timeline: 'Defused a rival’s post with an old photo.',
+      },
+    },
+  },
+  pro_summer_training: {
+    title: 'Six weeks',
+    body: 'Six free weeks before camp. Your phone has three offers: a trainer in the desert who charges by the scream, a teammate’s open gym in a city you don’t love, and your mother’s sofa.',
+    choices: {
+      desert_trainer: {
+        label: 'Go to the desert',
+        outcome:
+          'Sand hills at five a.m. and a man with a stopwatch who never says "good". You came back faster and slightly haunted.',
+        timeline: 'Spent the summer with a desert trainer.',
+      },
+      teammate_runs: {
+        label: 'Join the open gym',
+        outcome:
+          'Six weeks of runs with half the roster. You know what everyone wants to do with the ball now, and whose birthday is when.',
+        timeline: 'Spent the summer training with teammates.',
+      },
+      go_home: {
+        label: 'Go home',
+        outcome:
+          'You slept, ate your mother’s cooking and shot alone in the old gym in the evenings. Your body feels like it belongs to you again.',
+        timeline: 'Spent the summer resting at home.',
+      },
+      national_team_camp: {
+        label: 'Join the national team camp',
+        outcome:
+          'Three weeks in a national team shirt with players who still call you by your childhood nickname. The minutes were short and the drills were long.',
+        timeline: 'Spent the summer at national team camp.',
+      },
+    },
+  },
+  pro_family_money: {
+    title: 'The business plan',
+    body: 'Your cousin has a business plan. It is for a restaurant, a car wash and a record label, in the same building. Your mother says family is family. Your accountant says nothing, very loudly.',
+    choices: {
+      fund_the_plan: {
+        label: 'Fund it',
+        outcome:
+          'The building has a sign now. The sign has three logos on it. Your cousin calls you every day, which is nice, and about money, which is less nice.',
+        timeline: 'Funded his cousin’s business.',
+      },
+      buy_mum_a_house: {
+        label: 'Buy your mother a house instead',
+        outcome:
+          'She cried in the kitchen and then rearranged all of it. Your cousin has decided this counts as investing in family.',
+        timeline: 'Bought his mother a house.',
+      },
+      hire_a_planner: {
+        label: 'Set up a family budget with a planner',
+        outcome:
+          'A planner, a spreadsheet and a monthly allowance for everyone. It is sensible. Nobody at the family barbecue said so.',
+        timeline: 'Put his family on a budget.',
+      },
+      say_no: {
+        label: 'Say no',
+        outcome:
+          'You said no, kindly. Your cousin said "no problem", unkindly. The next family dinner is going to be a long one.',
+        timeline: 'Turned down a family request for money.',
+      },
+    },
+  },
+  pro_draftee_advice: {
+    title: 'The notebook',
+    body: 'The team’s new first-round pick sits next to you at lunch, puts his phone face down and asks how you did it. He means all of it. He has a notebook.',
+    choices: {
+      take_him_on: {
+        label: 'Take him under your wing',
+        outcome:
+          'Early shooting, late film and a strict ban on buying cars before Christmas. He says "yes" to everything, which is how you know he is listening.',
+        timeline: 'Took a rookie under his wing.',
+      },
+      one_rule: {
+        label: 'Give him one rule',
+        outcome: '"Save half of everything." He wrote it down and underlined it twice.',
+        timeline: 'Gave a rookie one piece of advice.',
+      },
+      figure_it_out: {
+        label: 'Tell him to figure it out like you did',
+        outcome:
+          'He nodded and closed the notebook. You finished your lunch in peace, and the peace felt older than you expected.',
+        timeline: 'Told a rookie to figure it out himself.',
+      },
+    },
+  },
+  pro_life_after: {
+    title: 'After',
+    body: 'A former teammate who retired last year calls to say he has started a podcast, a coffee brand and a beard. He sounds happy. He also asks you, twice, what day it is.',
+    choices: {
+      business_course: {
+        label: 'Enrol in a business course',
+        outcome:
+          'Online lectures on hotel wifi between road games. You now know what EBITDA means and have used it once in conversation, badly.',
+        timeline: 'Started a business course while still playing.',
+      },
+      coaching_clinics: {
+        label: 'Run coaching clinics in the summer',
+        outcome:
+          'Teaching twelve-year-olds to box out made you see the floor differently. You also learned that you yell "body!" in your sleep.',
+        timeline: 'Started running coaching clinics.',
+      },
+      invest_in_his_coffee: {
+        label: 'Invest in his coffee brand',
+        outcome:
+          'The coffee is in four hundred shops, or it is in his garage. It depends which month you ask.',
+        timeline: 'Invested in a former teammate’s coffee brand.',
+      },
+      not_yet: {
+        label: 'Not yet. Hang up and go shoot',
+        outcome:
+          'You have years left. You said it out loud in an empty gym, which is how you know it is true, mostly.',
+        timeline: 'Put off thinking about retirement.',
+      },
+    },
+  },
+  pro_team_plane: {
+    title: 'The back of the plane',
+    body: 'The card game at the back of the team plane has been running, in some form, since before you were drafted. {teammate} pats the empty seat.',
+    choices: {
+      play_for_real_money: {
+        label: 'Sit down and play for real money',
+        outcome:
+          'Five hours, two time zones and one hand you will be hearing about for years, one way or the other.',
+        timeline: 'Played cards for money on the team plane.',
+      },
+      play_for_snacks: {
+        label: 'Play for the snacks',
+        outcome:
+          'You won eleven bags of pretzels and the respect of the equipment manager. {teammate} wants a rematch on the flight home.',
+        timeline: 'Played cards for snacks on the team plane.',
+      },
+      sleep: {
+        label: 'Sleep',
+        outcome:
+          'You slept through the landing. Somebody drew on your hand. It washed off by the second quarter.',
+        timeline: 'Slept through the card game on the plane.',
+      },
+    },
+  },
+  pro_hot_streak: {
+    title: 'Everything is going in',
+    body: 'You have made everything for two weeks. A magazine wants you on the cover. A former coach texts "change nothing". Your barber would like to know if it is the haircut.',
+    choices: {
+      cover_shoot: {
+        label: 'Do the cover',
+        outcome:
+          'A whole day of holding a ball very still. The cover looks great. Every columnist in the country has mentioned the cover curse.',
+        timeline: 'Did a magazine cover during a hot streak.',
+      },
+      change_nothing: {
+        label: 'Change nothing, including the haircut',
+        outcome:
+          'Same breakfast, same socks, same seat on the bus. Your barber has been told to do the same thing again, exactly, and is nervous about it.',
+        timeline: 'Changed nothing during a hot streak.',
+      },
+      extra_reps: {
+        label: 'Bank the feeling with extra reps',
+        outcome:
+          'Three hundred makes after practice while the stroke still feels like yours. The coach watched from the tunnel and said nothing, approvingly.',
+        timeline: 'Put in extra shooting during a hot streak.',
+      },
+    },
+  },
 } satisfies Catalog;

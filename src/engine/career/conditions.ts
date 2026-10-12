@@ -37,9 +37,11 @@ export function meets(state: GameState, index: ContentIndex, c: Conditions | und
     const stage =
       career.stage === 'highSchool'
         ? 'highSchool'
-        : career.stage === 'college' && !career.draft.declared
-          ? 'college'
-          : 'prospect';
+        : career.stage === 'pro'
+          ? 'pro'
+          : career.stage === 'college' && !career.draft.declared
+            ? 'college'
+            : 'prospect';
     if (!c.stages.includes(stage)) return false;
   }
   if (c.phases && !c.phases.includes(collegePhase(week))) return false;

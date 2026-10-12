@@ -257,4 +257,16 @@ export const social = {
   event_kind_post: '{surname} posting about {rival}’s injury like that. class',
   event_freshman_song:
     '{surname} sang a song from home at freshman dinner and we have been humming it for three hours. send the lyrics',
+  award_fan:
+    'put the trophy next to the one from the school science fair. same shelf. {surname} earned both',
+  award_analyst:
+    'Deserved. {surname} was the most consistent player in the league from the first week to the last.',
+  award_hater: 'voters love a story. {surname} is a story. that is all this is',
+  award_hometown:
+    'The whole town watched. The bakery is giving away free bread in {surname}’s honour.',
+  signed_fan: 'GET THAT BAG {surname}. (please keep passing to the corner)',
+  signed_journalist:
+    'Done deal: {surname} signs. Sources say the number made the front office wince.',
+  signed_hater: 'that contract is going to look awful in two years. screenshot this',
+  signed_brand: 'New deal, new shoes? Our door is open, {surname}.',
 } satisfies Catalog;

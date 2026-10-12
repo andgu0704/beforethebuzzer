@@ -21,9 +21,12 @@ export default function GameLayout() {
   const state = useGame((g) => g.state);
   const busy = useGame((g) => g.busy);
   const pendingId = useGame((g) => g.state?.career.pending[0]?.id ?? null);
+  const pendingKind = useGame((g) => g.state?.career.pending[0]?.kind ?? null);
   const pathname = usePathname();
   useEffect(() => {
     if (!pendingId || busy || pathname === '/decide') return;
+    // Key moments during a watched game are answered on the live screen itself.
+    if (pathname === '/live' && pendingKind === 'keyMoment') return;
     openDecide();
     // A push made while the previous sheet is still animating away can be swallowed, so a
     // decision still pending a moment later is opened again.
@@ -31,7 +34,7 @@ export default function GameLayout() {
     return () => {
       clearInterval(id);
     };
-  }, [pendingId, busy, pathname]);
+  }, [pendingId, pendingKind, busy, pathname]);
 
   // A reload or deep link into the game: the index route reopens the last career (or welcomes).
   if (!state) return <Redirect href="/" />;
@@ -71,6 +74,7 @@ export default function GameLayout() {
       <Stack.Screen name="profile" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="bracket/[tournamentId]" options={{ headerShown: true, title: '' }} />
       <Stack.Screen name="ending" options={{ gestureEnabled: false }} />
+      <Stack.Screen name="live" options={{ gestureEnabled: false, animation: 'fade' }} />
       <Stack.Screen name="draft/night" options={{ gestureEnabled: false }} />
       <Stack.Screen name="draft/combine" options={{ headerShown: true, title: '' }} />
     </Stack>

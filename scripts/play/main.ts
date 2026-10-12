@@ -204,13 +204,37 @@ function describe(
         body: 'The green room smells like new suits.',
         options: [{ id: 'go', label: 'Let it happen' }],
       };
-    case 'afterDraft':
+    case 'afterDraft': {
+      const labels = {
+        returnToSchool: 'Go back to college for another season',
+        tryout: 'Try out at a pro camp',
+        endCareer: 'End the career here',
+      } as const;
       return {
         title: 'UNDRAFTED',
         body: `You have ${i.seasonsLeft} season${i.seasonsLeft === 1 ? '' : 's'} of college eligibility left.`,
+        options: i.options.map((id) => ({ id, label: labels[id] })),
+      };
+    }
+    case 'contract':
+      return {
+        title: 'CONTRACT',
+        body: 'Your deal is up. Offers:',
         options: [
-          { id: 'returnToSchool', label: 'Go back to college for another season' },
-          { id: 'endCareer', label: 'End the career here' },
+          ...i.offers.map((o) => ({
+            id: o.teamId,
+            label: `${n.team(o.teamId)}${o.current ? ' (stay)' : ''}: ${o.years} yr, $${(o.salary / 1e6).toFixed(1)}M, ${t.t(`roles.${o.role}`)}`,
+          })),
+          ...(i.canRetire ? [{ id: 'retire', label: 'Retire' }] : []),
+        ],
+      };
+    case 'retire':
+      return {
+        title: 'ONE MORE YEAR?',
+        body: `You are ${i.age}.`,
+        options: [
+          { id: 'continue', label: 'Play another season' },
+          { id: 'retire', label: 'Retire' },
         ],
       };
   }

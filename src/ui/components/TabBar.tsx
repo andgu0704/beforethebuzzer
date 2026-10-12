@@ -28,7 +28,11 @@ const ICONS: Record<string, Icon> = {
 };
 
 /** Five tabs: regular icons when inactive, fill when active (§10.5). */
-export function TabBar({ state, navigation }: BottomTabBarProps) {
+export function TabBar({
+  state,
+  navigation,
+  badges = {},
+}: BottomTabBarProps & { readonly badges?: Readonly<Record<string, number>> }) {
   const t = useTheme();
   const { t: tt } = useT();
   const insets = useSafeAreaInsets();
@@ -54,7 +58,9 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
             testID={`tab-${route.name}`}
             accessibilityRole="tab"
             accessibilityState={{ selected: focused }}
-            accessibilityLabel={label}
+            accessibilityLabel={
+              badges[route.name] ? `${label}, ${String(badges[route.name])}` : label
+            }
             onPress={() => {
               const event = navigation.emit({
                 type: 'tabPress',
@@ -68,11 +74,27 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
             }}
             style={styles.tab}
           >
-            <IconCmp
-              size={24}
-              color={focused ? t.c.ink : t.c.inkTertiary}
-              weight={focused ? 'fill' : 'regular'}
-            />
+            <View>
+              <IconCmp
+                size={24}
+                color={focused ? t.c.ink : t.c.inkTertiary}
+                weight={focused ? 'fill' : 'regular'}
+              />
+              {badges[route.name] ? (
+                <View
+                  testID={`badge-${route.name}`}
+                  style={[styles.badge, { backgroundColor: t.c.accent }]}
+                >
+                  <Text
+                    variant="caption"
+                    style={{ color: t.c.onAccent }}
+                    maxFontSizeMultiplier={1.2}
+                  >
+                    {String(badges[route.name])}
+                  </Text>
+                </View>
+              ) : null}
+            </View>
             <Text
               variant="caption"
               color={focused ? 'ink' : 'inkTertiary'}
@@ -90,4 +112,15 @@ export function TabBar({ state, navigation }: BottomTabBarProps) {
 const styles = StyleSheet.create({
   bar: { flexDirection: 'row', borderTopWidth: StyleSheet.hairlineWidth, paddingTop: 6 },
   tab: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 2, minHeight: 48 },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -12,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

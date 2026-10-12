@@ -2,12 +2,15 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { planBlocks, planEnergy } from '@/engine/career/progress';
+import { planBlocks, planEnergy, practiceBlocks } from '@/engine/career/progress';
 import { userOf } from '@/engine/career/state';
+import { headroom, practicePoints, upgradeCost } from '@/engine/career/upgrade';
+import { overallOf } from '@/engine/game/ratings';
 import { PLAN_BLOCKS, type Activity, type FeedEntry, type WeekPlan } from '@/engine/model/career';
-import { SKILLS, type Skill } from '@/engine/model/skills';
-import { contentIndex, setPlan, useGame } from '@/state/game';
+import { SKILLS } from '@/engine/model/skills';
+import { contentIndex, setPlan, upgrade, useGame } from '@/state/game';
 import { useSettings } from '@/state/settings';
+import { AnimatedNumber } from '@/ui/components/AnimatedNumber';
 import { Button } from '@/ui/components/Button';
 import { PlanBar, Stepper } from '@/ui/components/Controls';
 import { Banner, Screen, SectionHeader } from '@/ui/components/Layout';
@@ -18,10 +21,9 @@ import { useTheme } from '@/ui/theme/theme';
 
 const LIFE: readonly Activity[] = ['rest', 'film', 'bonding', 'study', 'media'];
 
-function withTrain(plan: WeekPlan, skill: Skill, v: number): WeekPlan {
-  const train = { ...plan.train, [skill]: v };
-  if (v === 0) delete train[skill];
-  return { ...plan, train };
+/** Practice is one number now; older plans that split it by skill are folded into it. */
+function withPractice(plan: WeekPlan, v: number): WeekPlan {
+  return { ...plan, train: {}, practice: v };
 }
 
 /** The last change shown for each skill in the feed, for the trend arrow. */
@@ -49,13 +51,16 @@ export function TrainScreen() {
   if (!state) return null;
   const u = userOf(state);
   const plan = draft ?? state.career.plan;
+  const index = contentIndex();
   const used = planBlocks(plan);
   const left = PLAN_BLOCKS - used;
   const dirty = draft !== null;
   const forecast = Math.max(0, Math.min(100, u.energy + planEnergy(plan)));
-  const trainTotal = Object.values(plan.train).reduce((a, b) => a + b, 0);
+  const trainTotal = practiceBlocks(plan);
+  const pointsForecast = practicePoints(state, index, trainTotal);
+  const points = state.career.skillPoints;
+  const ovr = overallOf(u.skills, u.position, u.heightCm);
   const trends = skillTrends(state.career.feed);
-  const index = contentIndex();
   const earned = u.traits.map((id) => index.trait.get(id)).filter((x) => x !== undefined);
   const locked = index.content.traits.filter(
     (x) =>
@@ -83,6 +88,84 @@ export function TrainScreen() {
           </View>
         ) : null}
 
+        <View
+          style={[
+            styles.points,
+            { backgroundColor: t.c.accentTint, borderRadius: t.radii.md, marginTop: t.space.m },
+          ]}
+          testID="skill-points"
+        >
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text variant="subhead" color="accentText">
+              {tt('ui.train.pointsTitle')}
+            </Text>
+            <Text variant="footnote" color="inkSecondary">
+              {tt('ui.train.pointsBody')}
+            </Text>
+          </View>
+          <AnimatedNumber value={Math.floor(points)} style={{ color: t.c.accentText }} />
+        </View>
+        <SectionHeader
+          title={tt('ui.train.skills')}
+          detail={tt('ui.train.overall', { n: Math.round(ovr) })}
+        />
+        {SKILLS.map((s) => {
+          const v = u.skills[s];
+          const trend = trends[s] ?? 0;
+          const cost = upgradeCost(u, s);
+          const room = headroom(u, s);
+          const affordable = points >= cost;
+          return (
+            <View
+              key={s}
+              style={[styles.skill, { borderBottomColor: t.c.hairline }]}
+              accessibilityLabel={`${tt(`skills.${s}`)} ${Math.floor(v)}`}
+            >
+              <View style={{ flex: 1, gap: 4 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
+                  <Text variant="subhead" style={{ flex: 1 }}>
+                    {tt(`skills.${s}`)}
+                  </Text>
+                  <Text
+                    variant="footnote"
+                    color={trend > 0 ? 'positive' : trend < 0 ? 'negative' : 'inkTertiary'}
+                  >
+                    {trend > 0 ? '↑' : trend < 0 ? '↓' : ''}
+                  </Text>
+                  <Text variant="stat" style={{ fontSize: 20, lineHeight: 24 }} align="right">
+                    {Math.floor(v)}
+                  </Text>
+                </View>
+                <View
+                  style={[styles.track, { backgroundColor: t.c.sunken, borderRadius: t.radii.xs }]}
+                >
+                  <View
+                    style={{
+                      width: `${Math.min(100, v)}%`,
+                      height: 6,
+                      backgroundColor: t.c.accent,
+                      borderRadius: t.radii.xs,
+                    }}
+                  />
+                </View>
+                <Text variant="footnote" color={room === 'none' ? 'caution' : 'inkSecondary'}>
+                  {`${tt(`ui.train.room.${room}`)} · ${tt('ui.train.cost', { n: cost })}`}
+                </Text>
+              </View>
+              <Button
+                testID={`upgrade-${s}`}
+                size="compact"
+                variant={affordable ? 'primary' : 'secondary'}
+                label="+1"
+                disabled={!affordable}
+                onPress={() => {
+                  upgrade(s);
+                }}
+              />
+            </View>
+          );
+        })}
+
         <SectionHeader
           title={tt('ui.train.plan')}
           detail={tt('ui.train.blocksLeft', { n: left })}
@@ -100,22 +183,17 @@ export function TrainScreen() {
             ]}
           />
         </View>
-        <Text variant="label" color="inkSecondary" style={{ marginTop: t.space.s }}>
-          {tt('ui.train.training')}
-        </Text>
-        {SKILLS.map((s) => (
-          <Stepper
-            key={s}
-            testID={`plan-${s}`}
-            label={tt(`skills.${s}`)}
-            value={plan.train[s] ?? 0}
-            max={PLAN_BLOCKS}
-            canIncrease={left > 0}
-            onChange={(v) => {
-              setDraft(withTrain(plan, s, v));
-            }}
-          />
-        ))}
+        <Stepper
+          testID="plan-practice"
+          label={tt('ui.train.practice')}
+          detail={tt('ui.train.practiceBody', { n: pointsForecast.toFixed(1) })}
+          value={trainTotal}
+          max={PLAN_BLOCKS}
+          canIncrease={left > 0}
+          onChange={(v) => {
+            setDraft(withPractice(plan, v));
+          }}
+        />
         <Text variant="label" color="inkSecondary" style={{ marginTop: t.space.l }}>
           {tt('ui.train.life')}
         </Text>
@@ -173,51 +251,6 @@ export function TrainScreen() {
             }}
           />
         </View>
-
-        <SectionHeader title={tt('ui.train.skills')} />
-        {SKILLS.map((s) => {
-          const v = u.skills[s];
-          const trend = trends[s] ?? 0;
-          return (
-            <View
-              key={s}
-              style={[styles.skill, { borderBottomColor: t.c.hairline }]}
-              accessible
-              accessibilityLabel={`${tt(`skills.${s}`)} ${Math.round(v)}`}
-            >
-              <Text variant="subhead" style={{ width: 120 }}>
-                {tt(`skills.${s}`)}
-              </Text>
-              <View
-                style={[styles.track, { backgroundColor: t.c.sunken, borderRadius: t.radii.xs }]}
-              >
-                <View
-                  style={{
-                    width: `${Math.min(100, v)}%`,
-                    height: 6,
-                    backgroundColor: t.c.accent,
-                    borderRadius: t.radii.xs,
-                  }}
-                />
-              </View>
-              <Text
-                variant="stat"
-                style={{ width: 40, fontSize: 20, lineHeight: 24 }}
-                align="right"
-              >
-                {Math.round(v)}
-              </Text>
-              <Text
-                variant="footnote"
-                color={trend > 0 ? 'positive' : trend < 0 ? 'negative' : 'inkTertiary'}
-                style={{ width: 22 }}
-                align="right"
-              >
-                {trend > 0 ? '↑' : trend < 0 ? '↓' : ''}
-              </Text>
-            </View>
-          );
-        })}
 
         <SectionHeader title={tt('ui.train.traits')} />
         <View style={{ gap: t.space.m, marginTop: t.space.s }}>
@@ -288,9 +321,11 @@ const styles = StyleSheet.create({
   skill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    minHeight: 44,
+    gap: 12,
+    minHeight: 64,
+    paddingVertical: 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  track: { flex: 1, height: 6, overflow: 'hidden' },
+  track: { height: 6, overflow: 'hidden' },
+  points: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 },
 });

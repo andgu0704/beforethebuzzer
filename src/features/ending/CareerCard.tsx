@@ -11,7 +11,7 @@ import { Text } from '@/ui/components/Text';
 import { useT } from '@/ui/i18n';
 import { useTheme } from '@/ui/theme/theme';
 
-/** The shareable summary: draft result, college line, medals, rival, badges. */
+/** The shareable summary: draft result, college and pro lines, titles and awards, rival, badges. */
 export const CareerCard = forwardRef<View, { readonly state: GameState }>(function CareerCard(
   { state },
   ref,
@@ -22,11 +22,27 @@ export const CareerCard = forwardRef<View, { readonly state: GameState }>(functi
   const end = state.career.ending;
   const draftTeam = end?.teamId ? state.world.teams[end.teamId] : undefined;
   const collegeLines = u.lines.filter((l) => l.league === 'college' && !l.competition);
-  const pg = perGame(collegeLines);
-  const seasons = new Set(collegeLines.map((l) => l.season)).size;
-  const medals = Object.values(state.world.seasons)
+  const proLines = u.lines.filter((l) => l.league === 'pro' && !l.competition);
+  const rows = [
+    { lines: collegeLines, label: tt('ui.ending.collegeLine') },
+    { lines: proLines, label: tt('ui.ending.proLine') },
+  ]
+    .filter((r) => r.lines.length > 0)
+    .map((r) => ({
+      ...r,
+      pg: perGame(r.lines),
+      seasons: new Set(r.lines.map((l) => l.season)).size,
+    }));
+  // Medals and individual awards, then team titles won while he was on the roster.
+  const honours = Object.values(state.world.seasons)
     .flatMap((s) => s.awards)
-    .filter((a) => a.personId === u.id && a.kind.startsWith('medal'));
+    .filter((a) => a.personId === u.id);
+  const titles = state.career.timeline.filter(
+    (e) =>
+      e.message.key === 'timeline.award.proChampion' ||
+      e.message.key === 'timeline.award.collegeChampion',
+  ).length;
+  const retired = end?.reason === 'retired';
   const rival = state.career.rivalId ? state.world.people[state.career.rivalId] : undefined;
   const rivalPick = isPlayer(rival)
     ? state.world.draft?.picks.find((p) => p.playerId === rival.id)
@@ -54,7 +70,11 @@ export const CareerCard = forwardRef<View, { readonly state: GameState }>(functi
         />
         <View style={{ flex: 1, gap: 4 }}>
           <Text variant="label" style={{ color: '#FFFFFF', opacity: 0.8 }}>
-            {end?.pick ? tt(`ui.ending.round.${end.pick <= 30 ? 1 : 2}`) : tt('ui.ending.kicker')}
+            {retired
+              ? tt('ui.ending.retiredKicker')
+              : end?.pick
+                ? tt(`ui.ending.round.${end.pick <= 30 ? 1 : 2}`)
+                : tt('ui.ending.kicker')}
           </Text>
           <Text
             variant={end?.pick ? 'scoreboard' : 'displayL'}
@@ -88,30 +108,33 @@ export const CareerCard = forwardRef<View, { readonly state: GameState }>(functi
           <Text variant="displayS">{names.person(u.id)}</Text>
           <Flag code={u.nation} size={14} />
         </View>
-        <View style={styles.statRow}>
-          {[
-            { v: tt('ui.ending.seasons', { n: seasons }), l: tt('ui.ending.collegeLine') },
-            { v: one(pg.pts), l: tt('ui.game.pts') },
-            { v: one(pg.reb), l: tt('ui.game.reb') },
-            { v: one(pg.ast), l: tt('ui.game.ast') },
-          ].map((s) => (
-            <View key={s.l} style={{ gap: 2 }}>
-              <Text variant="label" color="inkSecondary">
-                {s.l}
-              </Text>
-              <Text variant="stat" style={{ fontSize: 20, lineHeight: 24 }}>
-                {s.v}
-              </Text>
-            </View>
-          ))}
-        </View>
-        {medals.length ? (
+        {rows.map((r) => (
+          <View key={r.label} style={styles.statRow}>
+            {[
+              { v: tt('ui.ending.seasons', { n: r.seasons }), l: r.label },
+              { v: one(r.pg.pts), l: tt('ui.game.pts') },
+              { v: one(r.pg.reb), l: tt('ui.game.reb') },
+              { v: one(r.pg.ast), l: tt('ui.game.ast') },
+            ].map((s) => (
+              <View key={s.l} style={{ gap: 2 }}>
+                <Text variant="label" color="inkSecondary">
+                  {s.l}
+                </Text>
+                <Text variant="stat" style={{ fontSize: 20, lineHeight: 24 }}>
+                  {s.v}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ))}
+        {honours.length || titles ? (
           <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
-            {medals.map((m, i) => (
+            {titles ? <Tag tone="caution" label={tt('ui.ending.titles', { n: titles })} /> : null}
+            {honours.map((m, i) => (
               <Tag
                 key={i}
-                tone={m.kind === 'medalGold' ? 'caution' : 'neutral'}
-                label={tt(`ui.career.medal.${m.kind}`)}
+                tone={m.kind === 'medalGold' || m.kind === 'proMvp' ? 'caution' : 'neutral'}
+                label={tt(`ui.profile.award.${m.kind}`)}
               />
             ))}
           </View>

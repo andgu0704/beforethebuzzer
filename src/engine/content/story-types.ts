@@ -110,7 +110,7 @@ export interface TraitDef {
 
 // ------------------------------------------------------------------ conditions and effects
 
-export type Stage = 'highSchool' | 'college' | 'prospect';
+export type Stage = 'highSchool' | 'college' | 'prospect' | 'pro';
 
 export interface Conditions {
   readonly stages?: readonly Stage[];
@@ -311,7 +311,9 @@ export type SocialTrigger =
   | 'event'
   | 'declare'
   | 'drafted'
-  | 'undrafted';
+  | 'undrafted'
+  | 'award'
+  | 'signed';
 
 export type SocialAuthor =
   | 'fan'

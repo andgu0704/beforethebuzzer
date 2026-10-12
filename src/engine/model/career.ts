@@ -27,7 +27,10 @@ export const ACTIVITIES = ['rest', 'film', 'bonding', 'study', 'media'] as const
 export type Activity = (typeof ACTIVITIES)[number];
 
 export interface WeekPlan {
+  /** Older plans split practice by skill; it now all earns skill points, so only the sum counts. */
   readonly train: Readonly<Partial<Record<Skill, number>>>;
+  /** Practice blocks: each earns skill points to spend on the skills he chooses. */
+  readonly practice?: number;
   readonly rest: number;
   readonly film: number;
   readonly bonding: number;
@@ -144,6 +147,24 @@ export interface GameMemory {
   readonly pts: number;
 }
 
+// ------------------------------------------------------------------ pro contracts
+
+/** A team's offer when his deal runs out (or when he walks into a pro camp undrafted). */
+export interface ContractOffer {
+  readonly teamId: TeamId;
+  readonly years: number;
+  /** Dollars per season. */
+  readonly salary: number;
+  /** The role the team sees for him. */
+  readonly role: Role;
+  /** His current team's offer to stay. */
+  readonly current: boolean;
+}
+
+/** How he means to play the coming game, chosen before tip-off. */
+export const APPROACHES = ['team', 'score', 'facilitate', 'defend'] as const;
+export type Approach = (typeof APPROACHES)[number];
+
 // ------------------------------------------------------------------ interrupts
 
 export interface MomentSituation {
@@ -194,11 +215,27 @@ export type Interrupt =
   | { readonly id: InterruptId; readonly kind: 'draftNight' }
   | {
       readonly id: InterruptId;
-      /** Undrafted with college eligibility left: go back for another season, or stop here. */
+      /**
+       * Undrafted: go back for another season (with eligibility left), try out at a pro camp,
+       * or stop here.
+       */
       readonly kind: 'afterDraft';
-      readonly options: readonly ('returnToSchool' | 'endCareer')[];
+      readonly options: readonly ('returnToSchool' | 'tryout' | 'endCareer')[];
       /** College seasons he still has. */
       readonly seasonsLeft: number;
+    }
+  | {
+      readonly id: InterruptId;
+      /** His deal has run out: pick an offer, or retire if he may. */
+      readonly kind: 'contract';
+      readonly offers: readonly ContractOffer[];
+      readonly canRetire: boolean;
+    }
+  | {
+      readonly id: InterruptId;
+      /** A veteran's summer question: one more season, or call it a career. */
+      readonly kind: 'retire';
+      readonly age: number;
     };
 
 export type InterruptKind = Interrupt['kind'];
@@ -224,6 +261,8 @@ export interface TurnCursor {
   gameIds: GameId[];
   gameIndex: number;
   live: LiveUserGame | null;
+  /** His last finished game, kept (with its play log) until the next one starts, for replays. */
+  finished?: LiveUserGame | null;
   /** League games for the week have been played. */
   leagueDone: boolean;
   eventsDone: boolean;
@@ -232,10 +271,10 @@ export interface TurnCursor {
 // ------------------------------------------------------------------ the career
 
 export type CareerStage =
-  'highSchool' | 'college' | 'prospect' | 'drafted' | 'undrafted' | 'retired';
+  'highSchool' | 'college' | 'prospect' | 'drafted' | 'undrafted' | 'pro' | 'retired';
 
 export interface Ending {
-  readonly reason: 'draft' | 'undrafted' | 'injury' | 'choice';
+  readonly reason: 'draft' | 'undrafted' | 'injury' | 'choice' | 'retired';
   readonly date: GameDate;
   readonly pick: number | null;
   readonly teamId: TeamId | null;
@@ -298,4 +337,12 @@ export interface Career {
   callUps: Record<string, 'accepted' | 'declined'>;
   godMode: GodModeState;
   ending: Ending | null;
+  /** Unspent skill points, earned in games and practice and spent on upgrades. */
+  skillPoints: number;
+  /** Skill points earned in all, for the career summary. */
+  skillPointsEarned: number;
+  /** How he means to play his next game. */
+  approach: Approach;
+  /** Awards already announced, by season, so each is reported once. */
+  awardsSeen: Record<string, number>;
 }

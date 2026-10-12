@@ -16,6 +16,13 @@ import {
 } from './effects';
 
 const inSeason = ['preseason', 'nonConference', 'conference'] as const;
+/** The pro regular season wraps the new year (weeks 43 to 15); these phases cover most of it. */
+const proSeason = [
+  'nonConference',
+  'conference',
+  'conferenceTournament',
+  'nationalTournament',
+] as const;
 
 export const events: readonly EventDef[] = [
   {
@@ -1674,6 +1681,724 @@ export const events: readonly EventDef[] = [
         id: 'dawn_workout',
         requires: { traitsAny: ['gym_rat'] },
         effects: [status('coachTrust', 4), status('energy', -3)],
+      },
+    ],
+  },
+
+  // ---------------------------------------------------------------- the pros
+
+  {
+    id: 'pro_rookie_initiation',
+    category: 'team',
+    when: { stages: ['pro'], weeks: [36, 46], flagsNone: ['pro_rookie'] },
+    weight: 6,
+    once: true,
+    cast: ['starTeammate'],
+    choices: [
+      {
+        id: 'carry_the_bags',
+        effects: [
+          flag('pro_rookie'),
+          status('chemistry', 5),
+          rel('teammates', 6),
+          status('energy', -5),
+          status('confidence', -1),
+        ],
+      },
+      {
+        id: 'counter_offer',
+        effects: [
+          flag('pro_rookie'),
+          checkStatus(
+            'confidence',
+            55,
+            [status('chemistry', 3), status('confidence', 3)],
+            [status('chemistry', -2), rel('teammates', -3)],
+          ),
+        ],
+      },
+      {
+        id: 'refuse',
+        effects: [
+          flag('pro_rookie'),
+          status('confidence', 3),
+          status('chemistry', -5),
+          rel('teammates', -8),
+        ],
+      },
+      {
+        id: 'make_it_a_show',
+        requires: { traitsAny: ['media_darling', 'glue_guy'] },
+        effects: [
+          flag('pro_rookie'),
+          status('chemistry', 6),
+          status('reputation', 2),
+          status('energy', -3),
+        ],
+      },
+    ],
+  },
+  {
+    id: 'pro_veteran_mentor',
+    category: 'team',
+    when: { stages: ['pro'], phases: proSeason, flagRecent: { id: 'pro_rookie', withinWeeks: 26 } },
+    weight: 4,
+    once: true,
+    choices: [
+      {
+        id: 'mornings_with_him',
+        effects: [
+          skill('gameSense', 0.6),
+          skill('defence', 0.4),
+          status('energy', -6),
+          rel('teammates', 4),
+          flag('pro_mentored'),
+        ],
+      },
+      {
+        id: 'copy_his_routine',
+        effects: [status('health', 6), status('energy', 3), status('money', -20_000)],
+      },
+      { id: 'politely_decline', effects: [status('confidence', 2), rel('teammates', -3)] },
+    ],
+  },
+  {
+    id: 'pro_famous_arena',
+    category: 'social',
+    when: { stages: ['pro'], phases: proSeason, flagRecent: { id: 'pro_rookie', withinWeeks: 20 } },
+    weight: 3,
+    once: true,
+    choices: [
+      {
+        id: 'early_shootaround',
+        effects: [status('confidence', 3), skill('shooting', 0.2), status('energy', -2)],
+      },
+      {
+        id: 'photo_for_dad',
+        effects: [rel('family', 6), chance(0.3, [status('coachTrust', -2)])],
+      },
+      { id: 'just_another_game', effects: [status('coachTrust', 2), status('confidence', -1)] },
+    ],
+  },
+  {
+    id: 'pro_minutes_cut',
+    category: 'coach',
+    when: { stages: ['pro'], roles: ['bench', 'rotation'], phases: proSeason },
+    weight: 3,
+    cooldownWeeks: 14,
+    cast: ['coach', 'agent'],
+    choices: [
+      {
+        id: 'ask_why',
+        effects: [
+          checkStatus(
+            'coachTrust',
+            50,
+            [status('coachTrust', 4), status('confidence', 2)],
+            [status('coachTrust', -3), status('confidence', -2)],
+          ),
+        ],
+      },
+      {
+        id: 'outwork_it',
+        effects: [
+          skill('shooting', 0.4),
+          skill('defence', 0.4),
+          status('energy', -6),
+          status('coachTrust', 3),
+        ],
+      },
+      {
+        id: 'vent_to_reporters',
+        effects: [
+          status('reputation', 2),
+          status('coachTrust', -8),
+          rel('journalist', 4),
+          status('chemistry', -2),
+        ],
+      },
+      {
+        id: 'agent_calls_the_front_office',
+        requires: { hasAgent: true },
+        effects: [
+          rel('agent', 3),
+          status('coachTrust', -5),
+          chance(0.4, [status('confidence', 3)], [status('confidence', -1)]),
+        ],
+      },
+    ],
+  },
+  {
+    id: 'pro_trade_rumours',
+    category: 'media',
+    when: { stages: ['pro'], weeks: [1, 7] },
+    weight: 3,
+    cooldownWeeks: 40,
+    cast: ['journalist'],
+    choices: [
+      {
+        id: 'ask_the_front_office',
+        effects: [
+          checkStatus(
+            'coachTrust',
+            55,
+            [status('confidence', 3), status('coachTrust', 2)],
+            [status('confidence', -3)],
+          ),
+        ],
+      },
+      { id: 'phone_in_a_drawer', effects: [status('energy', 2), status('confidence', 1)] },
+      {
+        id: 'play_like_an_audition',
+        effects: [status('reputation', 2), status('confidence', 2), status('chemistry', -4)],
+      },
+      {
+        id: 'cryptic_post',
+        effects: [status('reputation', 3), status('coachTrust', -4), rel('fans', -2)],
+      },
+    ],
+  },
+  {
+    id: 'pro_contract_year',
+    category: 'agent',
+    when: { stages: ['pro'], weeks: [43, 52], flagsAll: ['pro_summer'] },
+    weight: 2,
+    cooldownWeeks: 52,
+    cast: ['agent'],
+    choices: [
+      {
+        id: 'play_for_the_numbers',
+        effects: [
+          status('confidence', 2),
+          status('reputation', 2),
+          status('chemistry', -4),
+          status('coachTrust', -2),
+        ],
+      },
+      {
+        id: 'ask_about_an_extension',
+        effects: [
+          checkStatus(
+            'coachTrust',
+            55,
+            [status('confidence', 4), status('coachTrust', 2)],
+            [status('confidence', -3)],
+          ),
+        ],
+      },
+      {
+        id: 'ban_contract_talk',
+        effects: [status('energy', 3), status('coachTrust', 2), rel('agent', -2)],
+      },
+      {
+        id: 'let_the_agent_worry',
+        requires: { hasAgent: true, relations: { agent: [55, 100] } },
+        effects: [rel('agent', 4), status('confidence', 2), status('energy', 2)],
+      },
+    ],
+  },
+  {
+    id: 'pro_shoe_deal',
+    category: 'money',
+    when: { stages: ['pro'], status: { reputation: [40, 100] }, flagsNone: ['pro_shoe_deal'] },
+    weight: 2,
+    cooldownWeeks: 52,
+    cast: ['agent'],
+    choices: [
+      {
+        id: 'big_deal',
+        effects: [
+          status('money', 900_000),
+          status('reputation', 4),
+          status('energy', -8),
+          status('coachTrust', -2),
+          flag('pro_shoe_deal'),
+        ],
+      },
+      {
+        id: 'small_deal',
+        effects: [status('money', 250_000), status('reputation', 1), flag('pro_shoe_deal')],
+      },
+      { id: 'stay_free', effects: [status('energy', 2), status('confidence', 1)] },
+      {
+        id: 'agent_haggles',
+        requires: { hasAgent: true },
+        effects: [
+          checkStatus(
+            'reputation',
+            60,
+            [
+              status('money', 1_400_000),
+              status('reputation', 3),
+              status('energy', -8),
+              rel('agent', 5),
+              flag('pro_shoe_deal'),
+            ],
+            [status('money', 300_000), rel('agent', -3), flag('pro_shoe_deal')],
+          ),
+        ],
+      },
+    ],
+  },
+  {
+    id: 'pro_locker_feud',
+    category: 'team',
+    when: { stages: ['pro'], phases: proSeason },
+    weight: 2,
+    cooldownWeeks: 26,
+    cast: ['teammate', 'starTeammate'],
+    choices: [
+      {
+        id: 'get_them_in_a_room',
+        effects: [
+          checkStatus(
+            'chemistry',
+            55,
+            [status('chemistry', 6), rel('teammates', 5)],
+            [status('chemistry', -2), rel('teammates', -3), status('energy', -2)],
+          ),
+        ],
+      },
+      {
+        id: 'back_the_star',
+        effects: [status('confidence', 2), status('chemistry', -2), rel('teammates', -2)],
+      },
+      { id: 'tell_the_coach', effects: [status('coachTrust', 3), rel('teammates', -6)] },
+      {
+        id: 'captain_call',
+        requires: { flagsAll: ['team_captain'], roles: ['starter', 'star'] },
+        effects: [status('chemistry', 6), status('coachTrust', 2), rel('teammates', 3)],
+      },
+    ],
+  },
+  {
+    id: 'pro_hometown_charity',
+    category: 'social',
+    when: { stages: ['pro'], weeks: [27, 42] },
+    weight: 3,
+    cooldownWeeks: 52,
+    choices: [
+      {
+        id: 'fix_the_roof',
+        effects: [
+          status('money', -150_000),
+          rel('fans', 8),
+          rel('family', 4),
+          status('reputation', 3),
+          post('event_hometown_photo'),
+        ],
+      },
+      {
+        id: 'run_a_camp',
+        effects: [status('energy', -6), rel('fans', 6), status('confidence', 3)],
+      },
+      {
+        id: 'send_a_video',
+        effects: [status('money', -40_000), rel('fans', 1), rel('family', -3)],
+      },
+    ],
+  },
+  {
+    id: 'pro_hit_piece',
+    category: 'media',
+    when: { stages: ['pro'], status: { reputation: [30, 100] } },
+    weight: 2,
+    cooldownWeeks: 30,
+    cast: ['journalist'],
+    choices: [
+      {
+        id: 'answer_online',
+        effects: [
+          rel('journalist', -10),
+          status('coachTrust', -2),
+          chance(
+            0.5,
+            [rel('fans', 4), status('reputation', 2)],
+            [status('reputation', -3), status('confidence', -1)],
+          ),
+        ],
+      },
+      {
+        id: 'invite_him_to_film',
+        effects: [
+          checkSkill(
+            'gameSense',
+            55,
+            [rel('journalist', 10), status('reputation', 3)],
+            [rel('journalist', 2), status('confidence', -2)],
+          ),
+        ],
+      },
+      {
+        id: 'say_nothing',
+        effects: [status('confidence', -2), later('unflattering_story', [2, 6], 0.4)],
+      },
+    ],
+  },
+  {
+    id: 'pro_load_management',
+    category: 'health',
+    when: { stages: ['pro'], phases: proSeason, status: { energy: [0, 45] } },
+    weight: 4,
+    cooldownWeeks: 10,
+    choices: [
+      {
+        id: 'sit_it_out',
+        effects: [status('energy', 12), status('health', 4), rel('fans', -4)],
+      },
+      {
+        id: 'play_through_it',
+        effects: [
+          status('energy', -5),
+          status('health', -3),
+          status('confidence', 2),
+          rel('fans', 3),
+          chance(0.2, [injury('hamstringStrain', [2, 4])]),
+        ],
+      },
+      {
+        id: 'minutes_limit',
+        effects: [status('energy', 4), status('health', 2), status('coachTrust', 1)],
+      },
+      {
+        id: 'ice_and_painkillers',
+        requires: { status: { health: [0, 70] } },
+        effects: [
+          status('energy', 2),
+          flag('painkillers'),
+          later('chronic_injury', [6, 16], 0.35),
+          rel('fans', 2),
+        ],
+      },
+    ],
+  },
+  {
+    id: 'pro_all_star_talk',
+    category: 'media',
+    when: { stages: ['pro'], weeks: [3, 7], status: { reputation: [55, 100] } },
+    weight: 3,
+    cooldownWeeks: 40,
+    cast: ['starTeammate'],
+    choices: [
+      {
+        id: 'make_your_case',
+        effects: [
+          chance(
+            0.5,
+            [status('reputation', 4), status('confidence', 3)],
+            [status('reputation', -2), status('confidence', -4)],
+          ),
+        ],
+      },
+      { id: 'let_the_numbers_talk', effects: [status('confidence', 1), status('coachTrust', 2)] },
+      {
+        id: 'push_the_teammate',
+        effects: [status('chemistry', 5), rel('teammates', 4), status('reputation', -1)],
+      },
+    ],
+  },
+  {
+    id: 'pro_elimination_nerves',
+    category: 'team',
+    when: { stages: ['pro'], weeks: [16, 25], lastGame: 'loss' },
+    weight: 6,
+    cooldownWeeks: 40,
+    choices: [
+      {
+        id: 'film_all_night',
+        effects: [skill('gameSense', 0.4), status('energy', -8), status('confidence', 1)],
+      },
+      {
+        id: 'force_yourself_to_sleep',
+        effects: [
+          checkStatus(
+            'confidence',
+            50,
+            [status('energy', 6), status('confidence', 3)],
+            [status('energy', 2), status('confidence', -3)],
+          ),
+        ],
+      },
+      {
+        id: 'call_home',
+        effects: [rel('family', 5), status('confidence', 3), status('energy', -1)],
+      },
+      {
+        id: 'speak_at_breakfast',
+        requires: { roles: ['starter', 'star'] },
+        effects: [
+          checkStatus(
+            'chemistry',
+            50,
+            [status('chemistry', 6), status('confidence', 4), status('coachTrust', 2)],
+            [status('chemistry', -2), status('confidence', -2)],
+          ),
+        ],
+      },
+    ],
+  },
+  {
+    id: 'pro_superteam_pitch',
+    category: 'recruiting',
+    when: { stages: ['pro'], weeks: [16, 34], status: { reputation: [50, 100] } },
+    weight: 2,
+    cooldownWeeks: 52,
+    cast: ['agent'],
+    choices: [
+      {
+        id: 'keep_talking',
+        effects: [
+          status('confidence', 3),
+          status('reputation', 2),
+          status('coachTrust', -5),
+          status('chemistry', -4),
+          flag('pro_flirted_superteam'),
+        ],
+      },
+      {
+        id: 'shut_it_down_publicly',
+        effects: [status('coachTrust', 4), status('chemistry', 3), rel('fans', 5)],
+      },
+      { id: 'leave_on_read', effects: [status('confidence', 1)] },
+      {
+        id: 'forward_to_agent',
+        requires: { hasAgent: true },
+        effects: [rel('agent', 4), status('reputation', 1), status('coachTrust', -2)],
+      },
+    ],
+  },
+  {
+    id: 'pro_team_meeting',
+    category: 'team',
+    when: { stages: ['pro'], phases: proSeason, lastGame: 'loss', status: { chemistry: [0, 60] } },
+    weight: 3,
+    cooldownWeeks: 12,
+    cast: ['coach', 'starTeammate'],
+    choices: [
+      {
+        id: 'speak_first',
+        effects: [
+          checkStatus(
+            'confidence',
+            55,
+            [status('chemistry', 5), status('coachTrust', 3)],
+            [status('chemistry', -3), status('confidence', -2)],
+          ),
+        ],
+      },
+      {
+        id: 'own_your_part',
+        effects: [status('chemistry', 3), status('coachTrust', 2), status('confidence', -2)],
+      },
+      {
+        id: 'call_out_the_star',
+        effects: [
+          checkStatus(
+            'reputation',
+            60,
+            [status('chemistry', 4), status('confidence', 3)],
+            [status('chemistry', -6), rel('teammates', -6)],
+          ),
+        ],
+      },
+      { id: 'say_nothing', effects: [status('chemistry', -1)] },
+    ],
+  },
+  {
+    id: 'pro_rival_beef',
+    category: 'rival',
+    when: { stages: ['pro'] },
+    weight: 2,
+    cooldownWeeks: 26,
+    cast: ['rival'],
+    choices: [
+      {
+        id: 'post_the_block',
+        effects: [
+          status('reputation', 3),
+          status('confidence', 2),
+          rel('rival', -10),
+          flag('feud_with_rival'),
+          post('event_feud'),
+        ],
+      },
+      {
+        id: 'call_him',
+        effects: [rel('rival', 8), flag('feud_with_rival', false), status('reputation', 1)],
+      },
+      {
+        id: 'save_it_for_the_game',
+        effects: [status('confidence', 3), status('coachTrust', 1), flag('chip_on_shoulder')],
+      },
+      {
+        id: 'bury_it_for_good',
+        requires: { flagsAll: ['rival_friendly'] },
+        effects: [rel('rival', 12), flag('feud_with_rival', false), rel('fans', 3)],
+      },
+    ],
+  },
+  {
+    id: 'pro_summer_training',
+    category: 'health',
+    when: { stages: ['pro'], weeks: [28, 38], flagsAll: ['pro_rookie'] },
+    weight: 4,
+    cooldownWeeks: 40,
+    choices: [
+      {
+        id: 'desert_trainer',
+        effects: [
+          skill('athleticism', 0.8),
+          status('money', -60_000),
+          status('energy', -6),
+          status('health', 2),
+          flag('pro_summer'),
+        ],
+      },
+      {
+        id: 'teammate_runs',
+        effects: [
+          status('chemistry', 5),
+          rel('teammates', 6),
+          skill('gameSense', 0.3),
+          status('energy', -4),
+          flag('pro_summer'),
+        ],
+      },
+      {
+        id: 'go_home',
+        effects: [status('energy', 12), status('health', 6), rel('family', 6), flag('pro_summer')],
+      },
+      {
+        id: 'national_team_camp',
+        requires: { relations: { nationalTeam: [50, 100] } },
+        effects: [
+          rel('nationalTeam', 8),
+          skill('gameSense', 0.3),
+          status('energy', -6),
+          flag('pro_summer'),
+        ],
+      },
+    ],
+  },
+  {
+    id: 'pro_family_money',
+    category: 'family',
+    when: { stages: ['pro'], status: { money: [200_000, 1_000_000_000] } },
+    weight: 2,
+    cooldownWeeks: 40,
+    choices: [
+      { id: 'fund_the_plan', effects: [status('money', -250_000), rel('family', 10)] },
+      {
+        id: 'buy_mum_a_house',
+        effects: [status('money', -400_000), rel('family', 14), status('confidence', 2)],
+      },
+      {
+        id: 'hire_a_planner',
+        effects: [status('money', -50_000), rel('family', -2), status('confidence', 1)],
+      },
+      { id: 'say_no', effects: [rel('family', -8)] },
+    ],
+  },
+  {
+    id: 'pro_draftee_advice',
+    category: 'team',
+    when: {
+      stages: ['pro'],
+      weeks: [36, 46],
+      flagsAll: ['pro_summer'],
+      status: { reputation: [35, 100] },
+    },
+    weight: 4,
+    once: true,
+    choices: [
+      {
+        id: 'take_him_on',
+        effects: [
+          status('energy', -5),
+          status('chemistry', 4),
+          rel('teammates', 5),
+          feat('bondingBlocks', 2),
+          flag('pro_veteran'),
+        ],
+      },
+      { id: 'one_rule', effects: [status('chemistry', 2), flag('pro_veteran')] },
+      {
+        id: 'figure_it_out',
+        effects: [status('chemistry', -2), status('energy', 2), flag('pro_veteran')],
+      },
+    ],
+  },
+  {
+    id: 'pro_life_after',
+    category: 'money',
+    when: { stages: ['pro'], weeks: [27, 42], flagsAll: ['pro_veteran'] },
+    weight: 2,
+    once: true,
+    choices: [
+      {
+        id: 'business_course',
+        effects: [
+          status('money', -30_000),
+          status('energy', -4),
+          status('confidence', 2),
+          flag('pro_planning_ahead'),
+        ],
+      },
+      {
+        id: 'coaching_clinics',
+        effects: [
+          skill('gameSense', 0.5),
+          rel('fans', 4),
+          status('energy', -4),
+          flag('pro_planning_ahead'),
+        ],
+      },
+      {
+        id: 'invest_in_his_coffee',
+        effects: [chance(0.5, [status('money', 400_000)], [status('money', -500_000)])],
+      },
+      { id: 'not_yet', effects: [status('confidence', 3), status('energy', 2)] },
+    ],
+  },
+  {
+    id: 'pro_team_plane',
+    category: 'team',
+    when: { stages: ['pro'], phases: proSeason },
+    weight: 2,
+    cooldownWeeks: 20,
+    cast: ['teammate'],
+    choices: [
+      {
+        id: 'play_for_real_money',
+        effects: [
+          status('chemistry', 2),
+          status('energy', -2),
+          chance(0.5, [status('money', 15_000)], [status('money', -25_000)]),
+        ],
+      },
+      { id: 'play_for_snacks', effects: [status('chemistry', 3), status('energy', -1)] },
+      { id: 'sleep', effects: [status('energy', 5), status('chemistry', -1)] },
+    ],
+  },
+  {
+    id: 'pro_hot_streak',
+    category: 'media',
+    when: { stages: ['pro'], phases: proSeason, form: 'hot' },
+    weight: 3,
+    cooldownWeeks: 20,
+    choices: [
+      {
+        id: 'cover_shoot',
+        effects: [
+          status('reputation', 4),
+          status('energy', -4),
+          chance(0.3, [status('confidence', -3)]),
+        ],
+      },
+      { id: 'change_nothing', effects: [status('confidence', 2), status('energy', 1)] },
+      {
+        id: 'extra_reps',
+        effects: [skill('shooting', 0.4), status('energy', -5), status('coachTrust', 2)],
       },
     ],
   },

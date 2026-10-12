@@ -42,7 +42,15 @@ export const saveSchema = z.object({
     career: z
       .object({
         playerId: z.string(),
-        stage: z.enum(['highSchool', 'college', 'prospect', 'drafted', 'undrafted', 'retired']),
+        stage: z.enum([
+          'highSchool',
+          'college',
+          'prospect',
+          'drafted',
+          'undrafted',
+          'pro',
+          'retired',
+        ]),
         pending: z.array(z.object({ id: z.string(), kind: z.string() }).loose()),
         cursor: z.object({ stage: z.enum(['idle', 'games', 'events', 'wrap']) }).loose(),
       })

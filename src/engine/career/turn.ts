@@ -5,7 +5,7 @@
  */
 
 import { seasonOf, WEEK, weekIndex } from '../core/calendar';
-import type { PersonId, TeamId, TournamentId } from '../core/ids';
+import type { GameId, PersonId, TeamId, TournamentId } from '../core/ids';
 import type { ContentIndex } from '../content/registry';
 import type { Interrupt } from '../model/career';
 import { isPlayer } from '../model/person';
@@ -36,6 +36,7 @@ import {
   updateProjection,
   updateRole,
 } from './progress';
+import { announceAwards, proSummer, proWeek, resolveContract, resolveRetire } from './pro';
 import { clearShowcase, commitTo, raiseOffers } from './recruiting';
 import { socialReactions } from './social';
 import { msg, pushFeed, userTeamId, type GameState } from './state';
@@ -44,6 +45,18 @@ export type StepResult =
   | { readonly kind: 'interrupt'; readonly interrupt: Interrupt }
   | { readonly kind: 'weekDone' }
   | { readonly kind: 'ended' };
+
+/** Where a sliced advance may also hand back control: at his tip-off, and at his final buzzer. */
+export interface Stops {
+  readonly gameStart?: boolean;
+  readonly gameEnd?: boolean;
+}
+
+export type SliceResult =
+  | StepResult
+  | { readonly kind: 'yield' }
+  | { readonly kind: 'gameStart'; readonly gameId: GameId }
+  | { readonly kind: 'gameEnd'; readonly gameId: GameId };
 
 function leagueContext(state: GameState, index: ContentIndex): LeagueContext {
   const career = state.career;
@@ -70,7 +83,8 @@ function watchedTeams(state: GameState): Set<TeamId> {
 
 export function advance(state: GameState, index: ContentIndex): StepResult {
   const step = advanceSlice(state, index, Infinity);
-  if (step.kind === 'yield') throw new Error('an unbounded advance cannot yield');
+  if (step.kind === 'yield' || step.kind === 'gameStart' || step.kind === 'gameEnd')
+    throw new Error('an unbounded advance cannot yield');
   return step;
 }
 
@@ -83,7 +97,8 @@ export function advanceSlice(
   state: GameState,
   index: ContentIndex,
   slots: number,
-): StepResult | { readonly kind: 'yield' } {
+  stops: Stops = {},
+): SliceResult {
   const career = state.career;
   let budget = slots;
   for (let guard = 0; guard < 500; guard++) {
@@ -99,8 +114,10 @@ export function advanceSlice(
         break;
       case 'games': {
         if (cursor.live) {
+          const gameId = cursor.live.gameId;
           const moment = continueUserGame(state, index);
           if (moment) return { kind: 'interrupt', interrupt: moment };
+          if (stops.gameEnd) return { kind: 'gameEnd', gameId };
           break;
         }
         const step = playNextSlot(state.world, (g) => isUserGame(state, g), watchedTeams(state));
@@ -109,7 +126,10 @@ export function advanceSlice(
           break;
         }
         const mine = step.held[0];
-        if (mine) startUserGame(state, index, mine);
+        if (mine) {
+          startUserGame(state, index, mine);
+          if (stops.gameStart) return { kind: 'gameStart', gameId: mine.id };
+        }
         budget -= 1;
         if (budget <= 0) return { kind: 'yield' };
         break;
@@ -163,7 +183,8 @@ function beginWeek(state: GameState, index: ContentIndex): void {
     ) as TournamentId[];
     raiseCallUps(state, created);
   }
-  if (career.stage === 'college') updateRole(state);
+  proSummer(state);
+  if (career.stage === 'college' || career.stage === 'pro') updateRole(state);
 }
 
 function endWeek(state: GameState, index: ContentIndex): void {
@@ -174,7 +195,10 @@ function endWeek(state: GameState, index: ContentIndex): void {
     updateProjection(state, index);
   rivalNews(state, index);
   quietWeekReaction(state, index);
+  proWeek(state, index);
+  const season = seasonOf(state.world.date);
   endLeagueWeek(state.world, leagueContext(state, index));
+  announceAwards(state, index, season);
 }
 
 /** Now and then the rival's big night reaches the user's phone. */
@@ -206,6 +230,7 @@ export function resolve(
   index: ContentIndex,
   interruptId: string,
   choice: Choice,
+  extra: { readonly timing?: number } = {},
 ): unknown {
   const career = state.career;
   const interrupt = career.pending.find((p) => p.id === interruptId);
@@ -214,7 +239,7 @@ export function resolve(
   const done = () => (career.pending = career.pending.filter((p) => p.id !== interruptId));
   switch (interrupt.kind) {
     case 'keyMoment':
-      return resolveKeyMoment(state, index, interrupt, one);
+      return resolveKeyMoment(state, index, interrupt, one, extra.timing);
     case 'event': {
       const outcome = resolveEvent(state, index, interrupt, one);
       done();
@@ -253,9 +278,20 @@ export function resolve(
       done();
       runDraftNight(state, index, career.godMode.draftTeam);
       return null;
-    case 'afterDraft':
-      resolveAfterDraft(state, index, one === 'endCareer' ? 'endCareer' : 'returnToSchool');
+    case 'afterDraft': {
+      if (!interrupt.options.includes(one as 'tryout'))
+        throw new Error('invalid after-draft choice');
       done();
+      resolveAfterDraft(state, index, one as 'returnToSchool' | 'tryout' | 'endCareer');
+      return null;
+    }
+    case 'contract':
+      done();
+      resolveContract(state, index, interrupt, one);
+      return null;
+    case 'retire':
+      done();
+      resolveRetire(state, one);
       return null;
   }
 }

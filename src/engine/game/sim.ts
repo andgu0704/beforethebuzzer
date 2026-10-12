@@ -490,7 +490,7 @@ class Sim {
 
     line.fga += 1;
     if (type === 'three') line.tpa += 1;
-    this.record(offense, shooter, type === 'three' ? 'miss3' : 'miss2');
+    this.record(offense, shooter, type === 'three' ? 'miss3' : 'miss2', { shot: type });
     const blockEdge = this.avg(defense, 'blk', 'max') / 62;
     const blockChance =
       { rim: 0.2, post: 0.16, mid: 0.035, three: 0.012 }[type] * blockEdge * Math.sqrt(blockEdge);
@@ -502,7 +502,7 @@ class Sim {
     if (blocker !== null) {
       const bLine = g.stats[defense][blocker];
       if (bLine) bLine.blk += 1;
-      this.record(defense, blocker, 'blk');
+      this.record(defense, blocker, 'blk', { vs: shooter });
     }
     return 'miss';
   }
@@ -573,7 +573,7 @@ class Sim {
     }
     line.pts += points;
     this.addPoints(offense, points);
-    this.record(offense, shooter, type === 'three' ? 'fg3' : 'fg2');
+    this.record(offense, shooter, type === 'three' ? 'fg3' : 'fg2', { shot: type });
     if (setUp) {
       const assister =
         forcedAssist ??
@@ -689,7 +689,7 @@ class Sim {
     if (stolenBy !== null) {
       const sLine = g.stats[defense][stolenBy];
       if (sLine) sLine.stl += 1;
-      this.record(defense, stolenBy, 'stl');
+      this.record(defense, stolenBy, 'stl', { vs: by });
       g.transition = this.rng.chance(0.6);
     }
     g.possession = defense;
@@ -778,17 +778,36 @@ class Sim {
     }
   }
 
-  private record(side: Side, player: number, kind: PlayKind): void {
+  private record(
+    side: Side,
+    player: number,
+    kind: PlayKind,
+    extra: { readonly shot?: ShotType; readonly vs?: number } = {},
+  ): void {
     const g = this.g;
     if (!g.recordPlays) return;
+    // The lineups ride along whenever they have changed, so a replay knows who was on the floor.
+    const changed = lineupChanged(g);
     g.plays.push({
       t: Math.round(g.elapsed * 10) / 10,
       side,
       player,
       kind,
       score: [g.score[0], g.score[1]],
+      ...extra,
+      ...(changed ? { on: [[...g.onCourt[0]], [...g.onCourt[1]]] as const } : {}),
     });
   }
+}
+
+/** Whether the floor has changed since the last lineup written to the play log. */
+function lineupChanged(g: LiveGame): boolean {
+  for (let i = g.plays.length - 1; i >= 0; i--) {
+    const on = g.plays[i]?.on;
+    if (!on) continue;
+    return on[0].join(',') !== g.onCourt[0].join(',') || on[1].join(',') !== g.onCourt[1].join(',');
+  }
+  return true;
 }
 
 /** Takes a player out for the rest of the game and refills the lineup. */

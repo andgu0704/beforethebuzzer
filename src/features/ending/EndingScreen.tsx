@@ -25,7 +25,12 @@ export function EndingScreen() {
   if (!state) return null;
   const end = state.career.ending;
   const last = state.career.feed
-    .filter((f) => f.message.key === 'feed.drafted' || f.message.key === 'feed.undrafted')
+    .filter(
+      (f) =>
+        f.message.key === 'feed.drafted' ||
+        f.message.key === 'feed.undrafted' ||
+        f.message.key === 'feed.pro.retired',
+    )
     .pop();
   return (
     <View
@@ -42,9 +47,9 @@ export function EndingScreen() {
             {m(last.message)}
           </Text>
         ) : null}
-        {end && !end.pick ? (
+        {end?.reason === 'undrafted' || end?.reason === 'retired' ? (
           <Text variant="body" style={{ marginBottom: t.space.m }}>
-            {tt('ui.ending.undraftedBody')}
+            {tt(end.reason === 'retired' ? 'ui.ending.retiredBody' : 'ui.ending.undraftedBody')}
           </Text>
         ) : null}
         <CareerCard ref={ref} state={state} />

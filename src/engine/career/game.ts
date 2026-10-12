@@ -1,4 +1,4 @@
-import { weekIndex } from '../core/calendar';
+import { ageAt, weekIndex } from '../core/calendar';
 import { asInterruptId, nextId, type PersonId, type TeamId } from '../core/ids';
 import { clamp } from '../core/math';
 import { createRng } from '../core/rng';
@@ -13,7 +13,7 @@ import {
   type ClipSpec,
 } from '../game/moments';
 import type { PlayerModifiers } from '../game/prepare';
-import { overallOf } from '../game/ratings';
+import { overallOf, type GameRatings } from '../game/ratings';
 import {
   isLastPeriod,
   playScripted,
@@ -24,7 +24,7 @@ import {
 } from '../game/sim';
 import type { Side } from '../game/types';
 import type { GameRecord, PlayerLine } from '../model/game';
-import type { Interrupt, LiveUserGame } from '../model/career';
+import type { Approach, Interrupt, LiveUserGame } from '../model/career';
 import { isPlayer } from '../model/person';
 import { rollInjury } from '../player/injury';
 import { finishGame, prepareFor, rulesForGame } from '../season/play';
@@ -33,6 +33,7 @@ import { changeStatus } from './effects';
 import { socialReactions } from './social';
 import { cause, msg, pushFeed, pushTimeline, teamRef, userOf, type GameState } from './state';
 import { mergeTraits } from './traits';
+import { earnPoints, gamePoints } from './upgrade';
 import { checkTraitUnlocks } from './progress';
 
 export function isUserGame(state: GameState, game: GameRecord): boolean {
@@ -72,22 +73,77 @@ export function unavailableReason(
   return null;
 }
 
+/** What each pre-game approach does to his game: more shots, more passes, or more defence. */
+export const APPROACH_EFFECTS: Readonly<
+  Record<
+    Approach,
+    {
+      readonly usageMul: number;
+      readonly shotMod: number;
+      readonly stamina: number;
+      readonly ratingAdd: Readonly<Partial<GameRatings>>;
+    }
+  >
+> = {
+  team: { usageMul: 1, shotMod: 0, stamina: 0, ratingAdd: {} },
+  score: { usageMul: 1.3, shotMod: -0.04, stamina: -3, ratingAdd: { pass: -4 } },
+  facilitate: { usageMul: 0.78, shotMod: 0.03, stamina: 0, ratingAdd: { pass: 9, security: 3 } },
+  defend: {
+    usageMul: 0.9,
+    shotMod: 0,
+    stamina: -8,
+    ratingAdd: { perD: 8, intD: 6, stl: 6, blk: 4 },
+  },
+};
+
 function userModifiers(state: GameState, index: ContentIndex): Map<PersonId, PlayerModifiers> {
   const user = userOf(state);
   const t = mergeTraits(index, user);
   const form = state.career.form === 'hot' ? 0.08 : state.career.form === 'slump' ? -0.1 : 0;
   const hurt = user.injury?.playedThrough ? -0.15 : 0;
+  const plan = APPROACH_EFFECTS[state.career.approach];
   return new Map([
     [
       user.id,
       {
-        shotMod: t.shotMod + form + hurt,
+        shotMod: t.shotMod + form + hurt + plan.shotMod,
         clutchMod: t.clutchMod,
-        usageMul: t.usageMul * (state.career.form === 'hot' ? 1.1 : 1),
-        stamina: t.stamina,
+        usageMul: t.usageMul * (state.career.form === 'hot' ? 1.1 : 1) * plan.usageMul,
+        stamina: t.stamina + plan.stamina,
+        ratingAdd: plan.ratingAdd,
       },
     ],
   ]);
+}
+
+/** The room's view of how he played it: the coach and teammates notice the approach he chose. */
+function approachReaction(
+  state: GameState,
+  index: ContentIndex,
+  line: PlayerLine,
+  won: boolean,
+  vsExpected: number,
+): void {
+  const reb = line.orb + line.drb;
+  switch (state.career.approach) {
+    case 'score':
+      if (line.pts >= 20) changeStatus(state, index, 'reputation', 1.2);
+      if (!won && vsExpected < 0) changeStatus(state, index, 'coachTrust', -1.2);
+      if (line.ast <= 1) changeStatus(state, index, 'chemistry', -0.8);
+      break;
+    case 'facilitate':
+      changeStatus(state, index, 'chemistry', line.ast >= 5 ? 2 : 0.8);
+      if (line.ast >= 6) changeStatus(state, index, 'coachTrust', 1);
+      state.career.relations.teammates = clamp(state.career.relations.teammates + 1.2, 0, 100);
+      break;
+    case 'defend':
+      changeStatus(state, index, 'coachTrust', line.stl + line.blk >= 3 || reb >= 8 ? 1.8 : 0.6);
+      break;
+    case 'team':
+      changeStatus(state, index, 'chemistry', 0.5);
+      if (won) changeStatus(state, index, 'coachTrust', 0.4);
+      break;
+  }
 }
 
 /** Starts the user's game, or plays it straight through if he cannot take part. */
@@ -97,7 +153,7 @@ export function startUserGame(state: GameState, index: ContentIndex, game: GameR
   const rules = rulesForGame(game);
   const userCtx = {
     ...(reason ? { exclude: new Set([state.career.playerId]) } : {}),
-    ...(game.league === 'college'
+    ...(game.league === 'college' || game.league === 'pro'
       ? { userRole: state.career.role }
       : game.kind === 'showcase'
         ? { userRole: 'starter' as const }
@@ -120,6 +176,7 @@ export function startUserGame(state: GameState, index: ContentIndex, game: GameR
   const [lo, hi] =
     tournament?.format.momentsPerGame ?? (game.kind === 'showcase' ? [1, 1] : [1, 2]);
   const budget = reason || forced ? 0 : createRng(state.world.seed, 'budget', game.id).int(lo, hi);
+  state.career.cursor.finished = null;
   state.career.cursor.live = {
     gameId: game.id,
     live,
@@ -225,6 +282,7 @@ export function continueUserGame(state: GameState, index: ContentIndex): Interru
     state.career.godMode.forceNextGame = null;
   }
   finishUserGame(state, index, game, current);
+  state.career.cursor.finished = current;
   state.career.cursor.live = null;
   return null;
 }
@@ -234,11 +292,21 @@ export interface MomentResult {
   readonly clip: ClipSpec;
 }
 
+/**
+ * What his timing on the skill check is worth, in log-odds: a perfect release adds about as
+ * much as a hot streak, a bad one costs the same. No timing (bots, simulate ahead) is neutral.
+ */
+export function timingEdge(timing: number | undefined): number {
+  if (timing === undefined || !Number.isFinite(timing)) return 0;
+  return (clamp(timing, 0, 1) - 0.5) * 1.2;
+}
+
 export function resolveKeyMoment(
   state: GameState,
   index: ContentIndex,
   interrupt: Extract<Interrupt, { kind: 'keyMoment' }>,
   optionId: string,
+  timing?: number,
 ): MomentResult {
   const current = state.career.cursor.live;
   const def = index.moment.get(interrupt.momentId);
@@ -252,7 +320,8 @@ export function resolveKeyMoment(
   const edge =
     (traits.momentEdge[option.action.kind] ?? 0) +
     (late ? traits.clutchMod : 0) +
-    (state.career.form === 'hot' ? 0.06 : state.career.form === 'slump' ? -0.08 : 0);
+    (state.career.form === 'hot' ? 0.06 : state.career.form === 'slump' ? -0.08 : 0) +
+    (option.action.kind === 'pain' ? 0 : timingEdge(timing));
   const forced = state.career.godMode.forceNextMoment;
   const offense = current.pendingMoment.offense;
   const scoreBefore = margin(live.score, userSide);
@@ -469,6 +538,11 @@ function finishUserGame(
       };
     }
     recordFeats(state, line);
+    approachReaction(state, index, line, won, vsExpected);
+    earnPoints(
+      state,
+      gamePoints(minutes, vsExpected, won, ageAt(user.birthYear, state.world.date)),
+    );
     updateForm(state, traits.slumpResist);
     // Injury: tired legs and old knocks raise the odds.
     const risk =

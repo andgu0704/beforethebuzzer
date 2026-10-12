@@ -29,6 +29,9 @@ describe('localisation', () => {
     expect(tr.t('a', { name: 'Nika' })).toBe('Hi Nika');
     expect(tr.t('b', { n: 1 })).toBe('1 week');
     expect(tr.t('b', { n: 3 })).toBe('3 weeks');
+    const z = createTranslator('en', { c: { by: 'n', zero: 'none', one: 'one', other: '{n}' } });
+    expect(z.t('c', { n: 0 })).toBe('none');
+    expect(z.t('c', { n: 2 })).toBe('2');
     expect(
       tr.message(
         { key: 'a', params: { name: { person: 'p1' as never } } },
