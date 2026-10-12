@@ -40,6 +40,11 @@ appId: app.beforethebuzzer
       id: tip-off
     timeout: 30000
 - takeScreenshot: pregame
+# At the largest text sizes the approaches are below the fold.
+- scrollUntilVisible:
+    element:
+      id: approach-score
+    direction: DOWN
 - tapOn:
     id: approach-score
 - tapOn:

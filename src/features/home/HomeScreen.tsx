@@ -296,6 +296,8 @@ export function HomeScreen() {
 const styles = StyleSheet.create({
   weekHeader: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    columnGap: 12,
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     borderBottomWidth: 2,
