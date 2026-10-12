@@ -64,22 +64,34 @@ appId: app.beforethebuzzer
       - runFlow:
           when:
             visible:
-              id: 'moment-(?!continue).*'
+              id: key-moment
           commands:
             - takeScreenshot: moment
+            # At the largest text sizes the options, the meter and Continue are below the fold.
+            - scrollUntilVisible:
+                element:
+                  id: 'moment-(?!continue).*'
+                direction: DOWN
             - tapOn:
                 id: 'moment-(?!continue).*'
                 index: 0
-            - runFlow:
-                when:
-                  visible:
-                    id: skill-check
-                commands:
-                  - takeScreenshot: skill-check
-                  - tapOn:
-                      id: skill-release
+            # The skill check, unless the move has nothing to time (playing hurt).
+            - scrollUntilVisible:
+                element:
+                  id: skill-release
+                direction: DOWN
+                timeout: 3000
+                optional: true
+            - takeScreenshot: skill-check
+            - tapOn:
+                id: skill-release
+                optional: true
             - waitForAnimationToEnd:
                 timeout: 4000
+            - scrollUntilVisible:
+                element:
+                  id: moment-continue
+                direction: DOWN
             - tapOn:
                 id: moment-continue
       - runFlow:

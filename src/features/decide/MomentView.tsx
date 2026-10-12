@@ -46,7 +46,7 @@ export function MomentView({
   const usTeam = state.world.teams[us];
   const themTeam = state.world.teams[them];
   return (
-    <View style={{ gap: t.space.l }}>
+    <View style={{ gap: t.space.l }} testID="key-moment">
       <View
         style={[
           styles.board,
